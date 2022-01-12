@@ -20,9 +20,7 @@ def connect():
 
         # create a cursor
 
-        cursor = connection.cursor()
-
-        return cursor, connection
+        return connection
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -35,14 +33,10 @@ def disconnect(cursor, connection):
     cursor.close()
 
 
-
 if __name__ == "__main__":
     connection_arguments = connect()
 
     if connection_arguments is not None:
-        cursor, connection = connection_arguments
+        connection = connection_arguments
+        cursor = connection.cursor()
         disconnect(cursor, connection)
-
-
-
-    
