@@ -2,18 +2,11 @@ from database_folder.sql_setup import connect, disconnect
 
 
 class BaseManager:
-    # @classmethod
-    # def set_connection(cls, database_settings):
-    #     connection = connect()
-    #     connection.autocommit = True
-    #     cls.connection = connection
-
     @classmethod
     def _get_cursor(cls):
         connection = connect()
         connection.autocommit = True
         return connection.cursor()
-        return cls.connection.cursor()
 
     @classmethod
     def _execute_query(cls, query, params=None):
@@ -23,7 +16,7 @@ class BaseManager:
     def __init__(self, model_class):
         self.model_class = model_class
 
-    def select(self, field_names, conditions_dict, chunk_size=2000):
+    def select(self, field_names: set, conditions_dict: dict, chunk_size=2000):
         # Build SELECT query
 
         if len(field_names) == 0:
@@ -48,7 +41,7 @@ class BaseManager:
 
             # conditions_value_placeholder = "=%s, ".join(conditions_column)
             conditions_value_placeholder = [f"{i}=%s" for i in conditions_column]
-            conditions_value_placeholder = ", ".join(conditions_value_placeholder)
+            conditions_value_placeholder = " AND ".join(conditions_value_placeholder)
 
             conditions_value_parameters = list(conditions_dict.values())
             query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
@@ -153,6 +146,7 @@ class MetaModel(type):
 
     @property
     def objects(cls):
+        print("called manager using _get_manager method")
         return cls._get_manager()
 
 
