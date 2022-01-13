@@ -1,7 +1,45 @@
 from wsgiref.simple_server import make_server
 from url_config import url_handler
 
+
+# use this after class single middleware works well
+import functools
+
+CONDITION = True
+
+
+def session_decorator(condition):
+    def decorator_function(function):
+
+        '''
+        *args, **kwargs
+        '''
+
+        @functools.wraps(function)
+        def wrapper(*args):
+
+            if condition:
+                global CONDITION
+                environ, start_response, status, response_headers = args
+                print("Something is happening before the function is called.")
+                return_values = function(*args)
+                print("Something is happening after the function is called.")
+                return return_values
+            else:
+                return function(*args)
+
+        return wrapper
+
+    return decorator_function
+
+
 ###############################################
+
+# url resolver
+
+###############################################
+
+
 class Reverse_middleware:
     def __init__(self, app):
         self.wrapped_app = app
@@ -14,14 +52,20 @@ class Reverse_middleware:
         ]  # this should be iterable like FIRST or yield data will work, yeild "data"
 
 
-###############################################
+class SessionMiddleware:
+    def __init__(self):
+        self.wrapped_app = application
 
-# url resolver
+    def __call__(self, environ, start_response, *args, **kwargs):
+        wrapped_app_response = self.wrapped_app(environ, start_response)
+        # tweeking response, we can also tweek request
+        return [
+            data[::-1] for data in wrapped_app_response
+        ]  # this should be iterable like FIRST or yield data will work, yeild "data"
 
-###############################################
 
-
-def application(environ, start_response):
+# @session_decorator(CONDITION)
+def application(environ, start_response, status=None, response_headers=None):
 
     path = environ.get('PATH_INFO')
 
@@ -37,26 +81,37 @@ def application(environ, start_response):
     # use this instead
     # html_to_render = response_body = view(environ, a=121212)
 
-    html_to_render = response_body = view(environ)
+    start_response_headers: dict = {}
 
-    status = '200 OK'
+    html_response_body, start_response_headers = view(environ)
+    #  verifying data receievd from functions
+    assert type(html_response_body) == str and type(start_response_headers) == dict
 
-    response_headers = [
+    status_basic = '200 OK'
+    status = start_response_headers.get('status', status_basic)
+
+    response_header_basic = [
         ('Content-type', 'text/html'),
-        ('Content-length', str(len(response_body))),
+        ('Content-length', str(len(html_response_body))),
     ]
+
+    response_headers = start_response_headers.get('response_headers', response_header_basic)
 
     start_response(status, response_headers)
 
-    return [html_to_render.encode('utf-8')]
-    # only one data in the list, PEP 333(3) returned data should be an iterable
-    ##  return iter([data.encode('utf-8')]) # FIRST, this should be iterable like FIRST
+    return [html_response_body.encode('utf-8')]
 
 
 if __name__ == "__main__":
+
+    # make user post, then session middleware
+    # server = make_server('localhost', 8000, app=SessionMiddleware(application))
+
     server = make_server('localhost', 8000, app=application)
     # adding middle ware
     # server = make_server('localhost', 8000, app=Reverse_middleware(application))
+
+    # gunicorn server:SessionMiddleware --reload
     print('Server started')
     server.serve_forever()
 

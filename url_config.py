@@ -4,6 +4,8 @@ from clean_print_function.clean_print import first_clean_print_function
 URL_DICTIONARY = {
     '': views.root,
     'test': views.test,
+    'login': views.login_view,
+    'authentication': views.authenticating_view,
 }
 
 
