@@ -149,6 +149,50 @@ class BaseManager:
             # Execute query
             self._execute_query(query, params)
 
+    def insert_or_update_data(self, **kwargs):
+        # Class.objects.insert_or_update_data(feild1=12,fiedl2=432, ..., keys=('keyname'))
+        """
+        kwargs['key'] specifies the key based on which u[date or insert should be done
+        """
+
+        key_name = kwargs['key']
+
+        del kwargs['key']
+
+        fields_skelton_list = list(kwargs.keys())
+
+        field_names = ", ".join(fields_skelton_list)
+        field_names = "(" + field_names + ")"
+        print(field_names)
+
+        values = list(kwargs.values()).copy()
+        values_placeholder = ["%s" for i in values if i != 'key']
+        values_placeholder = ", ".join(values_placeholder)
+        values_placeholder = "(" + values_placeholder + ")"
+        print(values_placeholder)
+
+        print("///////////////////////////////////////////////////////////////////////////////////////////////")
+        print(list(kwargs.values()).copy())
+
+        print("kwargs is", kwargs)
+        print()
+        print()
+        print()
+        parameters = values
+        parameters = parameters + parameters
+
+        # fields_skelton_list
+        fields_skelton_with_formatting_s = [f'{i}=%s' for i in fields_skelton_list]
+        update_conflict_field_formatting = ", ".join(fields_skelton_with_formatting_s)
+
+        query = f'''INSERT INTO {self.model_class.table_name} {field_names} VALUES{values_placeholder} ON CONFLICT ({key_name})
+        DO UPDATE SET {update_conflict_field_formatting}'''
+        print(query)
+        print("///////////////////////////////////////////////////////////////////////////////////////////////")
+
+        self._execute_query(query, parameters)
+        return True
+
     def delete(self):
         # Build DELETE query
         query = f"DELETE FROM {self.model_class.table_name} "

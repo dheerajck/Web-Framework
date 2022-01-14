@@ -68,6 +68,9 @@ class SessionMiddleware:
 def application(environ, start_response, status=None, response_headers=None):
 
     path = environ.get('PATH_INFO')
+    print(path)
+    print(environ['HTTP_COOKIE'])
+    print(environ['HTTP_COOKIE'])
 
     if path.startswith('/'):
         path = path[1:]
@@ -84,7 +87,17 @@ def application(environ, start_response, status=None, response_headers=None):
     start_response_headers: dict = {}
 
     html_response_body, start_response_headers = view(environ)
+    # print(path, view)
+    # print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhoiii")
+
     #  verifying data receievd from functions
+    # print("_________________________________________________________________")
+    # print(start_response_headers)
+    # print(f"{start_response_headers=} first reponse")
+    # print()
+    # print()
+    # print()
+    # print("done showed response")
     assert type(html_response_body) == str and type(start_response_headers) == dict
 
     status_basic = '200 OK'
@@ -96,6 +109,23 @@ def application(environ, start_response, status=None, response_headers=None):
     ]
 
     response_headers = start_response_headers.get('response_headers', response_header_basic)
+    # print(f"1,{start_response_headers=}")
+    # response_headers = []
+    # response_headers.extend(start_response_headers.get('response_headers', []))
+    response_headers.extend(start_response_headers.get('extend', []))
+    # print(f"2,{start_response_headers=}")
+    more_headers = start_response_headers.get('extend', [])
+    # print(f"3,{start_response_headers=}")
+
+    # print("Again", start_response_headers)
+    # print()
+    # print(f"345,{start_response_headers=}")
+    # print(more_headers)
+    # print()
+
+    response_headers.extend(more_headers)
+
+    from webapp.clean_print_function.clean_print import first_clean_print_function
 
     start_response(status, response_headers)
 

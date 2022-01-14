@@ -1,9 +1,10 @@
+from pprint import pprint
 def first_clean_print_function(s):
     print()
     print()
     print("_________________")
     print()
-    print(s)
+    pprint(s)
     print()
     print("_________________")
     print()

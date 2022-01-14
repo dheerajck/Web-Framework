@@ -41,6 +41,7 @@ def session(environ, **kwargs):
     from pprint import pprint
 
     pprint(environ)
+    print("view")
 
     html_to_render = render_template("session_test.html", context={})
     html_to_render += f"<h1>{environ.get('HTTP_COOKIE')}"
