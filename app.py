@@ -1,5 +1,5 @@
 from wsgiref.simple_server import make_server
-from url_config import url_handler
+from webapp.url_config import url_handler
 
 
 # use this after class single middleware works well

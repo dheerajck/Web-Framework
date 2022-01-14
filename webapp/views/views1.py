@@ -1,4 +1,4 @@
-from utils.template_handlers import render_template
+from ..utils.template_handlers import render_template
 
 start_response_headers: dict = {}
 
@@ -27,6 +27,25 @@ def login_view(environ, **kwargs):
     # pprint(environ)
 
     return render_template("authentication-templates/login-register.html", context={}), start_response_headers
+
+
+def dashboard_view(environ, **kwargs):
+    from pprint import pprint
+
+    # pprint(environ)
+
+    return render_template("dashboard.html", context={}), start_response_headers
+
+
+def session(environ, **kwargs):
+    from pprint import pprint
+
+    pprint(environ)
+
+    html_to_render = render_template("session_test.html", context={})
+    html_to_render += f"<h1>{environ.get('HTTP_COOKIE')}"
+
+    return html_to_render, start_response_headers
 
 
 def view_404(environ, **kwargs):

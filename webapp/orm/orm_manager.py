@@ -1,4 +1,4 @@
-from database_folder.sql_setup import connect, disconnect
+from .database_folder.sql_setup import connect, disconnect
 
 
 class BaseManager:
@@ -11,12 +11,23 @@ class BaseManager:
     @classmethod
     def _execute_query(cls, query, params=None):
         cursor = cls._get_cursor()
+
+        print("_______________________________++++++++++++++++==")
+        print("Current sql query", query, params)
         cursor.execute(query, params)
+
+        if "SELECT" in query:
+            print(cursor)
+
+            field_names = [desc[0] for desc in cursor.description]
+            print(field_names)
+        print("_______________________________++++++++++++++++==")
+        return cursor
 
     def __init__(self, model_class):
         self.model_class = model_class
 
-    def select(self, field_names: set, conditions_dict: dict, chunk_size=2000):
+    def select(self, field_names: set, conditions_dict: dict, ALL_OR=0, chunk_size=2000):
         # Build SELECT query
 
         if len(field_names) == 0:
@@ -29,31 +40,41 @@ class BaseManager:
         cursor = self._get_cursor()
 
         if len(conditions_dict) == 0:
-            cursor.execute(query)
+            # cursor.execute(query)
+            used_cursor_object = self._execute_query(query)
         else:
             conditions_column = conditions_dict.keys()
-            print()
-            print(conditions_dict)
-            print(conditions_column)
-            print()
+            # print()
+            # print(conditions_dict)
+            # print(conditions_column)
+            # print()
             conditions_column = list(conditions_column)
-            print(conditions_column)
+            # print(conditions_column)
 
             # conditions_value_placeholder = "=%s, ".join(conditions_column)
+            LOGIC_SELECTOR = " AND "
+            if ALL_OR == 1:
+                LOGIC_SELECTOR = " OR "
+
             conditions_value_placeholder = [f"{i}=%s" for i in conditions_column]
-            conditions_value_placeholder = " AND ".join(conditions_value_placeholder)
+            conditions_value_placeholder = LOGIC_SELECTOR.join(conditions_value_placeholder)
 
             conditions_value_parameters = list(conditions_dict.values())
             query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
 
-            # Execute query
-            cursor = self._get_cursor()
-            cursor.execute(query, conditions_value_parameters)
-        print("_______________________________++++++++++++++++==")
-        print(query)
-        field_names = [desc[0] for desc in cursor.description]
-        print(field_names)
-        print("_______________________________++++++++++++++++==")
+            # # Execute query
+            # cursor = self._get_cursor()
+
+            # # this works
+            # cursor.execute(query, conditions_value_parameters)
+
+            used_cursor_object = self._execute_query(query, conditions_value_parameters)
+
+        # print("_______________________________++++++++++++++++==")
+        # print(query)
+        field_names = [desc[0] for desc in used_cursor_object.description]
+        # print(field_names)
+        # print("_______________________________++++++++++++++++==")
 
         # Fetch data obtained with the previous query execution
         # and transform it into `model_class` objects.
@@ -61,23 +82,23 @@ class BaseManager:
         # avoid to run out of memory.
         model_objects = list()
         is_fetching_completed = False
-        print(is_fetching_completed)
+        # print(is_fetching_completed)
         while not is_fetching_completed:
-            print(is_fetching_completed)
-            result = cursor.fetchmany(size=chunk_size)
+            # print(is_fetching_completed)
+            result = used_cursor_object.fetchmany(size=chunk_size)
 
-            print("result", result)
-            print('start')
+            # print("result", result)
+            # print('start')
             for row_values in result:
-                print("current resultdata", row_values)
+                # print("current resultdata", row_values)
                 keys, values = field_names, row_values
-                print(keys, values)
+                # print(keys, values)
                 row_data = dict(zip(keys, values))
-                print(row_data)
-                print(self.model_class(**row_data))
+                # print(row_data)
+                # print(self.model_class(**row_data))
                 model_objects.append(self.model_class(**row_data))
             is_fetching_completed = len(result) < chunk_size
-            print('stop')
+            # print('stop')
 
         return model_objects
 

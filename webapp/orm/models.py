@@ -1,4 +1,4 @@
-from orm_manager import BaseModel, BaseManager
+from .orm_manager import BaseModel, BaseManager
 import psycopg2
 
 

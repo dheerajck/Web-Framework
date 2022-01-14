@@ -7,7 +7,7 @@ if __name__ == "__main__":
     query = """
         CREATE TABLE IF NOT EXISTS app_users  (
             id SERIAL PRIMARY KEY,
-            name varchar(50) NOT NULL,
+            name varchar(50),
             username varchar(50) UNIQUE NOT NULL,
             email varchar(50) UNIQUE NOT NULL,
             password varchar(100) NOT NULL
