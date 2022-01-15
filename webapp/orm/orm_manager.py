@@ -13,15 +13,15 @@ class BaseManager:
         cursor = cls._get_cursor()
 
         print("_______________________________++++++++++++++++==")
-        print("Current sql query", query, params)
+        # print("Current sql query", query, params)
         cursor.execute(query, params)
 
         if "SELECT" in query:
-            print(cursor)
+            # print(cursor)
 
             field_names = [desc[0] for desc in cursor.description]
-            print(field_names)
-        print("_______________________________++++++++++++++++==")
+        #     print(field_names)
+        # print("_______________________________++++++++++++++++==")
         return cursor
 
     def __init__(self, model_class):
@@ -193,12 +193,19 @@ class BaseManager:
         self._execute_query(query, parameters)
         return True
 
-    def delete(self):
+    # currently deletes only based on one field
+    def delete(self, **kwargs):
+        # kwargs.keys()[0] are not subscriptable, need to covert to list
+        # field_name = next(iter(kwargs.keys()))
+        # field_value_of_row_to_be_delete = next(iter(kwargs.values()))
+        # making iterator of dictionary items to use next()
+        field_name, field_value = next(iter(kwargs.items()))
         # Build DELETE query
-        query = f"DELETE FROM {self.model_class.table_name} "
+        query = f"DELETE FROM {self.model_class.table_name} WHERE {field_name}=%s"
+        parameter = [field_value]
 
         # Execute query
-        self._execute_query(query)
+        self._execute_query(query, parameter)
 
 
 # ----------------------- Model ----------------------- #

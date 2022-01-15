@@ -8,6 +8,7 @@ URL_DICTIONARY = {
     'dashboard': views.dashboard_view,
     'authentication': views.authenticating_view,
     'session': views.session,
+    'logout': views.logout_view,
 }
 
 

@@ -20,15 +20,6 @@ def test(environ, **kwargs):
     return render_template("test.html", context={}), start_response_headers
 
 
-def login_view(environ, **kwargs):
-    from pprint import pprint
-
-    print("LOGIN")
-    # pprint(environ)
-
-    return render_template("authentication-templates/login-register.html", context={}), start_response_headers
-
-
 def dashboard_view(environ, **kwargs):
     from pprint import pprint
 

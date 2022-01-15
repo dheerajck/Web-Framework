@@ -8,6 +8,8 @@ import functools
 CONDITION = True
 
 
+# assert False, "Implement url / strip always"
+# IMPLEMENT MIDDLEWARE
 def session_decorator(condition):
     def decorator_function(function):
 
@@ -46,31 +48,26 @@ class Reverse_middleware:
 
     def __call__(self, environ, start_response, *args, **kwargs):
         wrapped_app_response = self.wrapped_app(environ, start_response)
-        # tweeking response, we can also tweek request
+        # here tweeking response is done by reversing data from app, we can also tweek request
         return [
             data[::-1] for data in wrapped_app_response
         ]  # this should be iterable like FIRST or yield data will work, yeild "data"
 
 
-class SessionMiddleware:
-    def __init__(self):
-        self.wrapped_app = application
+from webapp.utils.session_handler import get_cookie_dict
 
-    def __call__(self, environ, start_response, *args, **kwargs):
-        wrapped_app_response = self.wrapped_app(environ, start_response)
-        # tweeking response, we can also tweek request
-        return [
-            data[::-1] for data in wrapped_app_response
-        ]  # this should be iterable like FIRST or yield data will work, yeild "data"
+from webapp.utils.redirect_functions import redirect_view, redirect_to_login_module
+from webapp.utils.session_handler import check_validity_of_session_id
 
 
 # @session_decorator(CONDITION)
 def application(environ, start_response, status=None, response_headers=None):
 
     path = environ.get('PATH_INFO')
+    print("newone")
     print(path)
-    print(environ['HTTP_COOKIE'])
-    print(environ['HTTP_COOKIE'])
+
+    # print(environ['HTTP_COOKIE'], type(environ['HTTP_COOKIE']))
 
     if path.startswith('/'):
         path = path[1:]
@@ -78,6 +75,7 @@ def application(environ, start_response, status=None, response_headers=None):
     if path.endswith('/'):
         path = path[:-1]
 
+    # url resolve
     view, kwargs_to_views = url_handler(path)
 
     # disabling named paramater for now, dont use this now  # html_to_render = response_body = view(environ, **kwargs_to_views)
@@ -86,6 +84,7 @@ def application(environ, start_response, status=None, response_headers=None):
 
     start_response_headers: dict = {}
 
+    # calling view
     html_response_body, start_response_headers = view(environ)
     # print(path, view)
     # print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhoiii")
@@ -112,9 +111,10 @@ def application(environ, start_response, status=None, response_headers=None):
     # print(f"1,{start_response_headers=}")
     # response_headers = []
     # response_headers.extend(start_response_headers.get('response_headers', []))
-    response_headers.extend(start_response_headers.get('extend', []))
+    # response_headers.extend(start_response_headers.get('extend', []))
     # print(f"2,{start_response_headers=}")
-    more_headers = start_response_headers.get('extend', [])
+    # avoided unwanted key
+    # more_headers = start_response_headers.get('extend', [])
     # print(f"3,{start_response_headers=}")
 
     # print("Again", start_response_headers)
@@ -122,22 +122,141 @@ def application(environ, start_response, status=None, response_headers=None):
     # print(f"345,{start_response_headers=}")
     # print(more_headers)
     # print()
-
-    response_headers.extend(more_headers)
+    # avoided unwanted response header key from the response of the view
+    # response_headers.extend(more_headers)
 
     from webapp.clean_print_function.clean_print import first_clean_print_function
 
-    start_response(status, response_headers)
+    print("app")
+    first_clean_print_function(response_headers)
 
+    start_response(status, response_headers)
+    assert isinstance(html_response_body, str), "html response is not string"
     return [html_response_body.encode('utf-8')]
+
+
+# gunicorn
+class SessionMiddleware:
+    def __init__(self, environ, start_response, app=application):
+        self.environ = environ
+        self.start_response = start_response
+        self.wrapped_app = app
+
+    def __iter__(self):
+        environ = self.environ
+        start_response = self.start_response
+
+        print()
+        print()
+        print("Middleware starts")
+
+        print("yoooooooooooooooooooooooooooooooooooooooooooooo")
+        print(environ.get('PATH_INFO'))
+        print(environ.get('HTTP_COOKIE'))
+        # aadsa = input()
+
+        # here request from web server is tweeked
+        SESSION_KEY_NAME = "session_key"
+
+        path = environ.get('PATH_INFO')
+        if path.startswith('/'):
+            path = path[1:]
+
+        if path.endswith('/'):
+            path = path[:-1]
+        cookie_string = environ.get('HTTP_COOKIE')
+        if path == "login" or path == "authentication":
+            print("so user is logining in to site")
+            wrapped_app_response: list = self.wrapped_app(environ, start_response)
+            return wrapped_app_response
+
+        # assert cookie_string is None, "No cookies"
+        # no cookies ?? redirect to login page
+        # get our apps session_id from cookies
+        cookie_dict = get_cookie_dict(cookie_string)  # returns None, NOW RETURNS EMPTY DICT
+        session_key_value = cookie_dict.get(SESSION_KEY_NAME)
+        # OR do shortcut circuiting so check_validity_of_session_id(session_key_value)
+        # will be evaluated onlny if session_key_value is not None
+        print("so validity", session_key_value)
+        print(check_validity_of_session_id(session_key_value))
+        if session_key_value is None or check_validity_of_session_id(session_key_value) is False:
+            response_body, start_response_headers = redirect_to_login_module()
+            status = start_response_headers['status']
+            response_headers = start_response_headers['response_headers']
+
+            print()
+            print()
+            print(response_headers)
+            start_response(status, response_headers)
+            return [response_body.encode('utf-8')]
+
+        wrapped_app_response = self.wrapped_app(environ, start_response)
+        # tweeking response, we can also tweek request
+        return wrapped_app_response
+
+
+# for wsgiref simple server this is used
+# class SessionMiddleware:
+#     def __init__(self, app=application):
+#         self.wrapped_app = app
+
+#     def __call__(self, environ, start_response, *args, **kwargs):
+
+#         print()
+#         print()
+#         print("Middleware starts")
+
+#         print("yoooooooooooooooooooooooooooooooooooooooooooooo")
+#         print(environ.get('PATH_INFO'))
+#         print(environ.get('HTTP_COOKIE'))
+#         # aadsa = input()
+
+#         # here request from web server is tweeked
+#         SESSION_KEY_NAME = "session_key"
+
+#         path = environ.get('PATH_INFO')
+#         if path.startswith('/'):
+#             path = path[1:]
+
+#         if path.endswith('/'):
+#             path = path[:-1]
+#         cookie_string = environ.get('HTTP_COOKIE')
+#         if path == "login" or path == "authentication":
+#             print("so user is logining in to site")
+#             wrapped_app_response: list = self.wrapped_app(environ, start_response)
+#             return wrapped_app_response
+
+#         # assert cookie_string is None, "No cookies"
+#         # no cookies ?? redirect to login page
+#         # get our apps session_id from cookies
+#         cookie_dict = get_cookie_dict(cookie_string)  # returns None, NOW RETURNS EMPTY DICT
+#         session_key_value = cookie_dict.get(SESSION_KEY_NAME)
+#         # OR do shortcut circuiting so check_validity_of_session_id(session_key_value)
+#         # will be evaluated onlny if session_key_value is not None
+#         print("so validity", session_key_value)
+#         print(check_validity_of_session_id(session_key_value))
+#         if session_key_value is None or check_validity_of_session_id(session_key_value) is False:
+#             response_body, start_response_headers = redirect_to_login_module()
+#             status = start_response_headers['status']
+#             response_headers = start_response_headers['response_headers']
+
+#             print()
+#             print()
+#             print(response_headers)
+#             start_response(status, response_headers)
+#             return [response_body.encode('utf-8')]
+
+#         wrapped_app_response = self.wrapped_app(environ, start_response)
+#         # tweeking response, we can also tweek request
+#         return wrapped_app_response
 
 
 if __name__ == "__main__":
 
     # make user post, then session middleware
-    # server = make_server('localhost', 8000, app=SessionMiddleware(application))
 
-    server = make_server('localhost', 8000, app=application)
+    server = make_server('localhost', 8000, app=SessionMiddleware(application))
+    # server = make_server('localhost', 8000, app=application)
     # adding middle ware
     # server = make_server('localhost', 8000, app=Reverse_middleware(application))
 
