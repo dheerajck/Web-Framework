@@ -168,7 +168,7 @@ class SessionMiddleware:
         if path == "login" or path == "authentication":
             print("so user is logining in to site")
             wrapped_app_response: list = self.wrapped_app(environ, start_response)
-            return wrapped_app_response
+            return iter(wrapped_app_response)
 
         # assert cookie_string is None, "No cookies"
         # no cookies ?? redirect to login page
@@ -188,11 +188,11 @@ class SessionMiddleware:
             print()
             print(response_headers)
             start_response(status, response_headers)
-            return [response_body.encode('utf-8')]
+            return iter([response_body.encode('utf-8')])
 
         wrapped_app_response = self.wrapped_app(environ, start_response)
         # tweeking response, we can also tweek request
-        return wrapped_app_response
+        return iter(wrapped_app_response)
 
 
 # for wsgiref simple server this is used
@@ -255,7 +255,7 @@ if __name__ == "__main__":
 
     # make user post, then session middleware
 
-    server = make_server('localhost', 8000, app=SessionMiddleware(application))
+    server = make_server('localhost', 8000, app=SessionMiddleware)
     # server = make_server('localhost', 8000, app=application)
     # adding middle ware
     # server = make_server('localhost', 8000, app=Reverse_middleware(application))
