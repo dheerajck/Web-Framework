@@ -61,6 +61,11 @@ def create_session_id_header(userid, days=1):
     return headers
 
 
+def delete_session_id(session_id):
+    Session.objects.delete(session_key=session_id)
+    return None
+
+
 def check_validity_of_session_id(session_id):
     curent_session_object = Session.objects.select({}, {'session_key': session_id})
     l = len(curent_session_object)
@@ -71,6 +76,9 @@ def check_validity_of_session_id(session_id):
         curent_session_object = curent_session_object[0]
         current_time = datetime.now(tz=timezone)
         if current_time >= curent_session_object.expiry_date:
+            # deleted the expired session id
+            delete_session_id(session_id)
+
             return False
         else:
             return curent_session_object.user_id
@@ -90,8 +98,3 @@ def get_cookie_dict(cookie_string):
         cookie_value = cookie_value.strip()
         cookie_dict[cookie_name] = cookie_value
     return cookie_dict
-
-
-def delete_session_id(session_id):
-    Session.objects.delete(session_key=session_id)
-    return None
