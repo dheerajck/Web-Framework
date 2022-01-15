@@ -20,6 +20,10 @@ can use regex
 '''
 
 
+def url_strip(url):
+    return url.strip("/")
+
+
 def url_handler(request_url):
 
     view_name = URL_DICTIONARY.get(request_url, None)

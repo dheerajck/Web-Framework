@@ -1,5 +1,5 @@
 from wsgiref.simple_server import make_server
-from webapp.url_config import url_handler
+from webapp.url_config import url_handler, url_strip
 
 
 # use this after class single middleware works well
@@ -8,7 +8,7 @@ import functools
 CONDITION = True
 
 
-# assert False, "Implement url / strip always"
+# assert False, "Implement url / strip always" done url_config.url_strip()
 # IMPLEMENT MIDDLEWARE
 def session_decorator(condition):
     def decorator_function(function):
@@ -69,11 +69,13 @@ def application(environ, start_response, status=None, response_headers=None):
 
     # print(environ['HTTP_COOKIE'], type(environ['HTTP_COOKIE']))
 
-    if path.startswith('/'):
-        path = path[1:]
+    # if path.startswith('/'):
+    #     path = path[1:]
 
-    if path.endswith('/'):
-        path = path[:-1]
+    # if path.endswith('/'):
+    #     path = path[:-1]
+
+    path = url_strip(path)
 
     # url resolve
     view, kwargs_to_views = url_handler(path)
@@ -159,11 +161,8 @@ class SessionMiddleware:
         SESSION_KEY_NAME = "session_key"
 
         path = environ.get('PATH_INFO')
-        if path.startswith('/'):
-            path = path[1:]
+        path = url_strip(path)
 
-        if path.endswith('/'):
-            path = path[:-1]
         cookie_string = environ.get('HTTP_COOKIE')
         if path == "login" or path == "authentication":
             print("so user is logining in to site")

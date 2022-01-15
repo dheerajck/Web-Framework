@@ -47,6 +47,8 @@ def authenticating_view(environ, **kwargs):
 
         # Launched external handler for 'localhost:8000//dashboard/'.
         # url_to_redirect = f'{http_host}/{redirect_url_path}'
+
+        # important dont strip this "/ at starting is important / at the end is not important"
         url_to_redirect = '/dashboard/'
         status = '302 FOUND'
 
