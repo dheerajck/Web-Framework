@@ -12,23 +12,24 @@ def connect():
         params = config()
 
         # connect to the PostgreSQL server
-        print('Connecting to the PostgreSQL database...')
+        # print('Connecting to the PostgreSQL database...')
 
         connection = psycopg2.connect(**params)
         connection.set_session(autocommit=True)
-        print('Connecting to the PostgreSQL database...Successfull', connection)
+        # print('Connecting to the PostgreSQL database...Successfull', connection)
+        # print('Connecting to the PostgreSQL database...Successfull')
 
         # create a cursor
 
         return connection
 
-    except (Exception, psycopg2.DatabaseError) as error:
+    except (psycopg2.DatabaseError) as error:
         print(error)
         print()
 
 
 def disconnect(cursor, connection):
-    print('Disconnecting from db...Successfull', connection)
+    print('Disconnecting from db...Successfull')
     connection.close()
     cursor.close()
 

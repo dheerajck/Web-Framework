@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
 # give full path from where this connection is called at the beginning
-def config(filename='database_folder/db_config.ini', section='postgresql'):
+def config(filename='webapp/orm/database_folder/db_config.ini', section='postgresql'):
     # create a parser
     parser = ConfigParser()
     # read config file
