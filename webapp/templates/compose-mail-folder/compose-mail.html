@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Configure mail</title>
+	<!-- <link rel="stylesheet" href="/static/style.css">  works  / starts from root-->
+  <link rel="stylesheet" href="/static/sent-mail.css">
+
+
+	
+</head>
+
+<body>
+	
+
+	<div class="sent-mail-page">
+		<div class="form">
+
+
+
+		<!-- abc@t.com, abc@t1.com enter mails separated by comma-->
+		  <form class="sent-mail-form" action="http://localhost:8000/sent-mail/"  method="post">
+			<label for="To">To</label>
+			<!-- better to close input tags like this -->
+			<input id="TO" name="to_list" type="email"  multiple/> 
+
+			<br>
+			
+
+			<label for="title">Title</label>
+			<input id="title" name="title" type="text"/>
+
+			<br>
+
+			<label for="body">Body</label>
+			<textarea id="body" name="body" rows="4" cols="50"></textarea>
+			<!-- <input id="body" type="text"/> -->
+
+			<br>
+
+			<label for="attachement">attachement</label>
+			<!-- accept="image/png, image/gif, image/jpeg" to specify type of files that should be accepted -->
+			<input id="attachement" name="attachement" type="file" multiple/>
+		
+			<br>
+
+			<input type="submit" name="sent_button" value="sent" />
+			<input type="submit" name="draft_button" value="draft" />
+			
+		  </form>
+
+
+		</div>
+	  </div>
+
+</body>
+
+</html>

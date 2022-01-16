@@ -7,7 +7,7 @@ import functools
 
 CONDITION = True
 
-assert False, "merge this branch and create new branch"
+# assert False, "merge this branch and create new branch"
 # assert False, "Implement url / strip always" done url_config.url_strip()
 # IMPLEMENT MIDDLEWARE
 def session_decorator(condition):
@@ -87,7 +87,13 @@ def application(environ, start_response, status=None, response_headers=None):
     start_response_headers: dict = {}
 
     # calling view
-    html_response_body, start_response_headers = view(environ)
+    # also passing dict as key word argument, {'key':value} key=value
+    from pprint import pprint
+
+    print(']]]]]]]]]]]]]]]]]]]')
+    pprint(kwargs_to_views)
+    html_response_body, start_response_headers = view(environ, **kwargs_to_views)
+
     # print(path, view)
     # print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhoiii")
 

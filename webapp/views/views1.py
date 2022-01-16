@@ -40,5 +40,9 @@ def session(environ, **kwargs):
     return html_to_render, start_response_headers
 
 
+def compose_mail_view(environ, **kwargs):
+    return render_template("compose-mail-folder/compose-mail.html", context={}), start_response_headers
+
+
 def view_404(environ, **kwargs):
     return render_template("HTTP404.html", context={}), start_response_headers
