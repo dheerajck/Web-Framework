@@ -15,7 +15,7 @@ from ..utils.redirect_functions import redirect_to_dashboard_module
 
 start_response_headers: dict = {}
 
-from ..orm.models import User, Groups
+from ..orm.models import User, Groups, UserGroup
 
 
 def is_mail_group(mail):
@@ -126,15 +126,150 @@ def compose_mail_post_view(environ, **kwargs):
 
 
 def view_sent_mails(environ, **kwargs):
-    pass
+    user_id = get_user_from_environ(environ)
+    sent_mails = Mails.objects.select({}, {"sender": user_id})
+    print(sent_mails)
+    print("[[[[[[[")
+
+    mail_div = ''
+    print("s1")
+    for each_mail in sent_mails:
+
+        receivers_list = []
+        mail_id = each_mail.id
+        receivers_objects = MailReceivers.objects.select(['receiver_user', 'receiver_group'], {"mail_id": mail_id})
+        print(receivers_objects)
+        #  space present in comment tag after --  will make the template not render
+        for receiver in receivers_objects:
+            print(type(receiver.receiver_user))
+            print("hi")
+            receiver_user = receiver.receiver_user
+            print(receiver_user)
+            if receiver_user is None:
+                # then definitely there will be a group
+                # one constraint should have value
+                receivers_list.append(Groups.objects.select_one(['group_mail'], {"id": receiver.receiver_group}))
+            else:
+                receivers_list.append(User.objects.select_one(['email'], {"id": receiver.receiver_user}))
+
+        print(receivers_list)
+        receivers_list = ", ".join(receivers_list)
+        print("yessssssssssssssssssssss")
+
+        # <!-- add datetime sort Done -- >
+        mail_div += f'''
+        
+        <div>
+         <!-- add datetime sort Done -->
+      
+        
+        <h3>{each_mail.created_date}</h3>
+        <h2>{each_mail.title}</h2>
+        <p>To:{receivers_list}</p>
+        <pre>{each_mail.body}</pre>
+        <a href="">attachement link</a>
+        <form action="inbox-actions/" method="post">
+            <input type="button" name="interaction" value="reply" placeholder="reply">
+            <input type="button" name="interaction" value="delete" placeholder="delete">
+        </form>
+        <hr>
+        </div>'''
+    print("s2")
+    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.....")
+
+    from ..utils.template_handlers import render_template
+
+    context = {'title_of_page': "inbox", "mails": mail_div}
+    response_body = render_template('list-mail-template.html', context)
+    # print(users_groups)
+    # print(response_body)
+    start_response_headers = response_header_basic = {
+        "status": "200 OK",
+        "response_body": [
+            ('Content-type', 'text/html'),
+            ('Content-length', str(len(response_body))),
+        ],
+    }
+    return response_body, start_response_headers
 
 
 def view_draft(environ, **kwargs):
     pass
 
 
-def view_received_mails(environ, **kwargs):
-    pass
+from ..orm.models import Mails, MailReceivers
+
+
+def view_inbox(environ, **kwargs):
+
+    receivers_list = []
+    user_id = get_user_from_environ(environ)
+    users_groups = UserGroup.objects.select({"group_id"}, {'user_id': user_id})
+    print(users_groups)
+    users_groups_id = [user.group_id for user in users_groups]
+
+    users_groups_id = tuple(users_groups_id)
+    print(users_groups)
+
+    print("INBOX USER")
+    print("user id", user_id)
+    # 1 => OR 1 => IN
+    mails_id_objects = MailReceivers.objects.select(
+        {"mail_id"},
+        {"receiver_user": user_id, "receiver_group": users_groups_id},
+        1,
+        1,
+    )
+    mails_id_list = [mail_object.mail_id for mail_object in mails_id_objects]
+    print(mails_id_list, "FOUND")
+
+    mails_id_tuple = tuple(mails_id_list)
+    inbox = Mails.objects.select(
+        {},
+        {"id": mails_id_tuple, "archives": False},
+        0,
+        1,
+        ("created_date",),
+    )
+    print(inbox)
+
+    mail_div = ''
+    for each_mail in inbox:
+        #  space present in comment tag after --  will make the template not render
+        # <!-- add datetime sort Done -- >
+        mail_div += f'''
+        
+        <div>
+         <!-- add datetime sort Done -->
+      
+        
+        <h3>{each_mail.created_date}</h3>
+        <h2>{each_mail.title}</h2>
+        <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
+        <pre>{each_mail.body}</pre>
+        <a href="">attachement link</a>
+        <form action="inbox-actions/" method="post">
+            <input type="button" name="interaction" value="archive" placeholder="archive">
+            <input type="button" name="interaction" value="reply" placeholder="reply">
+            <input type="button" name="interaction" value="delete" placeholder="delete">
+        </form>
+        <hr>
+        </div>'''
+
+    from ..utils.template_handlers import render_template
+
+    context = {'title_of_page': "inbox", "mails": mail_div}
+    response_body = render_template('list-mail-template.html', context)
+    # print(users_groups)
+    # print(response_body)
+    start_response_headers = response_header_basic = {
+        "status": "200 OK",
+        "response_body": [
+            ('Content-type', 'text/html'),
+            ('Content-length', str(len(response_body))),
+        ],
+    }
+    return response_body, start_response_headers
 
 
 def view_archived_mails(environ, **kwargs):

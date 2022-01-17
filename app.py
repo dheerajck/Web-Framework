@@ -145,7 +145,7 @@ def application(environ, start_response, status=None, response_headers=None):
     print(
         "\n\n\n\n________________________________________ COMPLETED ONE REQUEST RESPONSE________________________________________________\n\n\n\n"
     )
-
+    # print(html_response_body)
     assert isinstance(html_response_body, str), "html response is not string"
     return [html_response_body.encode('utf-8')]
 

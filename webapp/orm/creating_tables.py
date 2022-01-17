@@ -62,7 +62,7 @@ if __name__ == "__main__":
     CREATE TABLE IF NOT EXISTS receivers_of_mail (
         id SERIAL PRIMARY KEY,
        
-        mail_id integer REFERENCES mails(id) ON DELETE CASCADE UNIQUE NOT NULL,
+        mail_id integer REFERENCES mails(id) ON DELETE CASCADE NOT NULL,
         receiver_user integer REFERENCES app_users(id),
         receiver_group integer REFERENCES groups(id),
         
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     CREATE TABLE IF NOT EXISTS receivers_of_draft_mails (
         id SERIAL PRIMARY KEY,
         
-        draft_id integer REFERENCES draft_mails(id) ON DELETE CASCADE UNIQUE NOT NULL,
+        draft_id integer REFERENCES draft_mails(id) ON DELETE CASCADE NOT NULL,
         receiver_user integer REFERENCES app_users(id),
         receiver_group integer REFERENCES groups(id)
     )

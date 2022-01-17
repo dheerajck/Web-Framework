@@ -31,8 +31,14 @@ class BaseManager:
     def __init__(self, model_class):
         self.model_class = model_class
 
-    def select(self, field_names: set, conditions_dict: dict, ALL_OR=0, chunk_size=2000):
+    def select(
+        self, field_names: list, conditions_dict: dict, ALL_OR=0, ALL_IN=0, order_by: tuple = (), chunk_size=2000
+    ):
         # Build SELECT query
+        print("check", ALL_OR, ALL_IN)
+        LOGIC_SELECTOR = " AND "
+        if ALL_OR == 1:
+            LOGIC_SELECTOR = " OR "
 
         if len(field_names) == 0:
             fields_format = "*"
@@ -41,11 +47,39 @@ class BaseManager:
 
         query = f"SELECT {fields_format} FROM {self.model_class.table_name}"
 
+        if len(order_by) == 1:
+            query += f"ORDER BY {order_by[0]} DESC"
+
         cursor = self._get_cursor()
 
         if len(conditions_dict) == 0:
             # cursor.execute(query)
             used_cursor_object = self._execute_query(query)
+        elif ALL_IN == 1:
+
+            conditions_column = conditions_dict.keys()
+            print('emteredhere')
+            """
+            Temporary IN solution
+            """
+            # making element to tuple if its not tuple to make this work for now here
+
+            conditions_value_placeholder = [f"({i} IN %s)" for i in conditions_column]
+            conditions_value_placeholder = LOGIC_SELECTOR.join(conditions_value_placeholder)
+
+            query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
+            parameters = []
+            for values in conditions_dict.values():
+                if isinstance(values, tuple):
+                    parameters.append(values)
+                else:
+                    value_to_append = ((values,),)
+                    parameters.append(value_to_append)
+
+            if len(order_by) == 1:
+                query += f"ORDER BY {order_by[0]} DESC"
+            used_cursor_object = self._execute_query(query, parameters)
+
         else:
             conditions_column = conditions_dict.keys()
             # print()
@@ -71,7 +105,8 @@ class BaseManager:
 
             # # this works
             # cursor.execute(query, conditions_value_parameters)
-
+            if len(order_by) == 1:
+                query += f"ORDER BY {order_by[0]} DESC"
             used_cursor_object = self._execute_query(query, conditions_value_parameters)
 
         # print("_______________________________++++++++++++++++==")
@@ -124,6 +159,8 @@ class BaseManager:
         returned_created_row_id_cursor = self._execute_query(query, params)
         # result of the sql query is obtained from the cursor which executed the sql statements
         value_returned = returned_created_row_id_cursor.fetchone()
+        assert type(value_returned) == tuple, "datatype errors"
+        print("tuple")
 
         print(value_returned, type(value_returned))
         return value_returned[0]
@@ -229,6 +266,22 @@ class BaseManager:
 
         # Execute query
         self._execute_query(query, params)
+
+    def select_one(self, field_name, conditions_dict):
+        if len(field_name) == 0:
+            field_name = "*c"
+
+        field_name = ", ".join(field_name)
+        conditions_value_placeholder = [f"({i} = %s)" for i in conditions_dict.keys()]
+        conditions_value_placeholder = ", ".join(conditions_value_placeholder)
+        query = f"SELECT {field_name} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
+        parameters = list(conditions_dict.values())
+        used_cursor = self._execute_query(query, parameters)
+        field_values = used_cursor.fetchone()
+        print(field_values, 111111111112)
+        print(field_values[0])
+        # first index contain first field name, if email and id in select list, field_values[0] gives email field_values[1] gives id
+        return field_values[0]
 
     # currently deletes only based on one field
     def delete(self, **kwargs):

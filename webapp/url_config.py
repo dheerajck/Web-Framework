@@ -11,6 +11,8 @@ URL_DICTIONARY = {
     'logout': views.logout_view,
     'dashboard/compose-mail': views.compose_mail_view,
     'compose-mail-post-view': views.compose_mail_post_view,
+    'inbox': views.view_inbox,
+    'sent-mails': views.view_sent_mails,
 }
 
 
