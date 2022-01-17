@@ -217,8 +217,8 @@ def view_inbox(environ, **kwargs):
     mails_id_objects = MailReceivers.objects.select(
         {"mail_id"},
         {"receiver_user": user_id, "receiver_group": users_groups_id},
-        1,
-        1,
+        1,  # 1 => OR
+        1,  # 1 => field IN tuples , 0 => field=value
     )
     mails_id_list = [mail_object.mail_id for mail_object in mails_id_objects]
     print(mails_id_list, "FOUND")
@@ -227,8 +227,8 @@ def view_inbox(environ, **kwargs):
     inbox = Mails.objects.select(
         {},
         {"id": mails_id_tuple, "archives": False},
-        0,
-        1,
+        0,  # 0 => OR
+        1,  # 1 => field IN tuples , 0 => field=value
         ("created_date",),
     )
     print(inbox)

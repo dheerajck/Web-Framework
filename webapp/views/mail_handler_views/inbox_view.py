@@ -1,0 +1,84 @@
+from ...utils.template_handlers import render_template
+
+from ...utils.session_handler import get_user_from_environ
+from ...orm.models import User, UserGroup
+from ...orm.models import Mails, MailReceivers
+
+
+def view_inbox(environ, **kwargs):
+    '''
+    select is not loop, so row containing values which satisifes condition are retrieved
+    rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
+    important => data retireved never greater than data in the table
+    if a user sends same mail through user, groups
+    only one copy will reach here since mail id is unique which is actually good
+    '''
+
+    receivers_list = []
+    user_id = get_user_from_environ(environ)
+    users_groups = UserGroup.objects.select({"group_id"}, {'user_id': user_id})
+    print(users_groups)
+    users_groups_id = [user.group_id for user in users_groups]
+
+    users_groups_id = tuple(users_groups_id)
+    print(user_id, users_groups_id)
+    print("^^^^^^^^^^^^^^^^^^^^^^^^")
+
+    print("INBOX USER")
+    print("user id", user_id)
+    # 1 => OR 1 => IN
+    mails_id_objects = MailReceivers.objects.select(
+        {"mail_id"},
+        {"receiver_user": user_id, "receiver_group": users_groups_id},
+        1,  # 1 => OR
+        1,  # 1 => field IN tuples , 0 => field=value
+    )
+    mails_id_list = [mail_object.mail_id for mail_object in mails_id_objects]
+    print(mails_id_list, "FOUND")
+
+    mails_id_tuple = tuple(mails_id_list)
+    print(mails_id_tuple, "FOUND")
+    inbox = Mails.objects.select(
+        {},
+        {"id": mails_id_tuple, "archives": False},
+        0,  # 0 => AND
+        1,  # 1 => field IN tuples , 0 => field=value
+        ("created_date",),  # order by created_date descending order
+    )
+    print(inbox)
+
+    mail_div = ''
+    for each_mail in inbox:
+        #  space present in comment tag after --  will make the template not render
+        # <!-- add datetime sort Done -- >
+        mail_div += f'''
+        
+        <div>
+         <!-- add datetime sort Done -->
+      
+        
+        <h3>{each_mail.created_date}</h3>
+        <h2>{each_mail.title}</h2>
+        <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
+        <pre>{each_mail.body}</pre>
+        <a href="">attachement link</a>
+        <form action="inbox-actions/" method="post">
+            <input type="button" name="interaction" value="archive" placeholder="archive">
+            <input type="button" name="interaction" value="reply" placeholder="reply">
+            <input type="button" name="interaction" value="delete" placeholder="delete">
+        </form>
+        <hr>
+        </div>'''
+
+    context = {'title_of_page': "inbox", "mails": mail_div}
+    response_body = render_template('list-mail-template.html', context)
+    # print(users_groups)
+    # print(response_body)
+    start_response_headers = response_header_basic = {
+        "status": "200 OK",
+        "response_body": [
+            ('Content-type', 'text/html'),
+            ('Content-length', str(len(response_body))),
+        ],
+    }
+    return response_body, start_response_headers

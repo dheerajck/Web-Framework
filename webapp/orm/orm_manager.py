@@ -126,6 +126,8 @@ class BaseManager:
             # print(is_fetching_completed)
             result = used_cursor_object.fetchmany(size=chunk_size)
 
+            # print(len(result))
+            # print()
             # print("result", result)
             # print('start')
             for row_values in result:
@@ -137,8 +139,9 @@ class BaseManager:
                 # print(self.model_class(**row_data))
                 model_objects.append(self.model_class(**row_data))
             is_fetching_completed = len(result) < chunk_size
-            # print('stop')
 
+            # print('stop')
+        print("fetching done")
         return model_objects
 
     def create(self, new_data: dict):
