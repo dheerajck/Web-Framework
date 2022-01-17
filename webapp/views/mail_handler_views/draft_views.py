@@ -2,17 +2,10 @@ from ...utils.template_handlers import render_template
 
 from ...utils.session_handler import get_user_from_environ
 from ...orm.models import User, UserGroup
-from ...orm.models import Mails, MailReceivers
+from ...orm.models import Drafts, DraftReceivers
 
 
-def view_inbox(environ, **kwargs):
-    '''
-    select is not loop, so row containing values which satisifes condition are retrieved
-    rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
-    important => data retireved never greater than data in the table
-    if a user sends same mail through user, groups
-    only one copy will reach here since mail id is unique which is actually good
-    '''
+def view_draft_mails(environ, **kwargs):
 
     receivers_list = []
     user_id = get_user_from_environ(environ)
@@ -24,39 +17,37 @@ def view_inbox(environ, **kwargs):
     print(user_id, users_groups_id)
     print("^^^^^^^^^^^^^^^^^^^^^^^^")
 
-    print("INBOX USER")
+    print("DRAFT USER")
     print("user id", user_id)
     # 1 => OR 1 => IN
-    mails_id_objects = MailReceivers.objects.select(
-        {"mail_id"},
+    draft_mails_id_objects = DraftReceivers.objects.select(
+        {"draft_id"},
         {"receiver_user": user_id, "receiver_group": users_groups_id},
         1,  # 1 => OR
         1,  # 1 => field IN tuples , 0 => field=value
     )
-    mails_id_list = [mail_object.mail_id for mail_object in mails_id_objects]
-    print(mails_id_list, "FOUND")
+    draft_mails_id_list = [mail_object.mail_id for mail_object in draft_mails_id_objects]
+    print(draft_mails_id_list, "FOUND")
 
-    mails_id_tuple = tuple(mails_id_list)
-    print(mails_id_tuple, "FOUND")
+    draft_mails_id_tuple = tuple(draft_mails_id_list)
 
-    filter_condition = {"id": mails_id_tuple, "archives": False}
-
-    if len(mails_id_tuple) == 0:
-        # found when creating draftbox
-        print("no mails")
+    filter_condition = {"id": draft_mails_id_tuple}
+    print(draft_mails_id_list, "FOUND")
+    if len(draft_mails_id_tuple) == 0:
+        print("no draft")
         filter_condition = {}
 
-    inbox = Mails.objects.select(
+    draft_mail_objects = Drafts.objects.select(
         {},
         filter_condition,
         0,  # 0 => AND
         1,  # 1 => field IN tuples , 0 => field=value
         ("created_date",),  # order by created_date descending order
     )
-    print(inbox)
+    print(draft_mail_objects)
 
     mail_div = ''
-    for each_mail in inbox:
+    for each_draft_mail in draft_mail_objects:
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
         mail_div += f'''
@@ -65,23 +56,20 @@ def view_inbox(environ, **kwargs):
          <!-- add datetime sort Done -->
       
         
-        <h3>{each_mail.created_date}</h3>
-        <h2>{each_mail.title}</h2>
-        <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
-        <pre>{each_mail.body}</pre>
+        <h3>{each_draft_mail.created_date}</h3>
+        <h2>{each_draft_mail.title}</h2>
+        <p>from:{User.objects.select_one(["email"], {"id":each_draft_mail.sender})}</p>
+        <pre>{each_draft_mail.body}</pre>
         <a href="">attachement link</a>
         <form action="inbox-actions/" method="post">
-            <input type="button" name="interaction" value="archive" placeholder="archive">
-            <input type="button" name="interaction" value="reply" placeholder="reply">
-            <input type="button" name="interaction" value="delete" placeholder="delete">
+            <input type="button" name="interaction" value="edit-mail" placeholder="edit-mail">
         </form>
         <hr>
         </div>'''
 
-    # if for loop is not executed because there are no mails in inbox of user
+    # if for loop is not executed because there are no mails in draftbox of user
     if mail_div == "":
-        mail_div = "<h1>No mails in Inbox</h1>"
-
+        mail_div = "<h1>No mails in Draft</h1>"
     context = {'title_of_page': "inbox", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)
     # print(users_groups)

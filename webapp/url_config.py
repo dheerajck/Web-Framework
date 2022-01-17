@@ -13,6 +13,8 @@ URL_DICTIONARY = {
     'compose-mail-post-view': views.compose_mail_post_view,
     'inbox': views.view_inbox,
     'sent-mails': views.view_sent_mails,
+    'draft-mails': views.view_draft_mails,
+    'archives': views.view_archive,
 }
 
 

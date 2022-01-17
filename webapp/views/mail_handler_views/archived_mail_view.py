@@ -4,8 +4,13 @@ from ...utils.session_handler import get_user_from_environ
 from ...orm.models import User, UserGroup
 from ...orm.models import Mails, MailReceivers
 
+"""
+can replace using inbox view by passing one paarameter to view 
+which says if inbox or archive should be  shown in the display
+"""
 
-def view_inbox(environ, **kwargs):
+
+def view_archive(environ, **kwargs):
     '''
     select is not loop, so row containing values which satisifes condition are retrieved
     rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
@@ -39,7 +44,7 @@ def view_inbox(environ, **kwargs):
     mails_id_tuple = tuple(mails_id_list)
     print(mails_id_tuple, "FOUND")
 
-    filter_condition = {"id": mails_id_tuple, "archives": False}
+    filter_condition = {"id": mails_id_tuple, "archives": True}
 
     if len(mails_id_tuple) == 0:
         # found when creating draftbox
@@ -80,7 +85,7 @@ def view_inbox(environ, **kwargs):
 
     # if for loop is not executed because there are no mails in inbox of user
     if mail_div == "":
-        mail_div = "<h1>No mails in Inbox</h1>"
+        mail_div = "<h1>No mails in Archive</h1>"
 
     context = {'title_of_page': "inbox", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)

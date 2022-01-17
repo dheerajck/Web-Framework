@@ -45,7 +45,7 @@ class BaseManager:
         else:
             fields_format = ', '.join(field_names)
 
-        query = f"SELECT {fields_format} FROM {self.model_class.table_name}"
+        query = f"SELECT {fields_format} FROM {self.model_class.table_name} "
 
         if len(order_by) == 1:
             query += f"ORDER BY {order_by[0]} DESC"
