@@ -63,9 +63,9 @@ from webapp.utils.session_handler import check_validity_of_session_id
 # @session_decorator(CONDITION)
 def application(environ, start_response, status=None, response_headers=None):
 
-    path = environ.get('PATH_INFO')
-    print("newone")
-    print(path)
+    # path = environ.get('PATH_INFO')
+    # # print("newone")
+    # print(path)
 
     # print(environ['HTTP_COOKIE'], type(environ['HTTP_COOKIE']))
 
@@ -75,6 +75,7 @@ def application(environ, start_response, status=None, response_headers=None):
     # if path.endswith('/'):
     #     path = path[:-1]
 
+    path = environ.get('PATH_INFO')
     path = url_strip(path)
 
     # url resolve
@@ -88,9 +89,11 @@ def application(environ, start_response, status=None, response_headers=None):
 
     # calling view
     # also passing dict as key word argument, {'key':value} key=value
+
     from pprint import pprint
 
-    print(']]]]]]]]]]]]]]]]]]]')
+    # print(']]]]]]]]]]]]]]]]]]]')
+    print("kwargs passing to view")
     pprint(kwargs_to_views)
     html_response_body, start_response_headers = view(environ, **kwargs_to_views)
 
@@ -135,10 +138,14 @@ def application(environ, start_response, status=None, response_headers=None):
 
     from webapp.clean_print_function.clean_print import first_clean_print_function
 
-    print("app")
-    first_clean_print_function(response_headers)
+    # print("app")
+    # first_clean_print_function(response_headers)
 
     start_response(status, response_headers)
+    print(
+        "\n\n\n\n________________________________________ COMPLETED ONE REQUEST RESPONSE________________________________________________\n\n\n\n"
+    )
+
     assert isinstance(html_response_body, str), "html response is not string"
     return [html_response_body.encode('utf-8')]
 
@@ -155,23 +162,33 @@ class SessionMiddleware:
         start_response = self.start_response
 
         print()
-        print()
-        print("Middleware starts")
+        print("\n\n__________________Middleware starts_________________\n\n")
+        # print("Middleware starts")
 
-        print("yoooooooooooooooooooooooooooooooooooooooooooooo")
-        print(environ.get('PATH_INFO'))
-        print(environ.get('HTTP_COOKIE'))
+        # print("yoooooooooooooooooooooooooooooooooooooooooooooo")
+
+        print()
+        print("path", environ.get('PATH_INFO'))
+        # print(environ.get('HTTP_COOKIE'))
         # aadsa = input()
 
         # here request from web server is tweeked
         SESSION_KEY_NAME = "session_key"
 
         path = environ.get('PATH_INFO')
+        print(1, path)
         path = url_strip(path)
+        print(path)
 
+        # path of static files will be like this
+        path_starting = path.split('/')[0]
+        print("check")
+        print(path)
+        # static/login.css = > login/static/login.css    /static/login.css = > static/login.css
+        # print(path.startswith('login/static/login'))
         cookie_string = environ.get('HTTP_COOKIE')
-        if path == "login" or path == "authentication":
-            print("so user is logining in to site")
+        if path == "login" or path == "authentication" or path.startswith('static/login'):
+            print("so user needs to Sign in to site")
             wrapped_app_response: list = self.wrapped_app(environ, start_response)
             return iter(wrapped_app_response)
 
@@ -182,8 +199,8 @@ class SessionMiddleware:
         session_key_value = cookie_dict.get(SESSION_KEY_NAME)
         # OR do shortcut circuiting so check_validity_of_session_id(session_key_value)
         # will be evaluated onlny if session_key_value is not None
-        print("so validity", session_key_value)
-        print(check_validity_of_session_id(session_key_value))
+        # print("so validity", session_key_value)
+        # print(check_validity_of_session_id(session_key_value))
         if session_key_value is None or check_validity_of_session_id(session_key_value) is False:
             response_body, start_response_headers = redirect_to_login_module()
             status = start_response_headers['status']
@@ -193,6 +210,9 @@ class SessionMiddleware:
             print()
             print(response_headers)
             start_response(status, response_headers)
+            print(
+                "\n\n\n\n________________________________________ COMPLETED ONE REQUEST RESPONSE________________________________________________\n\n\n\n"
+            )
             return iter([response_body.encode('utf-8')])
 
         wrapped_app_response = self.wrapped_app(environ, start_response)

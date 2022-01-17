@@ -10,6 +10,7 @@ URL_DICTIONARY = {
     'session': views.session,
     'logout': views.logout_view,
     'dashboard/compose-mail': views.compose_mail_view,
+    'compose-mail-post-view': views.compose_mail_post_view,
 }
 
 
@@ -34,7 +35,9 @@ def check_static_url(request_url):
 
 def url_handler(request_url):
 
+    print(f"\n\n__________________ URL logger __________________\n\n")
     print("url logger", request_url)
+    print(f"\n\n__________________ DONE __________________\n\n")
 
     static_file_name_or_false_value = check_static_url(request_url)
     if static_file_name_or_false_value:
@@ -44,6 +47,7 @@ def url_handler(request_url):
 
     view_name = URL_DICTIONARY.get(request_url, None)
     if not (request_url == 'favicon.ico'):
+
         first_clean_print_function(f"{request_url} ================> {view_name}")
 
     if view_name is None:

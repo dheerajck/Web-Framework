@@ -1,16 +1,33 @@
 from urllib.parse import parse_qs
 import cgi
 
+from tempfile import TemporaryFile
+
 
 def is_post_request(environ):
     if environ['REQUEST_METHOD'].upper() != 'POST':
         return False
     content_type = environ.get('CONTENT_TYPE', 'application/x-www-form-urlencoded')
-    print(content_type)
+    # print(content_type)
     print(content_type.startswith('multipart/form-data'))
     return content_type.startswith('application/x-www-form-urlencoded') or content_type.startswith(
         'multipart/form-data'
     )
+
+
+def read(environ):
+    length = int(environ.get('CONTENT_LENGTH', 0))
+    stream = environ['wsgi.input']
+    body = TemporaryFile(mode='w+b')
+    while length > 0:
+        part = stream.read(min(length, 1024 * 200))  # 200KB buffer size
+        if not part:
+            break
+        body.write(part)
+        length -= len(part)
+    body.seek(0)
+    environ['wsgi.input'] = body
+    return body
 
 
 def form_with_file_parsing(environ):
@@ -30,6 +47,9 @@ def form_with_file_parsing(environ):
 
     # assert is_post_request(environ)
 
+    # body = read(environ)
+    # print("bodye 1")
+    # print(body)
     wsgi_input = environ['wsgi.input']
 
     post_form = environ.get('wsgi.post_form')
@@ -38,10 +58,15 @@ def form_with_file_parsing(environ):
 
     # This must be done to avoid a bug in cgi.FieldStorage
     environ.setdefault('QUERY_STRING', '')
-    form_field_storage = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ, keep_blank_values=True)
+    a = environ['wsgi.input']
+    # print(1, environ['wsgi.input'])
+    # print(environ['wsgi.input'])
+    # better give variable instead of again taking environ['wsgi.input'] since wsgi
+    form_field_storage = cgi.FieldStorage(fp=wsgi_input, environ=environ, keep_blank_values=True)
+    # print(form_field_storage)
 
     wsgi_new_input = InputProcessed()
-    print(wsgi_new_input, 1111111111111111111111111)
+    # print(wsgi_new_input)
 
     post_form = (wsgi_new_input, wsgi_input, form_field_storage)
     environ['wsgi.post_form'] = post_form
@@ -68,3 +93,12 @@ class InputProcessed(object):
         raise EOFError('The wsgi.input stream has already been consumed')
 
     readline = readlines = __iter__ = read
+
+
+def cgiFieldStorageToDict(fieldStorage):
+    """Get a plain dictionary rather than the '.value' system used by the
+    cgi module's native fieldStorage class."""
+    params = {}
+    for key in fieldStorage.keys():
+        params[key] = fieldStorage[key].value
+    return params

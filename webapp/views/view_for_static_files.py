@@ -44,5 +44,5 @@ def serve_static_file(environ, **kwargs):
     # because assertion is done to ensure data received on app from view is always a string and a dict
     static_file_data_in_bytes = static_file_data_in_bytes.decode()
 
-    print(static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_header_basic_value})
+    # print(static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_header_basic_value})
     return static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_header_basic_value}

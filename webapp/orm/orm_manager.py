@@ -12,8 +12,10 @@ class BaseManager:
     def _execute_query(cls, query, params=None):
         cursor = cls._get_cursor()
 
-        print("_______________________________++++++++++++++++==")
-        # print("Current sql query", query, params)
+        print("\n\n__________________START ORM__________________\n\n")
+
+        print(params)
+        print("Current sql query", query, params)
         cursor.execute(query, params)
 
         if "SELECT" in query:
@@ -21,7 +23,9 @@ class BaseManager:
 
             field_names = [desc[0] for desc in cursor.description]
         #     print(field_names)
-        # print("_______________________________++++++++++++++++==")
+        print("\n\n__________________STOP ORM__________________\n\n")
+
+        # to fetch data/ result cursor is passed to the method
         return cursor
 
     def __init__(self, model_class):
@@ -112,9 +116,17 @@ class BaseManager:
         query = f'''
         INSERT INTO {self.model_class.table_name}
         ({field_names_formated})
-        VALUES ({values_placeholder_format})'''
+        VALUES ({values_placeholder_format})
+        RETURNING id
+        '''
+        # id and 'id' both are returning data correctly
 
-        self._execute_query(query, params)
+        returned_created_row_id_cursor = self._execute_query(query, params)
+        # result of the sql query is obtained from the cursor which executed the sql statements
+        value_returned = returned_created_row_id_cursor.fetchone()
+
+        print(value_returned, type(value_returned))
+        return value_returned[0]
 
     # def bulk_insert(self, rows: list):
     #     pass
@@ -169,15 +181,15 @@ class BaseManager:
         values_placeholder = ["%s" for i in values if i != 'key']
         values_placeholder = ", ".join(values_placeholder)
         values_placeholder = "(" + values_placeholder + ")"
-        print(values_placeholder)
+        # print(values_placeholder)
 
-        print("///////////////////////////////////////////////////////////////////////////////////////////////")
-        print(list(kwargs.values()).copy())
+        # print("///////////////////////////////////////////////////////////////////////////////////////////////")
+        # print(list(kwargs.values()).copy())
 
-        print("kwargs is", kwargs)
-        print()
-        print()
-        print()
+        # print("kwargs is", kwargs)
+        # print()
+        # print()
+        # print()
         parameters = values
         parameters = parameters + parameters
 
@@ -187,11 +199,36 @@ class BaseManager:
 
         query = f'''INSERT INTO {self.model_class.table_name} {field_names} VALUES{values_placeholder} ON CONFLICT ({key_name})
         DO UPDATE SET {update_conflict_field_formatting}'''
-        print(query)
-        print("///////////////////////////////////////////////////////////////////////////////////////////////")
+        # print(query)
+        # print("///////////////////////////////////////////////////////////////////////////////////////////////")
 
         self._execute_query(query, parameters)
         return True
+
+    def bulk_insert(self, rows: list):
+        print(rows)
+
+        # Build INSERT query and params:
+        field_names = rows[0].keys()
+        assert all(row.keys() == field_names for row in rows[1:])  # confirm that all rows have the same fields
+
+        fields_format = ", ".join(field_names)
+        values_placeholder_format = ", ".join(
+            [f'({", ".join(["%s"] * len(field_names))})'] * len(rows)
+        )  # https://www.psycopg.org/docs/usage.html#passing-parameters-to-sql-queries
+
+        query = f"INSERT INTO {self.model_class.table_name} ({fields_format}) " f"VALUES {values_placeholder_format}"
+        print(rows)
+        print("done row")
+        params = list()
+        for row in rows:
+            print('start')
+            row_values = [row[field_name] for field_name in field_names]
+            print(row_values)
+            params += row_values
+
+        # Execute query
+        self._execute_query(query, params)
 
     # currently deletes only based on one field
     def delete(self, **kwargs):
@@ -213,12 +250,15 @@ class MetaModel(type):
     manager_class = BaseManager
 
     def _get_manager(cls):
+        print(f"\n\n__________________calling manager class of the class {cls}__________________\n\n")
         print(f"class is {cls}")
+        print(f"\n\n__________________DONE__________________\n\n")
         return cls.manager_class(model_class=cls)
 
     @property
     def objects(cls):
-        print("called manager using _get_manager method")
+        print()
+        # print(f"called manager using _get_manager method{cls}")
         return cls._get_manager()
 
 
@@ -226,7 +266,9 @@ class BaseModel(metaclass=MetaModel):
     table_name = ""
 
     def __init__(self, **row_data):
-        print(row_data, 1)
+        # print()
+        # print()
+        # print(row_data, 1111111111111111111111111111111111111111111)
 
         for field_name, value in row_data.items():
 
@@ -235,3 +277,12 @@ class BaseModel(metaclass=MetaModel):
     def __repr__(self):
         attrs_format = ", ".join([f'{field}={value}' for field, value in self.__dict__.items()])
         return f"<{self.__class__.__name__}: ({attrs_format})>\n"
+
+
+if __name__ == "__main__":
+    emplyee = 1
+    employees_data = [
+        {"first_name": "Yan", "last_name": "KIKI", "salary": 10000},
+        {"first_name": "Yoweri", "last_name": "ALOH", "salary": 15000},
+    ]
+    employee.objects.bulk_insert(rows=employees_data)

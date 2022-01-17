@@ -36,6 +36,10 @@
 
 .form textarea
 {
+  /* in html textarea styling rows"4" cols="50" */
+  /* height: 12em;
+  width: 50em; */
+
   font-family: "Roboto", sans-serif;
   outline: 0;
   background: #f2f2f2;

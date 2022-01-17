@@ -98,3 +98,21 @@ def get_cookie_dict(cookie_string):
         cookie_value = cookie_value.strip()
         cookie_dict[cookie_name] = cookie_value
     return cookie_dict
+
+
+# replace others using this
+def get_user_from_environ(environ):
+
+    SESSION_KEY_NAME = "session_key"
+
+    cookie_string = environ.get('HTTP_COOKIE')
+    cookie_dict = get_cookie_dict(cookie_string)
+
+    session_key_value = cookie_dict.get(SESSION_KEY_NAME)
+
+    curent_session_object = Session.objects.select({}, {'session_key': session_key_value})
+
+    # because fetchmany returns iterable, fetchone returns one value
+    curent_session_object = curent_session_object[0]
+
+    return curent_session_object.user_id

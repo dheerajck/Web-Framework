@@ -19,7 +19,8 @@
 
 
 		<!-- abc@t.com, abc@t1.com enter mails separated by comma-->
-		  <form class="sent-mail-form" action="http://localhost:8000/sent-mail/"  method="post">
+		
+		  <form class="sent-mail-form" action="/compose-mail-post-view/"  method="post" enctype="multipart/form-data">
 			<label for="To">To</label>
 			<!-- better to close input tags like this -->
 			<input id="TO" name="to_list" type="email"  multiple/> 
@@ -32,20 +33,23 @@
 
 			<br>
 
+
 			<label for="body">Body</label>
-			<textarea id="body" name="body" rows="4" cols="50"></textarea>
-			<!-- <input id="body" type="text"/> -->
+			<!-- dont define style here, it will cause issues with parsing, enctype not saving was the problem  -->
+			<!-- <textarea id="body" name="body" rows="4" cols="50"></textarea> -->
+			<!-- <input id="body" name="body" type="text"/> -->
+			<textarea id="body" name="body"  cols="30" rows="10"></textarea>
 
 			<br>
 
-			<label for="attachement">attachement</label>
+			<label for="attachment">attachment</label>
 			<!-- accept="image/png, image/gif, image/jpeg" to specify type of files that should be accepted -->
-			<input id="attachement" name="attachement" type="file" multiple/>
+			<input id="attachment" name="attachment" type="file" multiple/>
 		
 			<br>
 
-			<input type="submit" name="sent_button" value="sent" />
-			<input type="submit" name="draft_button" value="draft" />
+			<input type="submit" name="submit_input" value="sent" />
+			<input type="submit" name="submit_input" value="draft" />
 			
 		  </form>
 

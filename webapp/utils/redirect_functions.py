@@ -8,6 +8,14 @@ def redirect_view(status, url_to_redirect):
     return start_response_headers_dict
 
 
+def redirect_to_dashboard_module(response_body=''):
+    url_to_redirect = '/dashboard/'
+    status = '302 FOUND'
+    response_body = ''
+    start_response_headers_dict = redirect_view(status, url_to_redirect)
+    return response_body, start_response_headers_dict
+
+
 def redirect_to_login_module(response_body=''):
     # http_host = environ.get('HTTP_HOST')
     # print(http_host)
