@@ -48,6 +48,14 @@ def view_draft_mails(environ, **kwargs):
 
     mail_div = ''
     for each_draft_mail in draft_mail_objects:
+
+        link_html_tag = ''
+        if each_draft_mail.attachment is not None:
+            file_name = each_draft_mail.attachment.split("__")[-1]
+            file_directory = '/media/'
+            file_link = f"{file_directory}{each_draft_mail.attachment}"
+            link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
+
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
         mail_div += f'''
@@ -60,7 +68,7 @@ def view_draft_mails(environ, **kwargs):
         <h2>{each_draft_mail.title}</h2>
         <p>from:{User.objects.select_one(["email"], {"id":each_draft_mail.sender})}</p>
         <pre>{each_draft_mail.body}</pre>
-        <a href="">attachement link</a>
+        {link_html_tag}
         <form action="inbox-actions/" method="post">
             <input type="button" name="interaction" value="edit-mail" placeholder="edit-mail">
         </form>

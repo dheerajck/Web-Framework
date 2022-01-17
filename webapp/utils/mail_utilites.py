@@ -42,6 +42,9 @@ def get_mail_data_dict(sender_id, form_field_object):
         # saving file
         print()
         directory = 'webapp/media/'
+        # file name contain extension, so no need to add it
+        # saves files to media folder
+        # serve this file as downloadable or viewable if browser supports
         file_path = directory + new_file_name
         with open(file_path, mode='wb') as f:
             # print(form_field_object.getvalue('attachment'))

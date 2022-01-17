@@ -64,8 +64,15 @@ def view_archive(environ, **kwargs):
     for each_mail in inbox:
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
-        mail_div += f'''
-        
+
+        link_html_tag = ''
+        if each_mail.attachment is not None:
+            file_name = each_mail.attachment.split("__")[-1]
+            file_directory = '/media/'
+            file_link = f"{file_directory}{each_mail.attachment}"
+            link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
+
+        mail_div += f'''       
         <div>
          <!-- add datetime sort Done -->
       
@@ -74,10 +81,12 @@ def view_archive(environ, **kwargs):
         <h2>{each_mail.title}</h2>
         <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
         <pre>{each_mail.body}</pre>
-        <a href="">attachement link</a>
+        {link_html_tag}
+        
         <form action="inbox-actions/" method="post">
             <input type="button" name="interaction" value="archive" placeholder="archive">
             <input type="button" name="interaction" value="reply" placeholder="reply">
+            <input type="button" name="interaction" value="forward" placeholder="forward">
             <input type="button" name="interaction" value="delete" placeholder="delete">
         </form>
         <hr>

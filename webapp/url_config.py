@@ -30,6 +30,13 @@ def url_strip(url):
     return url.strip("/")
 
 
+def check_media_url(request_url):
+    checking_url = request_url.split('/')
+    if checking_url[0] == 'media' and len(checking_url) == 2:
+        return checking_url[1]
+    return False
+
+
 def check_static_url(request_url):
     checking_url = request_url.split('/')
     if checking_url[0] == 'static' and len(checking_url) == 2:
@@ -48,6 +55,11 @@ def url_handler(request_url):
         # if asking for static content
         kwargs = {'file_name': static_file_name_or_false_value}
         return views.serve_static_file, kwargs
+
+    media_file_name_or_false_value = check_media_url(request_url)
+    if media_file_name_or_false_value:
+        kwargs = {'file_name': media_file_name_or_false_value}
+        return views.serve_media_file, kwargs
 
     view_name = URL_DICTIONARY.get(request_url, None)
     if not (request_url == 'favicon.ico'):
