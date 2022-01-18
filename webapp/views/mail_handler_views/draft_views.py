@@ -5,7 +5,7 @@ from ...orm.models import User, Groups
 from ...orm.models import Drafts, DraftReceivers
 
 
-def view_draft_mails(environ, **kwargs):
+def draft_mails_view(environ, **kwargs):
     user_id = get_user_from_environ(environ)
     sent_drafts = Drafts.objects.select(
         {},

@@ -10,15 +10,7 @@ which says if inbox or archive should be  shown in the display
 """
 
 
-def view_archive(environ, **kwargs):
-    '''
-    select is not loop, so row containing values which satisifes condition are retrieved
-    rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
-    important => data retireved never greater than data in the table
-    if a user sends same mail through user, groups
-    only one copy will reach here since mail id is unique which is actually good
-    '''
-
+def get_archives(environ):
     receivers_list = []
     user_id = get_user_from_environ(environ)
     users_groups = UserGroup.objects.select({"group_id"}, {'user_id': user_id})
@@ -66,6 +58,19 @@ def view_archive(environ, **kwargs):
             1,  # 1 => field IN tuples , 0 => field=value
             ("created_date",),  # order by created_date descending order
         )
+    return archives
+
+
+def archives_view(environ, **kwargs):
+    '''
+    select is not loop, so row containing values which satisifes condition are retrieved
+    rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
+    important => data retireved never greater than data in the table
+    if a user sends same mail through user, groups
+    only one copy will reach here since mail id is unique which is actually good
+    '''
+
+    archives = get_archives(environ)
     print(archives)
 
     mail_div = ''
@@ -92,10 +97,10 @@ def view_archive(environ, **kwargs):
         {link_html_tag}
         
         <form action="inbox-actions/" method="post">
-            <input type="button" name="interaction" value="archive" placeholder="archive">
-            <input type="button" name="interaction" value="reply" placeholder="reply">
-            <input type="button" name="interaction" value="forward" placeholder="forward">
-            <input type="button" name="interaction" value="delete" placeholder="delete">
+            <input type="submit" name="interaction" value="archive" placeholder="archive">
+            <input type="submit" name="interaction" value="reply" placeholder="reply">
+            <input type="submit" name="interaction" value="forward" placeholder="forward">
+            <input type="submit" name="interaction" value="delete" placeholder="delete">
         </form>
         <hr>
         </div>'''

@@ -171,7 +171,7 @@ class BaseManager:
     # def bulk_insert(self, rows: list):
     #     pass
 
-    def update(self, new_data: dict, conditions_dict):
+    def update(self, new_data: dict, conditions_dict: dict):
         # Build UPDATE query and params
         field_names = new_data.keys()
         placeholder_format = ', '.join([f'{field_name} = %s' for field_name in field_names])

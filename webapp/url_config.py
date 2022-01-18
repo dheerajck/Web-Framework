@@ -11,10 +11,11 @@ URL_DICTIONARY = {
     'logout': views.logout_view,
     'dashboard/compose-mail': views.compose_mail_view,
     'compose-mail-post-view': views.compose_mail_post_view,
-    'inbox': views.view_inbox,
-    'sent-mails': views.view_sent_mails,
-    'draft-mails': views.view_draft_mails,
-    'archives': views.view_archive,
+    'inbox': views.inbox_view,
+    'sent-mails': views.sent_mail_view,
+    'draft-mails': views.draft_mails_view,
+    'archives': views.archives_view,
+    # 'mail-user-interactions': views.mail_interactiions_view,
 }
 
 
@@ -60,6 +61,17 @@ def url_handler(request_url):
     if media_file_name_or_false_value:
         kwargs = {'file_name': media_file_name_or_false_value}
         return views.serve_media_file, kwargs
+
+    # Replace using regex
+    # ___________________________________________________
+    if request_url.startswith('mail-user-interactions'):
+        kwargs = {"mail_id": int(request_url.split('/')[-1])}
+        if request_url.split('/')[-1] == "mail-user-interactions":
+            # if no mail id is passed
+            return views.view_404, {}
+
+        return views.mail_interactiions_view, kwargs
+    # ___________________________________________________
 
     view_name = URL_DICTIONARY.get(request_url, None)
     if not (request_url == 'favicon.ico'):
