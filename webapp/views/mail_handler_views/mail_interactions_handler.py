@@ -36,7 +36,12 @@ def mail_interactiions_view(environ, **kwargs):
 
     if user_interaction == "archive":
         Mails.objects.update({"archives": True}, {"id": mail_id})
-    elif user_interaction == 1:
+    elif user_interaction == "delete":
+        Mails.objects.delete(id=mail_id)
+
+    elif user_interaction == "reply":
+        pass
+    elif user_interaction == "forward":
         pass
 
     return response_body, redirect_data_response_headers

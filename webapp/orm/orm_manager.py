@@ -286,7 +286,7 @@ class BaseManager:
         # first index contain first field name, if email and id in select list, field_values[0] gives email field_values[1] gives id
         return field_values[0]
 
-    # currently deletes only based on one field
+    # Important currently deletes only based on one field
     def delete(self, **kwargs):
         # kwargs.keys()[0] are not subscriptable, need to covert to list
         # field_name = next(iter(kwargs.keys()))
@@ -308,6 +308,7 @@ class MetaModel(type):
     def _get_manager(cls):
         print(f"\n\n__________________calling manager class of the class {cls}__________________\n\n")
         print(f"class is {cls}")
+        print(cls.manager_class(model_class=cls))
         print(f"\n\n__________________DONE__________________\n\n")
         return cls.manager_class(model_class=cls)
 
