@@ -48,6 +48,7 @@ if __name__ == "__main__":
     query = """
     CREATE TABLE IF NOT EXISTS groups (
         id SERIAL PRIMARY KEY,
+        group_name varchar(50) UNIQUE NOT NULL,
         group_mail varchar(50) UNIQUE NOT NULL
     )
     """

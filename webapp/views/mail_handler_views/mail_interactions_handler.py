@@ -10,7 +10,7 @@ from .inbox_view import get_inbox
 from ...orm.models import Mails
 
 
-def mail_interactiions_view(environ, **kwargs):
+def mail_interactions_view(environ, **kwargs):
 
     response_body = ''
     redirect_data_response_headers = redirect_view('302 FOUND', '/inbox')

@@ -4,6 +4,8 @@ from ..orm.models import Session
 import psycopg2
 from zoneinfo import ZoneInfo
 
+from ..orm.models import User
+
 
 timezone = ZoneInfo(key='Asia/Kolkata')
 
@@ -101,18 +103,35 @@ def get_cookie_dict(cookie_string):
 
 
 # replace others using this
-def get_user_from_environ(environ):
+def get_user_from_environ(environ, **kwargs):
+    '''
+    kwargs accepted instead of args since its more clear for function call
+    same value is passed for key and value of kwarg here
 
+    '''
+
+    assert len(kwargs) < 2, "only one keypair is needed"
     SESSION_KEY_NAME = "session_key"
+
+    if len(kwargs) == 0:
+        users_value_asked = ["user_id"]
+    else:
+        # get first_key
+        users_value_asked = [next(iter(kwargs.keys()))]
 
     cookie_string = environ.get('HTTP_COOKIE')
     cookie_dict = get_cookie_dict(cookie_string)
 
     session_key_value = cookie_dict.get(SESSION_KEY_NAME)
 
-    curent_session_object = Session.objects.select({}, {'session_key': session_key_value})
+    curent_session_object = Session.objects.select(users_value_asked, {'session_key': session_key_value})
 
     # because fetchmany returns iterable, fetchone returns one value
     curent_session_object = curent_session_object[0]
 
     return curent_session_object.user_id
+
+
+def get_username_from_environ(environ):
+    user_id = get_user_from_environ(environ)
+    return User.objects.select_one(['username'], {"id": user_id})

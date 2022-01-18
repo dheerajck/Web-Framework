@@ -15,7 +15,9 @@ URL_DICTIONARY = {
     '^sent-mails$': views.sent_mail_view,
     '^draft-mails$': views.draft_mails_view,
     '^archives$': views.archives_view,
-    '^mail-user-interactions/[0-9]+$': views.mail_interactiions_view
+    '^mail-user-interactions/[0-9]+$': views.mail_interactions_view,
+    '^real-time-chat$': views.real_time_chat_view,
+    '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view
     # 'mail-user-interactions': views.mail_interactiions_view,
 }
 
@@ -33,11 +35,14 @@ import re
 def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
     print(url_to_check)
     for pattern, value in url_dict_to_check.items():
-        print("@@")
-        print()
-        print(pattern, value)
-        print("@@")
+        # print("@@")
+        # print()
+        # print(pattern, value)
+        # print()
+        # print("@@")
         if re.search(pattern, url_to_check):
+            # print(url_to_check, pattern, value)
+            # print("yes")
             return value
     return None
 
@@ -79,12 +84,15 @@ def url_handler(request_url):
 
     view_name = url_lookup(request_url)
     kwargs_passing = {}
-    print(view_name, views.mail_interactiions_view)
-    print(view_name is views.mail_interactiions_view)
+    print(view_name, views.mail_interactions_view)
+    print(view_name is views.mail_interactions_view)
 
-    if view_name is views.mail_interactiions_view:
+    if view_name is views.mail_interactions_view:
         print("aaaaaaaaaaaa")
         kwargs_passing = {"mail_id": int(request_url.split('/')[-1])}
+        print(kwargs_passing)
+    if view_name is views.groups_view:
+        kwargs_passing = {"group_name": request_url.split('/')[-1]}
         print(kwargs_passing)
     # Replace using regex
     # done

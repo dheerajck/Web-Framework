@@ -270,7 +270,7 @@ class BaseManager:
         # Execute query
         self._execute_query(query, params)
 
-    def select_one(self, field_name, conditions_dict):
+    def select_one(self, field_name: list, conditions_dict: dict):
         if len(field_name) == 0:
             field_name = "*c"
 
@@ -281,6 +281,8 @@ class BaseManager:
         parameters = list(conditions_dict.values())
         used_cursor = self._execute_query(query, parameters)
         field_values = used_cursor.fetchone()
+
+        # fetch one also returns a list and it contains every element specified in the select like ["name", "password"]
         print(field_values, 111111111112)
         print(field_values[0])
         # first index contain first field name, if email and id in select list, field_values[0] gives email field_values[1] gives id
