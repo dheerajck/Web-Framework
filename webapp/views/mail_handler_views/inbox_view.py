@@ -25,11 +25,19 @@ def view_inbox(environ, **kwargs):
     print("^^^^^^^^^^^^^^^^^^^^^^^^")
 
     print("INBOX USER")
+
+    filter_conditions = {"receiver_user": user_id, "receiver_group": users_groups_id}
+    # better make user id a tuple, and avoid type(value) == int condition
+    # Receiver of a mail should satisfy one of this two condition => OR
+    filter_conditions = {
+        key: value for key, value in filter_conditions.items() if type(value) == int or len(value) != 0
+    }
+    print(filter_conditions)
     print("user id", user_id)
     # 1 => OR 1 => IN
     mails_id_objects = MailReceivers.objects.select(
         {"mail_id"},
-        {"receiver_user": user_id, "receiver_group": users_groups_id},
+        filter_conditions,
         1,  # 1 => OR
         1,  # 1 => field IN tuples , 0 => field=value
     )
@@ -44,15 +52,16 @@ def view_inbox(environ, **kwargs):
     if len(mails_id_tuple) == 0:
         # found when creating draftbox
         print("no mails")
-        filter_condition = {}
+        inbox = []
 
-    inbox = Mails.objects.select(
-        {},
-        filter_condition,
-        0,  # 0 => AND
-        1,  # 1 => field IN tuples , 0 => field=value
-        ("created_date",),  # order by created_date descending order
-    )
+    else:
+        inbox = Mails.objects.select(
+            {},
+            filter_condition,
+            0,  # 0 => AND
+            1,  # 1 => field IN tuples , 0 => field=value
+            ("created_date",),  # order by created_date descending order
+        )
     print(inbox)
 
     mail_div = ''

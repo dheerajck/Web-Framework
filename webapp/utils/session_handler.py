@@ -12,7 +12,7 @@ def create_session_key():
     return token_hex(16)
 
 
-def create_session_header(cookie_name, cookie_value, days=1):
+def create_cookie_header(cookie_name, cookie_value, days=1):
     # expiry_date = datetime.now() + timedelta(days=days)
     # path = "/"
     max_age = days * 86400
@@ -35,8 +35,8 @@ def create_session_id_header(userid, days=1):
             Session.objects.insert_or_update_data(
                 key=('user_id'), session_key=session_id, expiry_date=expiry_date, user_id=userid
             )
-            first_header: tuple = create_session_header("session_key", session_id)
-            # second_header: tuple = create_session_header("user_id", userid) might result in security issue
+            first_header: tuple = create_cookie_header("session_key", session_id)
+            # second_header: tuple = create_cookie_header("user_id", userid) might result in security issue
 
         except psycopg2.errors.UniqueViolation:
             pass

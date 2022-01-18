@@ -28,6 +28,7 @@ def view_sent_mails(environ, **kwargs):
             file_link = f"{file_directory}{each_mail.attachment}"
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
 
+        # generate all receivers of a sent mail
         receivers_list = []
         mail_id = each_mail.id
         receivers_objects = MailReceivers.objects.select(['receiver_user', 'receiver_group'], {"mail_id": mail_id})
@@ -70,6 +71,8 @@ def view_sent_mails(environ, **kwargs):
     print("s2")
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.....")
 
+    if mail_div == "":
+        mail_div = "<h1>No Sent mails</h1>"
     context = {'title_of_page': "inbox", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)
     # print(users_groups)

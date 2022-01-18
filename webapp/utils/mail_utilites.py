@@ -30,8 +30,10 @@ def get_mail_data_dict(sender_id, form_field_object):
         # archives: 1,
         'attachment': fileitem.filename,
     }
-
+    print("########################################################")
+    print(mail_data)
     mail_data = {key: value for key, value in mail_data.items() if value != ''}
+    print(mail_data)
     # print(22, form_field_object.getvalue('attachment'))
     if 'attachment' in mail_data:
         file_name = mail_data['attachment']
@@ -97,8 +99,9 @@ def send_draft(sender_id, user_list, group_list, form_field_object):
     # delete mail if its in draft
     draft_data_dict = get_mail_data_dict(sender_id, form_field_object)
     print(draft_data_dict)
-    print("Check 1")
+    print("Check 1 draft sent")
     # add to draft table
+    print(draft_data_dict)
     draft_id = Drafts.objects.create(new_data=draft_data_dict)
     print("draft test1", draft_id)
 

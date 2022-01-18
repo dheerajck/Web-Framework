@@ -29,12 +29,18 @@ def view_archive(environ, **kwargs):
     print(user_id, users_groups_id)
     print("^^^^^^^^^^^^^^^^^^^^^^^^")
 
-    print("INBOX USER")
+    print("DRAFT USER")
     print("user id", user_id)
     # 1 => OR 1 => IN
+    filter_conditions = {"receiver_user": user_id, "receiver_group": users_groups_id}
+    # better make user id a tuple, and avoid type(value) == int condition
+    # Receiver of a mail should satisfy one of this two condition => OR
+    filter_conditions = {
+        key: value for key, value in filter_conditions.items() if type(value) == int or len(value) != 0
+    }
     mails_id_objects = MailReceivers.objects.select(
         {"mail_id"},
-        {"receiver_user": user_id, "receiver_group": users_groups_id},
+        filter_conditions,
         1,  # 1 => OR
         1,  # 1 => field IN tuples , 0 => field=value
     )
@@ -48,20 +54,22 @@ def view_archive(environ, **kwargs):
 
     if len(mails_id_tuple) == 0:
         # found when creating draftbox
-        print("no mails")
+        print("no archives")
+        archives = []
         filter_condition = {}
 
-    inbox = Mails.objects.select(
-        {},
-        filter_condition,
-        0,  # 0 => AND
-        1,  # 1 => field IN tuples , 0 => field=value
-        ("created_date",),  # order by created_date descending order
-    )
-    print(inbox)
+    else:
+        archives = Mails.objects.select(
+            {},
+            filter_condition,
+            0,  # 0 => AND
+            1,  # 1 => field IN tuples , 0 => field=value
+            ("created_date",),  # order by created_date descending order
+        )
+    print(archives)
 
     mail_div = ''
-    for each_mail in inbox:
+    for each_mail in archives:
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
 
