@@ -63,7 +63,6 @@ def sent_mail_view(environ, **kwargs):
         <pre>{each_mail.body}</pre>
         {link_html_tag}
         <form action="inbox-actions/" method="post">
-            <input type="button" name="interaction" value="reply" placeholder="reply">
             <input type="button" name="interaction" value="delete" placeholder="delete">
         </form>
         <hr>

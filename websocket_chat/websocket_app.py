@@ -35,14 +35,14 @@ async def server_handler(websocket, path):
     print(path)
     try:
         async for message in websocket:
-            print(message)
+            # print(message)
             message_dict = literal_eval(message)
 
             user_message = message_format_and_authentication(message_dict)
             print(user_message)
             # user_message = True
             if user_message:
-                print(message_dict, type(message_dict))
+                # print(message_dict, type(message_dict))
                 for conn in connection_path[path]:
                     # if conn != websocket:
                     # always show message of a user to him so he ccan verify message sending to others is succesfull

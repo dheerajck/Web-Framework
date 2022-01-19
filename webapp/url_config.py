@@ -15,10 +15,13 @@ URL_DICTIONARY = {
     '^sent-mails$': views.sent_mail_view,
     '^draft-mails$': views.draft_mails_view,
     '^archives$': views.archives_view,
-    '^mail-user-interactions/[0-9]+$': views.mail_interactions_view,
     '^real-time-chat$': views.real_time_chat_view,
-    '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view
+    '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view,
     # 'mail-user-interactions': views.mail_interactiions_view,
+    '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
+    '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
+    '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
+    '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
 }
 
 
@@ -88,9 +91,17 @@ def url_handler(request_url):
     print(view_name is views.mail_interactions_view)
 
     if view_name is views.mail_interactions_view:
-        print("aaaaaaaaaaaa")
-        kwargs_passing = {"mail_id": int(request_url.split('/')[-1])}
+        print("mail_interaction")
+        url_split = request_url.split('/')
+
+        url_without_message_id: str = "/".join(url_split[:-1])
+
+        url_action = url_without_message_id.split("-")[-1]
+        url_message_id = int(url_split[-1])
+
+        kwargs_passing = {"mail_id": url_message_id, "action": url_action}
         print(kwargs_passing)
+
     if view_name is views.groups_view:
         kwargs_passing = {"group_name": request_url.split('/')[-1]}
         print(kwargs_passing)

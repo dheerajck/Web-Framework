@@ -10,6 +10,14 @@ from .inbox_view import get_inbox
 from ...orm.models import Mails
 
 
+allowed_actions = {
+    "inbox": {"archive", "reply", "forward", "delete"},
+    "sent": {"delete"},
+    "archive": {},
+    "draft": {},
+}
+
+
 def mail_interactions_view(environ, **kwargs):
 
     response_body = ''
@@ -18,6 +26,7 @@ def mail_interactions_view(environ, **kwargs):
     print("///////////////////////////////////////////////")
     # user_id = get_user_from_environ(environ)
     mail_id = kwargs["mail_id"]
+    action = kwargs["action"]
     form_field_object = form_with_file_parsing(environ)
     user_interaction = form_field_object.getvalue('interaction')
     print(user_interaction)
@@ -26,7 +35,7 @@ def mail_interactions_view(environ, **kwargs):
     inbox_mails = {mail.id for mail in inbox_mails}
     print(inbox_mails)
     print("///////////////////////////////////////////////////////////////////////")
-    if mail_id not in inbox_mails:
+    if mail_id not in inbox_mails or user_interaction not in allowed_actions[action]:
         kwargs_passing = {}
         print("no")
         # Access denied

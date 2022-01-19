@@ -92,7 +92,7 @@ def inbox_view(environ, **kwargs):
         <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
         <pre>{each_mail.body}</pre>
         {link_html_tag}
-        <form action="/mail-user-interactions/{each_mail.id}" method="post">
+        <form action="/mail-user-interactions-inbox/{each_mail.id}" method="post">
             <input type="submit" name="interaction" value="archive">
             <input type="submit" name="interaction" value="reply" placeholder="reply">
             <input type="submit" name="interaction" value="forward" placeholder="forward">
