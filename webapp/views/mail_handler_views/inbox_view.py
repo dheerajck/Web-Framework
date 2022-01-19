@@ -82,9 +82,9 @@ def inbox_view(environ, **kwargs):
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
         mail_div += f'''
-        
+
         <div>
-         <!-- add datetime sort Done -->
+        <!-- add datetime sort Done -->
       
         
         <h3>{each_mail.created_date}</h3>
@@ -92,6 +92,7 @@ def inbox_view(environ, **kwargs):
         <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
         <pre>{each_mail.body}</pre>
         {link_html_tag}
+        
         <form action="/mail-user-interactions-inbox/{each_mail.id}" method="post">
             <input type="submit" name="interaction" value="archive">
             <input type="submit" name="interaction" value="reply" placeholder="reply">

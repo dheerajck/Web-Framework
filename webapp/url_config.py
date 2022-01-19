@@ -71,7 +71,7 @@ def check_static_url(request_url):
 def url_handler(request_url):
 
     print(f"\n\n__________________ URL logger __________________\n\n")
-    print("url logger", request_url)
+    print(f"URL logger, requested url is {request_url}")
     print(f"\n\n__________________ DONE __________________\n\n")
 
     static_file_name_or_false_value = check_static_url(request_url)
@@ -87,8 +87,8 @@ def url_handler(request_url):
 
     view_name = url_lookup(request_url)
     kwargs_passing = {}
-    print(view_name, views.mail_interactions_view)
-    print(view_name is views.mail_interactions_view)
+    # print(view_name, views.mail_interactions_view)
+    # print(view_name is views.mail_interactions_view)
 
     if view_name is views.mail_interactions_view:
         print("mail_interaction")
@@ -121,9 +121,9 @@ def url_handler(request_url):
 
     # view_name = URL_DICTIONARY.get(request_url, None)
     # view_name = url_lookup(request_url)
-    if not (request_url == 'favicon.ico'):
+    # if not (request_url == 'favicon.ico'):
 
-        first_clean_print_function(f"{request_url} ================> {view_name}")
+    first_clean_print_function(f"{request_url} ================> {view_name}")
 
     if view_name is None:
         print("not here")

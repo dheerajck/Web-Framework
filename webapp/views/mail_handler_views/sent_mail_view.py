@@ -5,7 +5,7 @@ from ...orm.models import User, Groups
 from ...orm.models import Mails, MailReceivers
 
 
-def sent_mail_view(environ, **kwargs):
+def get_send_mails(environ):
     user_id = get_user_from_environ(environ)
     sent_mails = Mails.objects.select(
         {},
@@ -14,6 +14,12 @@ def sent_mail_view(environ, **kwargs):
         0,
         ("created_date",),
     )
+    return sent_mails
+
+
+def sent_mail_view(environ, **kwargs):
+
+    sent_mails = get_send_mails(environ)
     print(sent_mails)
     print("[[[[[[[")
 
@@ -62,8 +68,8 @@ def sent_mail_view(environ, **kwargs):
         <p>To:{receivers_list}</p>
         <pre>{each_mail.body}</pre>
         {link_html_tag}
-        <form action="inbox-actions/" method="post">
-            <input type="button" name="interaction" value="delete" placeholder="delete">
+        <form action="/mail-user-interactions-sent/{each_mail.id}" method="post">
+            <input type="submit" name="interaction" value="delete" placeholder="delete">
         </form>
         <hr>
         </div>'''

@@ -182,7 +182,7 @@ class SessionMiddleware:
 
         # path of static files will be like this
         path_starting = path.split('/')[0]
-        print("check")
+        # print("check")
         print(path)
         # static/login.css = > login/static/login.css    /static/login.css = > static/login.css
         # print(path.startswith('login/static/login'))

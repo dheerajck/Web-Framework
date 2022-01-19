@@ -85,9 +85,10 @@ def archives_view(environ, **kwargs):
             file_link = f"{file_directory}{each_mail.attachment}"
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
 
-        mail_div += f'''       
+        mail_div += f'''
+
         <div>
-         <!-- add datetime sort Done -->
+        <!-- add datetime sort Done -->
       
         
         <h3>{each_mail.created_date}</h3>
@@ -96,11 +97,12 @@ def archives_view(environ, **kwargs):
         <pre>{each_mail.body}</pre>
         {link_html_tag}
         
-        <form action="inbox-actions/" method="post">
-            <input type="submit" name="interaction" value="archive" placeholder="archive">
+         <form action="/mail-user-interactions-archive/{each_mail.id}" method="post">
+            <input type="submit" name="interaction" value="unarchive">
             <input type="submit" name="interaction" value="reply" placeholder="reply">
             <input type="submit" name="interaction" value="forward" placeholder="forward">
             <input type="submit" name="interaction" value="delete" placeholder="delete">
+
         </form>
         <hr>
         </div>'''
@@ -109,7 +111,7 @@ def archives_view(environ, **kwargs):
     if mail_div == "":
         mail_div = "<h1>No mails in Archive</h1>"
 
-    context = {'title_of_page': "inbox", "mails": mail_div}
+    context = {'title_of_page': "archive", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)
     # print(users_groups)
     # print(response_body)

@@ -1,4 +1,5 @@
 from .database_folder.sql_setup import connect, disconnect
+from ..clean_print_function.print_enable_and_disable_function import enablePrint, blockPrint
 
 
 class BaseManager:
@@ -10,6 +11,7 @@ class BaseManager:
 
     @classmethod
     def _execute_query(cls, query, params=None):
+        # blockPrint()
         cursor = cls._get_cursor()
 
         print("\n\n__________________START ORM__________________\n\n")
@@ -26,6 +28,7 @@ class BaseManager:
         print("\n\n__________________STOP ORM__________________\n\n")
 
         # to fetch data/ result cursor is passed to the method
+        # enablePrint()
         return cursor
 
     def __init__(self, model_class):
@@ -35,7 +38,7 @@ class BaseManager:
         self, field_names: list, conditions_dict: dict, ALL_OR=0, ALL_IN=0, order_by: tuple = (), chunk_size=2000
     ):
         # Build SELECT query
-        print("check", ALL_OR, ALL_IN)
+        # print("check", ALL_OR, ALL_IN)
         LOGIC_SELECTOR = " AND "
         if ALL_OR == 1:
             LOGIC_SELECTOR = " OR "
@@ -58,7 +61,7 @@ class BaseManager:
         elif ALL_IN == 1:
 
             conditions_column = conditions_dict.keys()
-            print('emteredhere')
+            # print('entered here')
             """
             Temporary IN solution
             """

@@ -8,7 +8,7 @@ def serve_media_file(environ, **kwargs):
     # traveral_attack_check(file_name)
 
     directory = 'webapp/media/'
-    11111111111111111wasa
+
     file_directory = f'{directory}{file_name}'
     # reading only in binary format,
     # data is read and written in the form of bytes
