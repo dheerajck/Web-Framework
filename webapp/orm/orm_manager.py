@@ -35,7 +35,14 @@ class BaseManager:
         self.model_class = model_class
 
     def select(
-        self, field_names: list, conditions_dict: dict, ALL_OR=0, ALL_IN=0, order_by: tuple = (), chunk_size=2000
+        self,
+        field_names: list,
+        conditions_dict: dict,
+        ALL_OR=0,
+        ALL_IN=0,
+        order_by: tuple = (),
+        join_model: list = [],  # list of tuple
+        chunk_size=2000,
     ):
         # Build SELECT query
         # print("check", ALL_OR, ALL_IN)
@@ -48,15 +55,26 @@ class BaseManager:
         else:
             fields_format = ', '.join(field_names)
 
-        query = f"SELECT {fields_format} FROM {self.model_class.table_name} "
+        from_table_value = self.model_class.table_name
+        if len(join_model) > 0:
 
-        if len(order_by) == 1:
-            query += f"ORDER BY {order_by[0]} DESC"
+            new_from_field_value = f" {from_table_value} {from_table_value} INNER JOIN {join_model[0][0]} {join_model[0][0]} ON ({from_table_value}.{join_model[0][1]} =  {join_model[0][0]}.{join_model[0][2]}) "
 
-        cursor = self._get_cursor()
+            for i in range(1, len(join_model)):
+                new_from_field_value += f" INNER JOIN {join_model[i][0]} {join_model[i][0]} ON ({join_model[i-1][0]}.{join_model[i-1][2]} =  {join_model[i][0]}.{join_model[i][2]}) "
+            from_table_value = new_from_field_value
+        # only two tables are joined(one model is the one which calls this, other model is passed as parameter)
+        # join_model = [model, "fieldname in first model to join", "fieldname in second model to join "]
+        # can make join_model a list of tuples,if there are many tables to join
 
         if len(conditions_dict) == 0:
             # cursor.execute(query)
+
+            query = f"SELECT {fields_format} FROM {from_table_value} "
+
+            if len(order_by) == 1:
+                query += f"ORDER BY {order_by[0]} DESC"
+
             used_cursor_object = self._execute_query(query)
         elif ALL_IN == 1:
 
@@ -70,10 +88,18 @@ class BaseManager:
             conditions_value_placeholder = [f"({i} IN %s)" for i in conditions_column]
             conditions_value_placeholder = LOGIC_SELECTOR.join(conditions_value_placeholder)
 
-            query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
+            query = f"SELECT {fields_format} FROM {from_table_value} WHERE {conditions_value_placeholder}"
             parameters = []
             for values in conditions_dict.values():
+
                 if isinstance(values, tuple):
+                    if len(values) == 0:
+                        return []
+                    parameters.append(values)
+                elif isinstance(values, list):
+                    if len(values) == 0:
+                        return []
+                    values = tuple(values)
                     parameters.append(values)
                 else:
                     value_to_append = ((values,),)
@@ -84,6 +110,7 @@ class BaseManager:
             used_cursor_object = self._execute_query(query, parameters)
 
         else:
+            # AND
             conditions_column = conditions_dict.keys()
             # print()
             # print(conditions_dict)
@@ -101,7 +128,7 @@ class BaseManager:
             conditions_value_placeholder = LOGIC_SELECTOR.join(conditions_value_placeholder)
 
             conditions_value_parameters = list(conditions_dict.values())
-            query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
+            query = f"SELECT {fields_format} FROM {from_table_value} WHERE {conditions_value_placeholder}"
 
             # # Execute query
             # cursor = self._get_cursor()
@@ -348,3 +375,31 @@ if __name__ == "__main__":
         {"first_name": "Yoweri", "last_name": "ALOH", "salary": 15000},
     ]
     employee.objects.bulk_insert(rows=employees_data)
+    '''
+    join sample data
+    user_id = get_user_from_environ(environ)
+    Usersent_table_name = UserSent.objects.model_class.table_name
+    Userinbox_table_name = UserInbox.objects.model_class.table_name
+    inbox = Mails.objects.select(
+        {f"{Usersent_table_name}.user_id as A", f"{Userinbox_table_name}.user_id as B"},
+        {f"{Userinbox_table_name}.user_id": user_id},
+        0,  # 0 => AND
+        1,  # 1 => field IN tuples , 0 => field=value
+        ("created_date",),  # order by created_date descending order
+        join_model=[(Userinbox_table_name, "id", "mail_id"), (Usersent_table_name, "mail_id", "mail_id")],
+    )
+    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+
+    '''
+    user_id = get_user_from_environ(environ)
+    Usersent_table_name = UserSent.objects.model_class.table_name
+    Userinbox_table_name = UserInbox.objects.model_class.table_name
+    inbox = Mails.objects.select(
+        {f"{Usersent_table_name}.user_id as A", f"{Userinbox_table_name}.user_id as B"},
+        {f"{Userinbox_table_name}.user_id": user_id},
+        0,  # 0 => AND
+        1,  # 1 => field IN tuples , 0 => field=value
+        ("created_date",),  # order by created_date descending order
+        join_model=[(Userinbox_table_name, "id", "mail_id"), (Usersent_table_name, "mail_id", "mail_id")],
+    )
+    # print(len(inbox), type(inbox)) # 0 => <class 'list'>

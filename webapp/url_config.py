@@ -12,16 +12,16 @@ URL_DICTIONARY = {
     '^dashboard/compose-mail$': views.compose_mail_view,
     '^compose-mail-post-view$': views.compose_mail_post_view,
     '^inbox$': views.inbox_view,
-    '^sent-mails$': views.sent_mail_view,
-    '^draft-mails$': views.draft_mails_view,
-    '^archives$': views.archives_view,
-    '^real-time-chat$': views.real_time_chat_view,
-    '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view,
-    # 'mail-user-interactions': views.mail_interactiions_view,
-    '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
-    '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
-    '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
-    '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
+    # '^sent-mails$': views.sent_mail_view,
+    # '^draft-mails$': views.draft_mails_view,
+    # '^archives$': views.archives_view,
+    # '^real-time-chat$': views.real_time_chat_view,
+    # '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view,
+    # # 'mail-user-interactions': views.mail_interactiions_view,
+    # '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
+    # '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
+    # '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
+    # '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
 }
 
 
@@ -90,21 +90,21 @@ def url_handler(request_url):
     # print(view_name, views.mail_interactions_view)
     # print(view_name is views.mail_interactions_view)
 
-    if view_name is views.mail_interactions_view:
-        print("mail_interaction")
-        url_split = request_url.split('/')
+    # if view_name is views.mail_interactions_view:
+    #     print("mail_interaction")
+    #     url_split = request_url.split('/')
 
-        url_without_message_id: str = "/".join(url_split[:-1])
+    #     url_without_message_id: str = "/".join(url_split[:-1])
 
-        url_action = url_without_message_id.split("-")[-1]
-        url_message_id = int(url_split[-1])
+    #     url_action = url_without_message_id.split("-")[-1]
+    #     url_message_id = int(url_split[-1])
 
-        kwargs_passing = {"mail_id": url_message_id, "action": url_action}
-        print(kwargs_passing)
+    #     kwargs_passing = {"mail_id": url_message_id, "action": url_action}
+    #     print(kwargs_passing)
 
-    if view_name is views.groups_view:
-        kwargs_passing = {"group_name": request_url.split('/')[-1]}
-        print(kwargs_passing)
+    # if view_name is views.groups_view:
+    #     kwargs_passing = {"group_name": request_url.split('/')[-1]}
+    #     print(kwargs_passing)
     # Replace using regex
     # done
     # ___________________________________________________

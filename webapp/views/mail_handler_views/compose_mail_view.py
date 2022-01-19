@@ -75,6 +75,7 @@ def compose_mail_post_view(environ, **kwargs):
     print(button)
 
     receivers_mails: list = form_field_storage.getvalue('to_list').split(",")
+    # draft can have no senders email this is checked here  to bypass draft mails
     if len(receivers_mails) == 0 and button == "sent":
         # if email doesnt exist redirect to form with error and button is send
         pass

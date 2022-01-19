@@ -1,59 +1,30 @@
 from ...utils.template_handlers import render_template
 
 from ...utils.session_handler import get_user_from_environ
-from ...orm.models import User, UserGroup
-from ...orm.models import Mails, MailReceivers
+from ...orm.models import User, UserGroup, Mails
+from ...orm.models import UserInbox, UserSent, User
 
 
 def get_inbox(environ):
-    receivers_list = []
+
     user_id = get_user_from_environ(environ)
-    users_groups = UserGroup.objects.select({"group_id"}, {'user_id': user_id})
-    print(users_groups)
-    users_groups_id = [user.group_id for user in users_groups]
-
-    users_groups_id = tuple(users_groups_id)
-    print(user_id, users_groups_id)
-    print("^^^^^^^^^^^^^^^^^^^^^^^^")
-
-    print("INBOX USER")
-
-    filter_conditions = {"receiver_user": user_id, "receiver_group": users_groups_id}
-    # better make user id a tuple, and avoid type(value) == int condition
-    # Receiver of a mail should satisfy one of this two condition => OR
-    filter_conditions = {
-        key: value for key, value in filter_conditions.items() if type(value) == int or len(value) != 0
-    }
-    print(filter_conditions)
-    print("user id", user_id)
-    # 1 => OR 1 => IN
-    mails_id_objects = MailReceivers.objects.select(
-        {"mail_id"},
-        filter_conditions,
-        1,  # 1 => OR
+    User_table_name = User.objects.model_class.table_name
+    Usersent_table_name = UserSent.objects.model_class.table_name
+    Userinbox_table_name = UserInbox.objects.model_class.table_name
+    inbox = Mails.objects.select(
+        {},
+        {f"{Userinbox_table_name}.user_id": user_id, f"{Userinbox_table_name}.archived_mail": False},
+        0,  # 0 => AND
         1,  # 1 => field IN tuples , 0 => field=value
+        ("created_date",),  # order by created_date descending order
+        join_model=[
+            (Userinbox_table_name, "id", "mail_id"),
+            (Usersent_table_name, "mail_id", "mail_id"),
+            (User_table_name, "user_id", "id"),
+        ],
     )
-    mails_id_list = [mail_object.mail_id for mail_object in mails_id_objects]
-    print(mails_id_list, "FOUND")
+    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
-    mails_id_tuple = tuple(mails_id_list)
-    print(mails_id_tuple, "FOUND")
-
-    filter_condition = {"id": mails_id_tuple, "archives": False}
-
-    if len(mails_id_tuple) == 0:
-        # found when creating draftbox
-        print("no mails")
-        inbox = []
-
-    else:
-        inbox = Mails.objects.select(
-            {},
-            filter_condition,
-            0,  # 0 => AND
-            1,  # 1 => field IN tuples , 0 => field=value
-            ("created_date",),  # order by created_date descending order
-        )
     return inbox
 
 
@@ -73,6 +44,7 @@ def inbox_view(environ, **kwargs):
         print(each_mail)
 
         link_html_tag = ''
+
         if each_mail.attachment is not None:
 
             file_name = each_mail.attachment.split("__")[-1]
@@ -89,7 +61,7 @@ def inbox_view(environ, **kwargs):
         
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>
-        <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
+        <p>from:{each_mail.email}</p>
         <pre>{each_mail.body}</pre>
         {link_html_tag}
         

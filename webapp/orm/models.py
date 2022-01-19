@@ -12,11 +12,6 @@ class Mails(BaseModel):
     table_name = "mails"
 
 
-class MailReceivers(BaseModel):
-    manager_class = BaseManager
-    table_name = "receivers_of_mail"
-
-
 class Groups(BaseModel):
     manager_class = BaseManager
     table_name = "groups"
@@ -27,19 +22,19 @@ class UserGroup(BaseModel):
     table_name = "user_group"
 
 
+class UserSent(BaseModel):
+    manager_class = BaseManager
+    table_name = "user_sent"
+
+
+class UserInbox(BaseModel):
+    manager_class = BaseManager
+    table_name = "user_inbox"
+
+
 class Session(BaseModel):
     manager_class = BaseManager
     table_name = "session"
-
-
-class Drafts(BaseModel):
-    manager_class = BaseManager
-    table_name = "draft_mails"
-
-
-class DraftReceivers(BaseModel):
-    manager_class = BaseManager
-    table_name = "receivers_of_draft_mails"
 
 
 if __name__ == "__main__":
