@@ -32,12 +32,16 @@ def session(environ, **kwargs):
     from pprint import pprint
 
     pprint(environ)
-    print("view")
+    print("session view")
 
     html_to_render = render_template("session_test.html", context={})
     html_to_render += f"<h1>{environ.get('HTTP_COOKIE')}"
 
     return html_to_render, start_response_headers
+
+
+def view_403(environ, **kwargs):
+    return render_template("HTTP403.html", context={}), start_response_headers
 
 
 def view_404(environ, **kwargs):

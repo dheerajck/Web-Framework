@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Thing1</title>
+</head>
+<body>
+
+    <h2>Group chat => $groupname</h2>
+
+    <div id="message_container"></div>
+
+    <br>
+    <div>
+
+        <input type="text" id="message_feild" name="message_input"/>
+        <input type="button" name="send_button" value="send message"/>
+        
+        <!-- var name = window.prompt("Enter your name: ");
+        alert("Your name is " + name);
+        <button onclick="sendMsg()">Send Msg</button> -->
+        
+    </div>
+   
+
+
+<script>
+    // Create WebSocket connection.
+    document.addEventListener('DOMContentLoaded', function(){
+        // console.log("hi console test")
+        const socket = new WebSocket('ws://localhost:5000/$groupname');
+        const group_auth_code = "$group_auth_code"
+
+        // const messagesContainer = document.querySelector();
+
+        const messageContainer = document.querySelector("#message_container")
+        const messageInput = document.querySelector("[name=message_input]");
+        const sendMessageButton = document.querySelector("[name=send_button]");
+
+
+        socket.onopen = function(){
+            console.log('Connected to the websocket server')
+            // console.log(group_auth_code)
+
+
+            sendMessageButton.onclick = function(){
+                // console.log("button_test")
+                // console.log(group_auth_code)
+                const username = "$username"
+                const group_auth_code = "$group_auth_code"
+                const message_object = {username:username, message:messageInput.value, group_auth_code: group_auth_code};
+                const final_message_json = JSON.stringify(message_object);
+                // console.log(final_message_json)
+                let finalmessage_json = username.concat(messageInput.value);
+                document.getElementById("message_feild").value = "";
+                socket.send(final_message_json);
+            };
+
+
+            socket.onmessage = function(message){
+
+                messageContainer.style = "border:  2px solid black; padding:5px"
+                const newMessage = document.createElement("div");
+                newMessage.innerHTML = message.data;
+                messageContainer.appendChild(newMessage);
+            };
+
+        };
+
+        socket.onclose = function(){
+            console.log('Closed connection to the websocket server')
+
+        };
+
+
+
+
+
+});
+    
+
+    // Connection opened
+    
+   
+</script>
+
+</body>
+</html>

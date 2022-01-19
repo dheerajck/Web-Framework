@@ -4,6 +4,8 @@ from ..orm.models import Session
 import psycopg2
 from zoneinfo import ZoneInfo
 
+from ..orm.models import User
+
 
 timezone = ZoneInfo(key='Asia/Kolkata')
 
@@ -12,7 +14,7 @@ def create_session_key():
     return token_hex(16)
 
 
-def create_session_header(cookie_name, cookie_value, days=1):
+def create_cookie_header(cookie_name, cookie_value, days=1):
     # expiry_date = datetime.now() + timedelta(days=days)
     # path = "/"
     max_age = days * 86400
@@ -35,8 +37,8 @@ def create_session_id_header(userid, days=1):
             Session.objects.insert_or_update_data(
                 key=('user_id'), session_key=session_id, expiry_date=expiry_date, user_id=userid
             )
-            first_header: tuple = create_session_header("session_key", session_id)
-            # second_header: tuple = create_session_header("user_id", userid) might result in security issue
+            first_header: tuple = create_cookie_header("session_key", session_id)
+            # second_header: tuple = create_cookie_header("user_id", userid) might result in security issue
 
         except psycopg2.errors.UniqueViolation:
             pass
@@ -98,3 +100,38 @@ def get_cookie_dict(cookie_string):
         cookie_value = cookie_value.strip()
         cookie_dict[cookie_name] = cookie_value
     return cookie_dict
+
+
+# replace others using this
+def get_user_from_environ(environ, **kwargs):
+    '''
+    kwargs accepted instead of args since its more clear for function call
+    same value is passed for key and value of kwarg here
+
+    '''
+
+    assert len(kwargs) < 2, "only one keypair is needed"
+    SESSION_KEY_NAME = "session_key"
+
+    if len(kwargs) == 0:
+        users_value_asked = ["user_id"]
+    else:
+        # get first_key
+        users_value_asked = [next(iter(kwargs.keys()))]
+
+    cookie_string = environ.get('HTTP_COOKIE')
+    cookie_dict = get_cookie_dict(cookie_string)
+
+    session_key_value = cookie_dict.get(SESSION_KEY_NAME)
+
+    curent_session_object = Session.objects.select(users_value_asked, {'session_key': session_key_value})
+
+    # because fetchmany returns iterable, fetchone returns one value
+    curent_session_object = curent_session_object[0]
+
+    return curent_session_object.user_id
+
+
+def get_username_from_environ(environ):
+    user_id = get_user_from_environ(environ)
+    return User.objects.select_one(['username'], {"id": user_id})
