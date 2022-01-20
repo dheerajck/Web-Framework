@@ -28,6 +28,7 @@ def get_inbox(environ):
     return inbox
 
 
+# actually inbox sent mails archive draft all need join btw all table
 def inbox_view(environ, **kwargs):
     '''
     select is not loop, so row containing values which satisifes condition are retrieved

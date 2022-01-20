@@ -151,7 +151,7 @@ class BaseManager:
         # avoid to run out of memory.
         model_objects = list()
         is_fetching_completed = False
-        # print(is_fetching_completed)
+        # print("start")
         while not is_fetching_completed:
             # print(is_fetching_completed)
             result = used_cursor_object.fetchmany(size=chunk_size)
@@ -171,7 +171,7 @@ class BaseManager:
             is_fetching_completed = len(result) < chunk_size
 
             # print('stop')
-        print("fetching done")
+        # print("fetching done")
         return model_objects
 
     def create(self, new_data: dict):
@@ -332,6 +332,41 @@ class BaseManager:
         # Execute query
         self._execute_query(query, parameter)
 
+    def raw_sql_query(self, query, paramaters, chunk_size=2000):
+        used_cursor_object = self._execute_query(query, paramaters)
+        field_names = [desc[0] for desc in used_cursor_object.description]
+        # print(field_names)
+        # print("_______________________________++++++++++++++++==")
+
+        # Fetch data obtained with the previous query execution
+        # and transform it into `model_class` objects.
+        # The fetching is done by batches of `chunk_size` to
+        # avoid to run out of memory.
+        model_objects = list()
+        is_fetching_completed = False
+        # print("start")
+        while not is_fetching_completed:
+            # print(is_fetching_completed)
+            result = used_cursor_object.fetchmany(size=chunk_size)
+
+            # print(len(result))
+            # print()
+            # print("result", result)
+            # print('start')
+            for row_values in result:
+                # print("current resultdata", row_values)
+                keys, values = field_names, row_values
+                # print(keys, values)
+                row_data = dict(zip(keys, values))
+                # print(row_data)
+                # print(self.model_class(**row_data))
+                model_objects.append(self.model_class(**row_data))
+            is_fetching_completed = len(result) < chunk_size
+
+            # print('stop')
+        # print("fetching done")
+        return model_objects
+
 
 # ----------------------- Model ----------------------- #
 class MetaModel(type):
@@ -339,7 +374,8 @@ class MetaModel(type):
 
     def _get_manager(cls):
         print(f"\n\n__________________calling manager class of the class {cls}__________________\n\n")
-        print(f"class is {cls}")
+        # print(f"class is {cls}")
+        # <class 'webapp.orm.models.Mails'>
         print(cls.manager_class(model_class=cls))
         print(f"\n\n__________________DONE__________________\n\n")
         return cls.manager_class(model_class=cls)
