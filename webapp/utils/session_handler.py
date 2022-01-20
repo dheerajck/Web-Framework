@@ -110,7 +110,8 @@ def get_user_from_environ(environ, **kwargs):
 
     '''
 
-    assert len(kwargs) < 2, "only one keypair is needed"
+    assert len(kwargs) < 2, "only one keypair is needed maximum"
+
     SESSION_KEY_NAME = "session_key"
 
     if len(kwargs) == 0:
@@ -132,6 +133,12 @@ def get_user_from_environ(environ, **kwargs):
     return curent_session_object.user_id
 
 
+# to depreciate
 def get_username_from_environ(environ):
     user_id = get_user_from_environ(environ)
-    return User.objects.select_one(['username'], {"id": user_id})
+    return User.objects.select_one(['username'], {"id": user_id})[0]
+
+
+def get_user_details_from_environ(environ, field: list = ["username"]):
+    user_id = get_user_from_environ(environ)
+    return User.objects.select_one(field, {"id": user_id})

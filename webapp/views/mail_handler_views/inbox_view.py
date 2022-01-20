@@ -59,6 +59,9 @@ def inbox_view(environ, **kwargs):
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
+        # <input type="submit" name="interaction" value="forward" placeholder="forward">
+        # <input type="submit" formaction="linktosomewhere" value="value to submit"> will work
+
         mail_div += f'''
 
         <div>
@@ -74,7 +77,7 @@ def inbox_view(environ, **kwargs):
         <form action="/mail-user-interactions-inbox/{each_mail.mail_id}" method="post">
             <input type="submit" name="interaction" value="archive">
             <input type="submit" name="interaction" value="reply" placeholder="reply">
-            <input type="submit" name="interaction" value="forward" placeholder="forward">
+            <button type="submit" formaction="/inbox/forward/{each_mail.mail_id}/">forward</button>
             <input type="submit" name="interaction" value="delete" placeholder="delete">
 
         </form>

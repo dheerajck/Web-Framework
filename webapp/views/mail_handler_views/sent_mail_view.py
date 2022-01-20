@@ -105,6 +105,7 @@ def sent_mail_view(environ, **kwargs):
             <pre>{each_mail.body}</pre>
             {link_html_tag}
             <form action="/mail-user-interactions-sent/{each_mail.id}" method="post">
+                <button type="submit" formaction="/sent-mails/forward/{each_mail.id}/">forward</button>
                 <input type="submit" name="interaction" value="delete" placeholder="delete">
             </form>
             <hr>

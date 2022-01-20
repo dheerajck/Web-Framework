@@ -15,17 +15,18 @@
 	<div class="sent-mail-page">
 		<div class="form">
 		
-		  <form class="sent-mail-form" action="/draft/edit-draft-mail-post/{mail_id}/"  method="post" enctype="multipart/form-data">
+		  <form class="sent-mail-form" action="{link_to_redirect}"  method="post" enctype="multipart/form-data">
 			<label for="To">To</label>
 			<!-- better to close input tags like this -->
-			<input id="TO" name="to_list" type="email"  multiple value={To}> 
+			<input id="TO" name="to_list" type="email"  multiple value='{To}'> 
 
 			<br>
 			
 
 			<label for="title">Title</label>
 			<!-- enter value after type -->
-			<input id="title" name="title"  type="text" value={Title}>
+			<!-- value without quotes around it removess ebvery word after space, using quotes will solve this issue -->
+			<input id="title" name="title"  type="text" value='{Title}'>
 
 			<br>
 
@@ -34,7 +35,7 @@
 			<!-- dont define style here, it will cause issues with parsing, enctype not saving was the problem  -->
 			<!-- <input id="body" name="body" type="text"/> -->
 			<!-- <input id="body" name="body" value={Body}  > -->
-			<textarea id="body" name="body" rows="4" cols="50">{Body}</textarea>
+			<textarea id="body" name="body" rows="10" cols="50">{Body}</textarea>
 
 			<br>
 

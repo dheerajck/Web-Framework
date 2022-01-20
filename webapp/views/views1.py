@@ -47,8 +47,10 @@ def session(environ, **kwargs):
 
 
 def view_403(environ, **kwargs):
+    start_response_headers["status"] = "403 Forbidden"
     return render_template("HTTP403.html", context={}), start_response_headers
 
 
 def view_404(environ, **kwargs):
+    start_response_headers["status"] = "404 Not Found"
     return render_template("HTTP404.html", context={}), start_response_headers

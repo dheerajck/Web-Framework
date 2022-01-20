@@ -25,6 +25,10 @@ URL_DICTIONARY = {
     #
     '^draft-mails/edit-draft/[0-9]+$': views.edit_draft_mail_render_view,
     '^draft/edit-draft-mail-post/[0-9]+$': views.edit_draft_mail_post_view,
+    #
+    '^inbox/forward/[0-9]+$': views.forward_mail_render_view,
+    '^sent-mails/forward/[0-9]+$': views.forward_mail_render_view,
+    '^archives/forward/[0-9]+$': views.forward_mail_render_view,
 }
 
 
@@ -49,6 +53,7 @@ def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
         if re.search(pattern, url_to_check):
             # print(url_to_check, pattern, value)
             # print("yes")
+            print(value, "zxzx")
             return value
     return None
 
@@ -103,13 +108,24 @@ def url_handler(request_url):
 
     # _________________________________________________________________________
 
-    if view_name is views.edit_draft_mail_render_view or view_name is views.edit_draft_mail_post_view:
+    if view_name in [
+        views.edit_draft_mail_render_view,
+        views.edit_draft_mail_post_view,
+    ]:
         url_split = request_url.split('/')
 
         url_message_id = int(url_split[-1])
         kwargs_passing = {"mail_id": url_message_id}
 
     # _________________________________________________________________________
+
+    if view_name is views.forward_mail_render_view:
+        print("forward options")
+        url_split = request_url.split("/")
+        kwargs_passing = {"mail_id": int(url_split[-1]), "forward_from": url_split[0]}
+        print(kwargs_passing)
+
+    # __________________________________________________________________________
 
     if view_name is views.mail_interactions_view:
         print("mail_interaction")

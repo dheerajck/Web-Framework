@@ -63,7 +63,18 @@ def edit_draft_mail_render_view(environ, **kwargs):
     # _________________________________________________________
     print(mail_to_edit)
 
-    context = {"mail_id": mail_id, "To": To, "Title": Title, "Body": Body, "Attachment_link": Attachment_link}
+    context = {
+        "from": "",
+        "from_name": "",
+        #
+        "mail_id": mail_id,
+        "To": To,
+        "Title": Title,
+        "Body": Body,
+        "Attachment_link": Attachment_link,
+        "link_to_redirect": f"/draft/edit-draft-mail-post/{mail_id}/",
+    }
+
     print(context)
     # context is not passing like kwarg, just using context = context for making it clear
 

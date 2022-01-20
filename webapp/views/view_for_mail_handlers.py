@@ -148,9 +148,9 @@ def view_sent_mails(environ, **kwargs):
             if receiver_user is None:
                 # then definitely there will be a group
                 # one constraint should have value
-                receivers_list.append(Groups.objects.select_one(['group_mail'], {"id": receiver.receiver_group}))
+                receivers_list.append(Groups.objects.select_one(['group_mail'], {"id": receiver.receiver_group})[0])
             else:
-                receivers_list.append(User.objects.select_one(['email'], {"id": receiver.receiver_user}))
+                receivers_list.append(User.objects.select_one(['email'], {"id": receiver.receiver_user})[0])
 
         print(receivers_list)
         receivers_list = ", ".join(receivers_list)
@@ -245,7 +245,7 @@ def view_inbox(environ, **kwargs):
         
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>
-        <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
+        <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})[0]}</p>
         <pre>{each_mail.body}</pre>
         <a href="">attachement link</a>
         <form action="inbox-actions/" method="post">

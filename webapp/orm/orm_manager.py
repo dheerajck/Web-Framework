@@ -303,7 +303,8 @@ class BaseManager:
         print(field_values, 111111111112)
         print(field_values[0])
         # first index contain first field name, if email and id in select list, field_values[0] gives email field_values[1] gives id
-        return field_values[0]
+        # return field_values[0]
+        return field_values
 
     # Important currently deletes only based on one field
     def delete(self, **kwargs):

@@ -16,8 +16,8 @@ from ...orm.models import Mails, UserInbox, UserSent
 allowed_actions = {
     "inbox": {"archive", "reply", "forward", "delete"},
     "archive": {"unarchive", "reply", "forward", "delete"},
-    "sent": {"delete"},
-    "draft": {"delete", "edit"},
+    "sent": {"forward", "delete"},
+    "draft": {"edit", "delete"},
 }
 
 
@@ -96,6 +96,14 @@ def mail_interactions_view(environ, **kwargs):
             UserSent.objects.update({"deleted": True}, {"mail_id": mail_id})
 
     elif user_interaction == "edit" and page == "draft":
+        url_to_redirect = f'/draft-mails/edit-draft/{mail_id}/'
+
+        response_body = ''
+        status = '302 FOUND'
+        redirect_data_response_headers = redirect_view(status, url_to_redirect)
+        return response_body, redirect_data_response_headers
+
+    elif user_interaction == "forward" and page == "sent":
         url_to_redirect = f'/draft-mails/edit-draft/{mail_id}/'
 
         response_body = ''
