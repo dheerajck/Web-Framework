@@ -9,7 +9,7 @@ from .archived_mail_view import get_archives
 from .sent_mail_view import get_send_mails
 
 
-from ...orm.models import Mails
+from ...orm.models import Mails, UserInbox, UserSent
 
 
 allowed_actions = {
@@ -62,9 +62,9 @@ def mail_interactions_view(environ, **kwargs):
     print("hi")
 
     if user_interaction == "archive":
-        Mails.objects.update({"archives": True}, {"id": mail_id})
+        UserInbox.objects.update({"archived_mail": True}, {"mail_id": mail_id})
     elif user_interaction == "unarchive":
-        Mails.objects.update({"archives": False}, {"id": mail_id})
+        Mails.objects.update({"archived_mail": False}, {"mail_id": mail_id})
 
     elif user_interaction == "delete":
         Mails.objects.delete(id=mail_id)

@@ -41,7 +41,6 @@ class BaseManager:
         ALL_OR=0,
         ALL_IN=0,
         order_by: tuple = (),
-        join_model: list = [],  # list of tuple
         chunk_size=2000,
     ):
         # Build SELECT query
@@ -55,22 +54,10 @@ class BaseManager:
         else:
             fields_format = ', '.join(field_names)
 
-        from_table_value = self.model_class.table_name
-        if len(join_model) > 0:
-
-            new_from_field_value = f" {from_table_value} {from_table_value} INNER JOIN {join_model[0][0]} {join_model[0][0]} ON ({from_table_value}.{join_model[0][1]} =  {join_model[0][0]}.{join_model[0][2]}) "
-
-            for i in range(1, len(join_model)):
-                new_from_field_value += f" INNER JOIN {join_model[i][0]} {join_model[i][0]} ON ({join_model[i-1][0]}.{join_model[i-1][2]} =  {join_model[i][0]}.{join_model[i][2]}) "
-            from_table_value = new_from_field_value
-        # only two tables are joined(one model is the one which calls this, other model is passed as parameter)
-        # join_model = [model, "fieldname in first model to join", "fieldname in second model to join "]
-        # can make join_model a list of tuples,if there are many tables to join
-
         if len(conditions_dict) == 0:
             # cursor.execute(query)
 
-            query = f"SELECT {fields_format} FROM {from_table_value} "
+            query = f"SELECT {fields_format} FROM {self.model_class.table_name} "
 
             if len(order_by) == 1:
                 query += f"ORDER BY {order_by[0]} DESC"
@@ -88,7 +75,7 @@ class BaseManager:
             conditions_value_placeholder = [f"({i} IN %s)" for i in conditions_column]
             conditions_value_placeholder = LOGIC_SELECTOR.join(conditions_value_placeholder)
 
-            query = f"SELECT {fields_format} FROM {from_table_value} WHERE {conditions_value_placeholder}"
+            query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
             parameters = []
             for values in conditions_dict.values():
 
@@ -128,7 +115,7 @@ class BaseManager:
             conditions_value_placeholder = LOGIC_SELECTOR.join(conditions_value_placeholder)
 
             conditions_value_parameters = list(conditions_dict.values())
-            query = f"SELECT {fields_format} FROM {from_table_value} WHERE {conditions_value_placeholder}"
+            query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
 
             # # Execute query
             # cursor = self._get_cursor()
@@ -332,8 +319,12 @@ class BaseManager:
         # Execute query
         self._execute_query(query, parameter)
 
-    def raw_sql_query(self, query, paramaters, chunk_size=2000):
-        used_cursor_object = self._execute_query(query, paramaters)
+    def raw_sql_query(self, query, paramaters=[], chunk_size=2000):
+        if paramaters == []:
+            used_cursor_object = self._execute_query(query)
+        else:
+            used_cursor_object = self._execute_query(query, paramaters)
+
         field_names = [desc[0] for desc in used_cursor_object.description]
         # print(field_names)
         # print("_______________________________++++++++++++++++==")

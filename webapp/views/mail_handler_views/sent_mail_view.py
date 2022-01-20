@@ -89,11 +89,12 @@ def sent_mail_view(environ, **kwargs):
         #  space present in comment tag after --  will make the template not render
 
         # <!-- add datetime sort Done -- >
+        #    <h3>{each_mail.id}</h3>
         mail_div += f'''
             <div>
             <!-- add datetime sort Done -->
         
-           <h3>{each_mail.id}</h3>
+        
             
             <h3>{each_mail.created_date}</h3>
             <h2>{each_mail.title}</h2>

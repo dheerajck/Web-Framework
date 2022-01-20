@@ -4,6 +4,7 @@ from ...utils.session_handler import get_user_from_environ
 from ...orm.models import User, UserGroup, Mails
 from ...orm.models import UserInbox, UserSent, User
 
+
 """
 can replace using inbox view by passing one paarameter to view 
 which says if inbox or archive should be  shown in the display
@@ -11,33 +12,43 @@ which says if inbox or archive should be  shown in the display
 
 
 def get_archives(environ):
+
     user_id = get_user_from_environ(environ)
+
+    Mails_table_name = Mails.objects.model_class.table_name
     User_table_name = User.objects.model_class.table_name
     Usersent_table_name = UserSent.objects.model_class.table_name
     Userinbox_table_name = UserInbox.objects.model_class.table_name
-    archives = Mails.objects.select(
-        {},
-        {f"{Userinbox_table_name}.user_id": user_id, f"{Userinbox_table_name}.archived_mail": True},
-        0,  # 0 => AND
-        1,  # 1 => field IN tuples , 0 => field=value
-        ("created_date",),  # order by created_date descending order
-        join_model=[
-            (Userinbox_table_name, "id", "mail_id"),
-            (Usersent_table_name, "mail_id", "mail_id"),
-            (User_table_name, "user_id", "id"),
-        ],
-    )
-    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+
+    query = f"""SELECT * FROM {Mails_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox  ON (Mail.id = Inbox.mail_id)
+                INNER JOIN  {Usersent_table_name} Sent ON (Inbox.mail_id = Sent.mail_id)
+                INNER JOIN {User_table_name} Users ON (Users.id = Sent.user_id)
+                
+                WHERE Inbox.user_id = %s AND  Inbox.archived_mail = %s
+                ORDER BY "created_date" DESC
+            """
+    parameters = [user_id, True]
+    print()
+    archives = Mails.objects.raw_sql_query(query, parameters)
+    print(archives)
 
     return archives
 
 
 def archives_view(environ, **kwargs):
-    inbox = get_archives(environ)
-    print(inbox)
+    '''
+    select is not loop, so row containing values which satisifes condition are retrieved
+    rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
+    important => data retireved never greater than data in the table
+    if a user sends same mail through user, groups
+    only one copy will reach here since mail id is unique which is actually good
+    '''
+
+    archives = get_archives(environ)
+    print(archives)
 
     mail_div = ''
-    for each_mail in inbox:
+    for each_mail in archives:
         print(each_mail)
 
         link_html_tag = ''
@@ -62,7 +73,7 @@ def archives_view(environ, **kwargs):
         <pre>{each_mail.body}</pre>
         {link_html_tag}
         
-        <form action="/mail-user-interactions-inbox/{each_mail.id}" method="post">
+        <form action="/mail-user-interactions-inbox/{each_mail.mail_id}" method="post">
             <input type="submit" name="interaction" value="archive">
             <input type="submit" name="interaction" value="reply" placeholder="reply">
             <input type="submit" name="interaction" value="forward" placeholder="forward">
@@ -74,7 +85,7 @@ def archives_view(environ, **kwargs):
 
     # if for loop is not executed because there are no mails in inbox of user
     if mail_div == "":
-        mail_div = "<h1>No mails Archived</h1>"
+        mail_div = "<h1>No Archived mails</h1>"
 
     context = {'title_of_page': "inbox", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)

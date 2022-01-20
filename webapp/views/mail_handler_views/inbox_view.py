@@ -8,24 +8,29 @@ from ...orm.models import UserInbox, UserSent, User
 def get_inbox(environ):
 
     user_id = get_user_from_environ(environ)
+
+    Mails_table_name = Mails.objects.model_class.table_name
     User_table_name = User.objects.model_class.table_name
     Usersent_table_name = UserSent.objects.model_class.table_name
     Userinbox_table_name = UserInbox.objects.model_class.table_name
-    inbox = Mails.objects.select(
-        {},
-        {f"{Userinbox_table_name}.user_id": user_id, f"{Userinbox_table_name}.archived_mail": False},
-        0,  # 0 => AND
-        1,  # 1 => field IN tuples , 0 => field=value
-        ("created_date",),  # order by created_date descending order
-        join_model=[
-            (Userinbox_table_name, "id", "mail_id"),
-            (Usersent_table_name, "mail_id", "mail_id"),
-            (User_table_name, "user_id", "id"),
-        ],
-    )
-    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+
+    query = f"""SELECT * FROM {Mails_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox  ON (Mail.id = Inbox.mail_id)
+                INNER JOIN  {Usersent_table_name} Sent ON (Inbox.mail_id = Sent.mail_id)
+                INNER JOIN {User_table_name} Users ON (Users.id = Sent.user_id)
+                
+                WHERE Inbox.user_id = %s AND  Inbox.archived_mail = %s
+                ORDER BY "created_date" DESC
+            """
+    parameters = [user_id, False]
+    print()
+    inbox = Mails.objects.raw_sql_query(query, parameters)
+    print(inbox)
 
     return inbox
+    #  {f"{Userinbox_table_name}.user_id": user_id, f"{Userinbox_table_name}.archived_mail": False},
+    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+
+    # return inbox
 
 
 # actually inbox sent mails archive draft all need join btw all table
@@ -66,7 +71,7 @@ def inbox_view(environ, **kwargs):
         <pre>{each_mail.body}</pre>
         {link_html_tag}
         
-        <form action="/mail-user-interactions-inbox/{each_mail.id}" method="post">
+        <form action="/mail-user-interactions-inbox/{each_mail.mail_id}" method="post">
             <input type="submit" name="interaction" value="archive">
             <input type="submit" name="interaction" value="reply" placeholder="reply">
             <input type="submit" name="interaction" value="forward" placeholder="forward">

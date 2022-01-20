@@ -16,10 +16,16 @@ def get_draft_mails(environ):
     sent_mails_mail_id = [i.mail_id for i in sent_mails]
     sent_mails_mail_tuple = tuple(sent_mails_mail_id)
 
+    # query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
+    #     FROM {Mail_table_name} Mail LEFT JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id)
+    #     INNER JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
+
+    #     WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
+    #     """
+
+    # all join is LEFT JOIN here because there is no sure/assurance there will be data having matching colimn since this is DRAFT
     query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
-            FROM {Mail_table_name} Mail LEFT JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) 
-            INNER JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
-            
+            FROM {Mail_table_name} Mail LEFT JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) LEFT JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
             WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
             """
     parameters = [sent_mails_mail_tuple, True]
@@ -74,7 +80,14 @@ def draft_mails_view(environ, **kwargs):
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
 
         # generate all receivers of a sent mail
-        receivers_list = ", ".join(receivers_dict[each_mail.id])
+
+        receivers_list = receivers_dict[each_mail.id]
+        receivers_list.remove(None)
+        if len(receivers_list) == 0:
+            receivers = ""
+        else:
+            receivers = ", ".join(receivers_list)
+
         print("________________________")
         print(receivers_dict)
         print()
@@ -84,15 +97,16 @@ def draft_mails_view(environ, **kwargs):
         #  space present in comment tag after --  will make the template not render
 
         # <!-- add datetime sort Done -- >
+        # <h3>{each_mail.id}</h3>
         mail_div += f'''
             <div>
             <!-- add datetime sort Done -->
         
-           <h3>{each_mail.id}</h3>
+           
             
             <h3>{each_mail.created_date}</h3>
             <h2>{each_mail.title}</h2>
-            <p>To:{receivers_list}</p>
+            <p>To:{receivers}</p>
             <pre>{each_mail.body}</pre>
             {link_html_tag}
             <form action="/mail-user-interactions-sent/{each_mail.id}" method="post">

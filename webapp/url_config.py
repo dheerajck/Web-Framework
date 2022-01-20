@@ -15,13 +15,13 @@ URL_DICTIONARY = {
     '^sent-mails$': views.sent_mail_view,
     '^draft-mails$': views.draft_mails_view,
     '^archives$': views.archives_view,
-    # '^real-time-chat$': views.real_time_chat_view,
-    # '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view,
-    # # 'mail-user-interactions': views.mail_interactiions_view,
-    # '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
-    # '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
-    # '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
-    # '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
+    '^real-time-chat$': views.real_time_chat_view,
+    '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view,
+    # 'mail-user-interactions': views.mail_interactiions_view,
+    '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
+    '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
+    '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
+    '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
 }
 
 
