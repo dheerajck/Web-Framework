@@ -90,21 +90,21 @@ def url_handler(request_url):
     # print(view_name, views.mail_interactions_view)
     # print(view_name is views.mail_interactions_view)
 
-    # if view_name is views.mail_interactions_view:
-    #     print("mail_interaction")
-    #     url_split = request_url.split('/')
+    if view_name is views.mail_interactions_view:
+        print("mail_interaction")
+        url_split = request_url.split('/')
 
-    #     url_without_message_id: str = "/".join(url_split[:-1])
+        url_without_message_id: str = "/".join(url_split[:-1])
 
-    #     url_action = url_without_message_id.split("-")[-1]
-    #     url_message_id = int(url_split[-1])
+        url_action = url_without_message_id.split("-")[-1]
+        url_message_id = int(url_split[-1])
 
-    #     kwargs_passing = {"mail_id": url_message_id, "action": url_action}
-    #     print(kwargs_passing)
+        kwargs_passing = {"mail_id": url_message_id, "page": url_action}
+        print(kwargs_passing)
 
-    # if view_name is views.groups_view:
-    #     kwargs_passing = {"group_name": request_url.split('/')[-1]}
-    #     print(kwargs_passing)
+    if view_name is views.groups_view:
+        kwargs_passing = {"group_name": request_url.split('/')[-1]}
+        print(kwargs_passing)
     # Replace using regex
     # done
     # ___________________________________________________

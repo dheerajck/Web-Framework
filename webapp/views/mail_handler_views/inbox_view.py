@@ -18,10 +18,10 @@ def get_inbox(environ):
                 INNER JOIN  {Usersent_table_name} Sent ON (Inbox.mail_id = Sent.mail_id)
                 INNER JOIN {User_table_name} Users ON (Users.id = Sent.user_id)
                 
-                WHERE Inbox.user_id = %s AND  Inbox.archived_mail = %s
+                WHERE Inbox.user_id = %s AND Inbox.deleted = %s AND Inbox.archived_mail = %s
                 ORDER BY "created_date" DESC
             """
-    parameters = [user_id, False]
+    parameters = [user_id, False, False]
     print()
     inbox = Mails.objects.raw_sql_query(query, parameters)
     print(inbox)

@@ -12,7 +12,7 @@ def get_draft_mails(environ):
     Mail_table_name = Mails.objects.model_class.table_name
     User_table_name = User.objects.model_class.table_name
 
-    sent_mails = UserSent.objects.select({"mail_id"}, {"user_id": user_id})
+    sent_mails = UserSent.objects.select({"mail_id"}, {"user_id": user_id, "deleted": False})
     sent_mails_mail_id = [i.mail_id for i in sent_mails]
     sent_mails_mail_tuple = tuple(sent_mails_mail_id)
 
@@ -24,14 +24,16 @@ def get_draft_mails(environ):
     #     """
 
     # all join is LEFT JOIN here because there is no sure/assurance there will be data having matching colimn since this is DRAFT
-    query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
-            FROM {Mail_table_name} Mail LEFT JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) LEFT JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
-            WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
-            """
-    parameters = [sent_mails_mail_tuple, True]
-    sent_mails = Mails.objects.raw_sql_query(query, parameters)
-    print(sent_mails)
-    return sent_mails
+    draft_mails = []
+    if len(sent_mails_mail_tuple) > 0:
+        query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
+                FROM {Mail_table_name} Mail LEFT JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) LEFT JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
+                WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
+                """
+        parameters = [sent_mails_mail_tuple, True]
+        draft_mails = Mails.objects.raw_sql_query(query, parameters)
+    print(draft_mails)
+    return draft_mails
     # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
 
@@ -109,7 +111,7 @@ def draft_mails_view(environ, **kwargs):
             <p>To:{receivers}</p>
             <pre>{each_mail.body}</pre>
             {link_html_tag}
-            <form action="/mail-user-interactions-sent/{each_mail.id}" method="post">
+            <form action="/mail-user-interactions-draft/{each_mail.id}" method="post">
                 <input type="submit" name="interaction" value="delete" placeholder="delete">
             </form>
             <hr>

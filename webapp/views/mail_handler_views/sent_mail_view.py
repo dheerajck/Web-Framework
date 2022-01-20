@@ -12,18 +12,20 @@ def get_send_mails(environ):
     Mail_table_name = Mails.objects.model_class.table_name
     User_table_name = User.objects.model_class.table_name
 
-    sent_mails = UserSent.objects.select({"mail_id"}, {"user_id": user_id})
+    sent_mails = UserSent.objects.select({"mail_id"}, {"user_id": user_id, "deleted": False})
     sent_mails_mail_id = [i.mail_id for i in sent_mails]
     sent_mails_mail_tuple = tuple(sent_mails_mail_id)
 
-    query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
-            FROM {Mail_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) 
-            INNER JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
-            
-            WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
-            """
-    parameters = [sent_mails_mail_tuple, False]
-    sent_mails = Mails.objects.raw_sql_query(query, parameters)
+    sent_mails = []
+    if len(sent_mails_mail_tuple) > 0:
+        query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
+                FROM {Mail_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) 
+                INNER JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
+                
+                WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
+                """
+        parameters = [sent_mails_mail_tuple, False]
+        sent_mails = Mails.objects.raw_sql_query(query, parameters)
     print(sent_mails)
     return sent_mails
     # print(len(inbox), type(inbox)) # 0 => <class 'list'>

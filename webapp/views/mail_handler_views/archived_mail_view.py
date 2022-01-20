@@ -24,10 +24,10 @@ def get_archives(environ):
                 INNER JOIN  {Usersent_table_name} Sent ON (Inbox.mail_id = Sent.mail_id)
                 INNER JOIN {User_table_name} Users ON (Users.id = Sent.user_id)
                 
-                WHERE Inbox.user_id = %s AND  Inbox.archived_mail = %s
+                WHERE Inbox.user_id = %s AND Inbox.deleted = %s AND Inbox.archived_mail = %s
                 ORDER BY "created_date" DESC
             """
-    parameters = [user_id, True]
+    parameters = [user_id, False, True]
     print()
     archives = Mails.objects.raw_sql_query(query, parameters)
     print(archives)
@@ -73,8 +73,8 @@ def archives_view(environ, **kwargs):
         <pre>{each_mail.body}</pre>
         {link_html_tag}
         
-        <form action="/mail-user-interactions-inbox/{each_mail.mail_id}" method="post">
-            <input type="submit" name="interaction" value="archive">
+        <form action="/mail-user-interactions-archive/{each_mail.mail_id}" method="post">
+            <input type="submit" name="interaction" value="unarchive">
             <input type="submit" name="interaction" value="reply" placeholder="reply">
             <input type="submit" name="interaction" value="forward" placeholder="forward">
             <input type="submit" name="interaction" value="delete" placeholder="delete">
