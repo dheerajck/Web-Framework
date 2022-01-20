@@ -22,6 +22,9 @@ URL_DICTIONARY = {
     '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
     '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
     '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
+    #
+    '^draft-mails/edit-draft/[0-9]+$': views.edit_draft_mail_render_view,
+    '^draft/edit-draft-mail-post/[0-9]+$': views.edit_draft_mail_post_view,
 }
 
 
@@ -48,6 +51,14 @@ def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
             # print("yes")
             return value
     return None
+
+
+def parse_url_last_strin(url, key):
+    pass
+
+
+def parse_last_id(url, key):
+    pass
 
 
 def url_strip(url):
@@ -90,6 +101,16 @@ def url_handler(request_url):
     # print(view_name, views.mail_interactions_view)
     # print(view_name is views.mail_interactions_view)
 
+    # _________________________________________________________________________
+
+    if view_name is views.edit_draft_mail_render_view or view_name is views.edit_draft_mail_post_view:
+        url_split = request_url.split('/')
+
+        url_message_id = int(url_split[-1])
+        kwargs_passing = {"mail_id": url_message_id}
+
+    # _________________________________________________________________________
+
     if view_name is views.mail_interactions_view:
         print("mail_interaction")
         url_split = request_url.split('/')
@@ -102,9 +123,14 @@ def url_handler(request_url):
         kwargs_passing = {"mail_id": url_message_id, "page": url_action}
         print(kwargs_passing)
 
+    # _________________________________________________________________________
+
     if view_name is views.groups_view:
         kwargs_passing = {"group_name": request_url.split('/')[-1]}
         print(kwargs_passing)
+
+    # _________________________________________________________________________
+
     # Replace using regex
     # done
     # ___________________________________________________

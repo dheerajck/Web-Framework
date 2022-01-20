@@ -62,7 +62,7 @@ if __name__ == "__main__":
     CREATE TABLE IF NOT EXISTS user_sent (
         id SERIAL PRIMARY KEY,
         user_id integer REFERENCES app_users(id) ON DELETE CASCADE NOT NULL,
-        mail_id integer REFERENCES mails(id) UNIQUE NOT NULL,
+        mail_id integer REFERENCES mails(id) ON DELETE CASCADE UNIQUE NOT NULL,
         deleted boolean DEFAULT false
     )
     """
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     CREATE TABLE IF NOT EXISTS user_inbox (
         id SERIAL PRIMARY KEY,
         user_id integer REFERENCES app_users(id) ON DELETE CASCADE NOT NULL,
-        mail_id integer REFERENCES mails(id) NOT NULL,
+        mail_id integer REFERENCES mails(id) ON DELETE CASCADE NOT NULL,
         archived_mail boolean DEFAULT false,
         
         group_id integer REFERENCES groups (id),

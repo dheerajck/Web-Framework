@@ -1,6 +1,5 @@
 from ...utils.post_form_handler import form_with_file_parsing
 from ...utils.session_handler import get_user_from_environ
-from ...utils.template_handlers import render_template
 
 from ..views1 import view_403
 from ...utils.redirect_functions import redirect_view
@@ -18,7 +17,7 @@ allowed_actions = {
     "inbox": {"archive", "reply", "forward", "delete"},
     "archive": {"unarchive", "reply", "forward", "delete"},
     "sent": {"delete"},
-    "draft": {"delete"},
+    "draft": {"delete", "edit"},
 }
 
 
@@ -39,6 +38,7 @@ def mail_interactions_view(environ, **kwargs):
     print(user_interaction)
     # print('///////////////////////////////////////')
 
+    # Important, to get mail_id from the get functions, there are difference btw key name in the methods used
     # mail.mail_id in inbox and archive
 
     # mail.id in sent and draft
@@ -54,6 +54,7 @@ def mail_interactions_view(environ, **kwargs):
         box_mails = {mail.mail_id for mail in box_mails}
         redirect_data_response_headers = redirect_view('302 FOUND', '/archives')
 
+    # sent => past, sent mails
     elif page == "sent":
         box_mails = get_send_mails(environ)
         print("///////////////////////////////////////////////////////////////////////")
@@ -94,9 +95,12 @@ def mail_interactions_view(environ, **kwargs):
         elif page in {"sent", "draft"}:
             UserSent.objects.update({"deleted": True}, {"mail_id": mail_id})
 
-    elif user_interaction == "reply":
-        pass
-    elif user_interaction == "forward":
-        pass
+    elif user_interaction == "edit" and page == "draft":
+        url_to_redirect = f'/draft-mails/edit-draft/{mail_id}/'
+
+        response_body = ''
+        status = '302 FOUND'
+        redirect_data_response_headers = redirect_view(status, url_to_redirect)
+        return response_body, redirect_data_response_headers
 
     return response_body, redirect_data_response_headers

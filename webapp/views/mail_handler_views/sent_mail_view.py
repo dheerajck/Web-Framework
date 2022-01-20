@@ -80,7 +80,8 @@ def sent_mail_view(environ, **kwargs):
             file_link = f"{file_directory}{each_mail.attachment}"
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
 
-        # generate all receivers of a sent mail
+        # Generate all receivers of a sent mail
+        # No issue of None because sent mails will have receivers
         receivers_list = ", ".join(receivers_dict[each_mail.id])
         print("________________________")
         print(receivers_dict)

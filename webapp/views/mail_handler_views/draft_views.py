@@ -37,16 +37,24 @@ def get_draft_mails(environ):
     # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
 
-def draft_mails_view(environ, **kwargs):
-    draft_mails = get_draft_mails(environ)
-    # print(sent_mails)
+def get_receivers_dict(draft_mails):
+    '''
+    receivers_list = receivers_dict.get(each_mail.id, [])
+    receivers = ", ".join(receivers_list)
+
+    Use dict.get to get receivers list and if there is no key return an empty list []
+    '''
+
     receivers_dict = {}
-
-    print(len(draft_mails))
-
     for mail in draft_mails:
 
+        if mail.user_mail is None:
+            # if there is no user, definitely there is no group,
+            # so no need to check if group_mail will have value
+            continue
+
         if mail.id in receivers_dict:
+
             value = receivers_dict[mail.id]
 
             if mail.group_mail is not None:
@@ -60,6 +68,19 @@ def draft_mails_view(environ, **kwargs):
                 receivers_dict[mail.id] = {mail.group_mail}
             else:
                 receivers_dict[mail.id] = {mail.user_mail}
+
+    for key in receivers_dict:
+        if None in receivers_dict[key]:
+            assert False, "None in receivers field"
+    return receivers_dict
+
+
+def draft_mails_view(environ, **kwargs):
+    draft_mails = get_draft_mails(environ)
+    # print(sent_mails)
+    receivers_dict = get_receivers_dict(draft_mails)
+
+    print(len(draft_mails))
 
     print(f"receivers dict is {receivers_dict=}")
     print()
@@ -83,17 +104,20 @@ def draft_mails_view(environ, **kwargs):
 
         # generate all receivers of a sent mail
 
-        receivers_list = receivers_dict[each_mail.id]
-        receivers_list.remove(None)
-        if len(receivers_list) == 0:
-            receivers = ""
-        else:
-            receivers = ", ".join(receivers_list)
+        # receivers_list = receivers_dict[each_mail.id]
+        # receivers_list.remove(None)
+        # if len(receivers_list) == 0:
+        #     receivers = ""
+        # else:
+        #     receivers = ", ".join(receivers_list)
+
+        receivers_list = receivers_dict.get(each_mail.id, [])
+        receivers = ", ".join(receivers_list)
 
         print("________________________")
         print(receivers_dict)
         print()
-        print(receivers_list, mail.id)
+        print(receivers_list, each_mail.id)
         print("________________________")
 
         #  space present in comment tag after --  will make the template not render
@@ -112,10 +136,14 @@ def draft_mails_view(environ, **kwargs):
             <pre>{each_mail.body}</pre>
             {link_html_tag}
             <form action="/mail-user-interactions-draft/{each_mail.id}" method="post">
+                <input type="submit" name="interaction" value="edit" placeholder="edit">
                 <input type="submit" name="interaction" value="delete" placeholder="delete">
             </form>
+            
             <hr>
+            
             </div>'''
+
     print("s2")
     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.....")
 
@@ -124,6 +152,7 @@ def draft_mails_view(environ, **kwargs):
 
     context = {'title_of_page': "inbox", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)
+
     # print(users_groups)
     # print(response_body)
     start_response_headers = response_header_basic = {
