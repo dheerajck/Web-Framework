@@ -19,8 +19,12 @@ def serve_media_file(environ, **kwargs):
     file_name = file_name.split("__")[-1]
 
     # js dont care about content type, works with text/css
-    response_headers = [(f'Content-type, text/html')]
-    response_headers = {}
+    response_headers = [
+        (f'Content-type', "application/octet-stream"),
+        (f'Content-Disposition', f'inline; filename={file_name}'),
+    ]
+    # reponse_headers = {}
+
     # because assertion is done to ensure data received on app from view is always a string and a dict
     # static_file_data_in_bytes = static_file_data_in_bytes.decode()
 

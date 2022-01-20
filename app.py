@@ -110,6 +110,7 @@ def application(environ, start_response, status=None, response_headers=None):
     # print("done showed response")
 
     # avoided to prevent issue with file downlaod
+    # add a new assertion to only allow file download
     # assert type(html_response_body) == str and type(start_response_headers) == dict
 
     status_basic = '200 OK'
