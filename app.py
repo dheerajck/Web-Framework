@@ -108,7 +108,9 @@ def application(environ, start_response, status=None, response_headers=None):
     # print()
     # print()
     # print("done showed response")
-    assert type(html_response_body) == str and type(start_response_headers) == dict
+
+    # avoided to prevent issue with file downlaod
+    # assert type(html_response_body) == str and type(start_response_headers) == dict
 
     status_basic = '200 OK'
     status = start_response_headers.get('status', status_basic)
@@ -146,8 +148,11 @@ def application(environ, start_response, status=None, response_headers=None):
         "\n\n\n\n________________________________________ COMPLETED ONE REQUEST RESPONSE________________________________________________\n\n\n\n"
     )
     # print(html_response_body)
-    assert isinstance(html_response_body, str), "html response is not string"
-    return [html_response_body.encode('utf-8')]
+    # assert isinstance(html_response_body, str), "html response is not string"
+    if type(html_response_body) == str:
+        html_response_body = html_response_body.encode('utf-8')
+
+    return [html_response_body]
 
 
 # gunicorn

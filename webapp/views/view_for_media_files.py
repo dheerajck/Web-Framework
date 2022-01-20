@@ -12,14 +12,17 @@ def serve_media_file(environ, **kwargs):
     file_directory = f'{directory}{file_name}'
     # reading only in binary format,
     # data is read and written in the form of bytes
-
+    print(file_directory)
     with open(file_directory, mode='rb') as f:
         static_file_data_in_bytes = f.read()
 
+    file_name = file_name.split("__")[-1]
+
     # js dont care about content type, works with text/css
-    response_header_basic_value = []
+    response_headers = [(f'Content-type, text/html')]
+    response_headers = {}
     # because assertion is done to ensure data received on app from view is always a string and a dict
-    static_file_data_in_bytes = static_file_data_in_bytes.decode()
+    # static_file_data_in_bytes = static_file_data_in_bytes.decode()
 
     # print(static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_header_basic_value})
-    return static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_header_basic_value}
+    return static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_headers}
