@@ -5,8 +5,8 @@ from .view_for_static_files import *
 from .mail_handler_views import *
 from .view_for_media_files import *
 
-from .chat_views.views_real_time_chat import *
-from .chat_views.groups_view import *
+from .views_for_chat.views_real_time_chat import *
+from .views_for_chat.chat_view import *
 
 start_response_headers = {}
 

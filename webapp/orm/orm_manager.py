@@ -35,7 +35,13 @@ class BaseManager:
         self.model_class = model_class
 
     def select(
-        self, field_names: list, conditions_dict: dict, ALL_OR=0, ALL_IN=0, order_by: tuple = (), chunk_size=2000
+        self,
+        field_names: list,
+        conditions_dict: dict,
+        ALL_OR=0,
+        ALL_IN=0,
+        order_by: tuple = (),
+        chunk_size=2000,
     ):
         # Build SELECT query
         # print("check", ALL_OR, ALL_IN)
@@ -48,15 +54,14 @@ class BaseManager:
         else:
             fields_format = ', '.join(field_names)
 
-        query = f"SELECT {fields_format} FROM {self.model_class.table_name} "
-
-        if len(order_by) == 1:
-            query += f"ORDER BY {order_by[0]} DESC"
-
-        cursor = self._get_cursor()
-
         if len(conditions_dict) == 0:
             # cursor.execute(query)
+
+            query = f"SELECT {fields_format} FROM {self.model_class.table_name} "
+
+            if len(order_by) == 1:
+                query += f"ORDER BY {order_by[0]} DESC"
+
             used_cursor_object = self._execute_query(query)
         elif ALL_IN == 1:
 
@@ -73,7 +78,15 @@ class BaseManager:
             query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
             parameters = []
             for values in conditions_dict.values():
+
                 if isinstance(values, tuple):
+                    if len(values) == 0:
+                        return []
+                    parameters.append(values)
+                elif isinstance(values, list):
+                    if len(values) == 0:
+                        return []
+                    values = tuple(values)
                     parameters.append(values)
                 else:
                     value_to_append = ((values,),)
@@ -84,6 +97,7 @@ class BaseManager:
             used_cursor_object = self._execute_query(query, parameters)
 
         else:
+            # AND
             conditions_column = conditions_dict.keys()
             # print()
             # print(conditions_dict)
@@ -124,7 +138,7 @@ class BaseManager:
         # avoid to run out of memory.
         model_objects = list()
         is_fetching_completed = False
-        # print(is_fetching_completed)
+        # print("start")
         while not is_fetching_completed:
             # print(is_fetching_completed)
             result = used_cursor_object.fetchmany(size=chunk_size)
@@ -144,7 +158,7 @@ class BaseManager:
             is_fetching_completed = len(result) < chunk_size
 
             # print('stop')
-        print("fetching done")
+        # print("fetching done")
         return model_objects
 
     def create(self, new_data: dict):
@@ -286,10 +300,12 @@ class BaseManager:
         field_values = used_cursor.fetchone()
 
         # fetch one also returns a list and it contains every element specified in the select like ["name", "password"]
-        print(field_values, 111111111112)
-        print(field_values[0])
+        # print(field_values, 111111111112)
+        # print(field_values[0]) will throw error if result is empty
+        # print(field_values[0])
         # first index contain first field name, if email and id in select list, field_values[0] gives email field_values[1] gives id
-        return field_values[0]
+        # return field_values[0]
+        return field_values
 
     # Important currently deletes only based on one field
     def delete(self, **kwargs):
@@ -305,6 +321,45 @@ class BaseManager:
         # Execute query
         self._execute_query(query, parameter)
 
+    def raw_sql_query(self, query, paramaters=[], chunk_size=2000):
+        if paramaters == []:
+            used_cursor_object = self._execute_query(query)
+        else:
+            used_cursor_object = self._execute_query(query, paramaters)
+
+        field_names = [desc[0] for desc in used_cursor_object.description]
+        # print(field_names)
+        # print("_______________________________++++++++++++++++==")
+
+        # Fetch data obtained with the previous query execution
+        # and transform it into `model_class` objects.
+        # The fetching is done by batches of `chunk_size` to
+        # avoid to run out of memory.
+        model_objects = list()
+        is_fetching_completed = False
+        # print("start")
+        while not is_fetching_completed:
+            # print(is_fetching_completed)
+            result = used_cursor_object.fetchmany(size=chunk_size)
+
+            # print(len(result))
+            # print()
+            # print("result", result)
+            # print('start')
+            for row_values in result:
+                # print("current resultdata", row_values)
+                keys, values = field_names, row_values
+                # print(keys, values)
+                row_data = dict(zip(keys, values))
+                # print(row_data)
+                # print(self.model_class(**row_data))
+                model_objects.append(self.model_class(**row_data))
+            is_fetching_completed = len(result) < chunk_size
+
+            # print('stop')
+        # print("fetching done")
+        return model_objects
+
 
 # ----------------------- Model ----------------------- #
 class MetaModel(type):
@@ -312,7 +367,8 @@ class MetaModel(type):
 
     def _get_manager(cls):
         print(f"\n\n__________________calling manager class of the class {cls}__________________\n\n")
-        print(f"class is {cls}")
+        # print(f"class is {cls}")
+        # <class 'webapp.orm.models.Mails'>
         print(cls.manager_class(model_class=cls))
         print(f"\n\n__________________DONE__________________\n\n")
         return cls.manager_class(model_class=cls)
@@ -348,3 +404,31 @@ if __name__ == "__main__":
         {"first_name": "Yoweri", "last_name": "ALOH", "salary": 15000},
     ]
     employee.objects.bulk_insert(rows=employees_data)
+    '''
+    join sample data
+    user_id = get_user_from_environ(environ)
+    Usersent_table_name = UserSent.objects.model_class.table_name
+    Userinbox_table_name = UserInbox.objects.model_class.table_name
+    inbox = Mails.objects.select(
+        {f"{Usersent_table_name}.user_id as A", f"{Userinbox_table_name}.user_id as B"},
+        {f"{Userinbox_table_name}.user_id": user_id},
+        0,  # 0 => AND
+        1,  # 1 => field IN tuples , 0 => field=value
+        ("created_date",),  # order by created_date descending order
+        join_model=[(Userinbox_table_name, "id", "mail_id"), (Usersent_table_name, "mail_id", "mail_id")],
+    )
+    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+
+    '''
+    user_id = get_user_from_environ(environ)
+    Usersent_table_name = UserSent.objects.model_class.table_name
+    Userinbox_table_name = UserInbox.objects.model_class.table_name
+    inbox = Mails.objects.select(
+        {f"{Usersent_table_name}.user_id as A", f"{Userinbox_table_name}.user_id as B"},
+        {f"{Userinbox_table_name}.user_id": user_id},
+        0,  # 0 => AND
+        1,  # 1 => field IN tuples , 0 => field=value
+        ("created_date",),  # order by created_date descending order
+        join_model=[(Userinbox_table_name, "id", "mail_id"), (Usersent_table_name, "mail_id", "mail_id")],
+    )
+    # print(len(inbox), type(inbox)) # 0 => <class 'list'>

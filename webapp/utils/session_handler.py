@@ -1,4 +1,4 @@
-from secrets import token_hex
+import secrets
 from datetime import datetime, timedelta
 from ..orm.models import Session
 import psycopg2
@@ -11,7 +11,11 @@ timezone = ZoneInfo(key='Asia/Kolkata')
 
 
 def create_session_key():
-    return token_hex(16)
+    return secrets.token_hex(16)
+
+
+def create_random_link():
+    return secrets.token_urlsafe(16)
 
 
 def create_cookie_header(cookie_name, cookie_value, days=1):
@@ -110,7 +114,8 @@ def get_user_from_environ(environ, **kwargs):
 
     '''
 
-    assert len(kwargs) < 2, "only one keypair is needed"
+    assert len(kwargs) < 2, "only one keypair is needed maximum"
+
     SESSION_KEY_NAME = "session_key"
 
     if len(kwargs) == 0:
@@ -132,6 +137,16 @@ def get_user_from_environ(environ, **kwargs):
     return curent_session_object.user_id
 
 
+# to depreciate
 def get_username_from_environ(environ):
     user_id = get_user_from_environ(environ)
-    return User.objects.select_one(['username'], {"id": user_id})
+    return User.objects.select_one(['username'], {"id": user_id})[0]
+
+
+def get_user_details_from_id(user_id, field: list = ["username"]):
+    return User.objects.select_one(field, {"id": user_id})
+
+
+def get_user_details_from_environ(environ, field: list = ["username"]):
+    user_id = get_user_from_environ(environ)
+    return User.objects.select_one(field, {"id": user_id})

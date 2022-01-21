@@ -6,9 +6,9 @@ from ast import literal_eval
 
 
 def message_format_and_authentication(message_dict):
-    group_auth_code = "2fcfdcedfb6290fa404c8a06e366a35555f4392293c6435ff326aa06f2ebd755"
-    message_auth_code = message_dict["group_auth_code"]
-    if group_auth_code == message_auth_code:
+    chat_auth_code = "2fcfdcedfb6290fa404c8a06e366a35555f4392293c6435ff326aa06f2ebd755"
+    message_auth_code_from_client = message_dict["chat_auth_code"]
+    if chat_auth_code == message_auth_code_from_client:
         print("matched")
         user = message_dict["username"]
         message = message_dict["message"]

@@ -2,53 +2,12 @@ from ...utils.template_handlers import render_template
 from ...utils.redirect_functions import redirect_to_dashboard_module
 
 from ...utils.post_form_handler import form_with_file_parsing, cgiFieldStorageToDict
-from ...utils.mail_utilites import send_mail, send_draft
+from ...utils.mail_utilites import send_mail, send_draft, get_receivers_id_from_mail
 
 from ...utils.session_handler import get_user_from_environ
 
+
 start_response_headers: dict = {}
-
-from ...orm.models import User, Groups
-
-
-def is_mail_group(mail):
-    data = Groups.objects.select({'id'}, {'group_mail': mail})
-    if len(data) == 0:
-        return False
-    else:
-        return data[0].id
-
-
-def is_mail_user(mail):
-    data = User.objects.select({'id'}, {'email': mail})
-    if len(data) == 0:
-        return False
-    else:
-        return data[0].id
-
-
-def get_receivers_id(receivers_list):
-
-    group_list = []
-    user_list = []
-    invalid_email_list = []
-
-    for mail in receivers_list:
-        mail = mail.strip()
-
-        group_id = is_mail_group(mail)
-        if group_id:
-            group_list.append(group_id)
-            continue
-
-        user_id = is_mail_user(mail)
-        if user_id:
-            user_list.append(user_id)
-            continue
-        # if not the mail doesnt exist
-        invalid_email_list.append(mail)
-
-    return group_list, user_list, invalid_email_list
 
 
 def compose_mail_view(environ, **kwargs):
@@ -61,12 +20,13 @@ def compose_mail_post_view(environ, **kwargs):
     print()
     print("START")
     if environ['REQUEST_METHOD'].upper() != 'POST':
-        return redirect_to_dashboard
+        return redirect_to_dashboard_module()
         # pass  # dashboard
 
     form_field_storage = form_with_file_parsing(environ)
+    # print(form_field_storage, "xsdad")
     # print(form_field_storage.getvalue('attachment'))
-    print("sas/da")
+    # print("sas/da")
 
     # this wont throw error since form returns attachment with no datas
     fileitem = form_field_storage['attachment']
@@ -75,17 +35,21 @@ def compose_mail_post_view(environ, **kwargs):
     print(button)
 
     receivers_mails: list = form_field_storage.getvalue('to_list').split(",")
-    if len(receivers_mails) == 0 and button == "sent":
-        # if email doesnt exist redirect to form with error and button is send
+    # draft can have no senders email this is checked here  to bypass draft mails
+    if len(receivers_mails) == 0 and button == "send":
+        # if email doesnt exist redirect to form with error and button is send,
+        # currently redirects to dashboard(no email is same as invalid email so the mail will not be send)
+        # can add required in input field if draft was not an option
         pass
 
-    group_list, user_list, invalid_email_list = get_receivers_id(receivers_mails)
+    # get_receivers_id_from_mail accepts a list of receiver mails and returns a list of "user id", "group id"and "invalid mail"
+    group_list, user_list, invalid_email_list = get_receivers_id_from_mail(receivers_mails)
 
     if len(invalid_email_list) > 0:
         # invalid email id present
         pass
 
-    if button == "sent":
+    if button == "send":
         print('send')
 
         send_mail(

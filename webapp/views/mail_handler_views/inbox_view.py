@@ -1,62 +1,38 @@
 from ...utils.template_handlers import render_template
-
 from ...utils.session_handler import get_user_from_environ
-from ...orm.models import User, UserGroup
-from ...orm.models import Mails, MailReceivers
+from ...orm.models import User, UserGroup, Mails
+from ...orm.models import UserInbox, UserSent, User
 
 
 def get_inbox(environ):
-    receivers_list = []
+
     user_id = get_user_from_environ(environ)
-    users_groups = UserGroup.objects.select({"group_id"}, {'user_id': user_id})
-    print(users_groups)
-    users_groups_id = [user.group_id for user in users_groups]
 
-    users_groups_id = tuple(users_groups_id)
-    print(user_id, users_groups_id)
-    print("^^^^^^^^^^^^^^^^^^^^^^^^")
+    Mails_table_name = Mails.objects.model_class.table_name
+    User_table_name = User.objects.model_class.table_name
+    Usersent_table_name = UserSent.objects.model_class.table_name
+    Userinbox_table_name = UserInbox.objects.model_class.table_name
 
-    print("INBOX USER")
+    query = f"""SELECT * FROM {Mails_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox  ON (Mail.id = Inbox.mail_id)
+                INNER JOIN  {Usersent_table_name} Sent ON (Inbox.mail_id = Sent.mail_id)
+                INNER JOIN {User_table_name} Users ON (Users.id = Sent.user_id)
 
-    filter_conditions = {"receiver_user": user_id, "receiver_group": users_groups_id}
-    # better make user id a tuple, and avoid type(value) == int condition
-    # Receiver of a mail should satisfy one of this two condition => OR
-    filter_conditions = {
-        key: value for key, value in filter_conditions.items() if type(value) == int or len(value) != 0
-    }
-    print(filter_conditions)
-    print("user id", user_id)
-    # 1 => OR 1 => IN
-    mails_id_objects = MailReceivers.objects.select(
-        {"mail_id"},
-        filter_conditions,
-        1,  # 1 => OR
-        1,  # 1 => field IN tuples , 0 => field=value
-    )
-    mails_id_list = [mail_object.mail_id for mail_object in mails_id_objects]
-    print(mails_id_list, "FOUND")
+                WHERE Inbox.user_id = %s AND Inbox.deleted = %s AND Inbox.archived_mail = %s
+                ORDER BY "created_date" DESC
+            """
+    parameters = [user_id, False, False]
+    print()
+    inbox = Mails.objects.raw_sql_query(query, parameters)
+    print(inbox)
 
-    mails_id_tuple = tuple(mails_id_list)
-    print(mails_id_tuple, "FOUND")
-
-    filter_condition = {"id": mails_id_tuple, "archives": False}
-
-    if len(mails_id_tuple) == 0:
-        # found when creating draftbox
-        print("no mails")
-        inbox = []
-
-    else:
-        inbox = Mails.objects.select(
-            {},
-            filter_condition,
-            0,  # 0 => AND
-            1,  # 1 => field IN tuples , 0 => field=value
-            ("created_date",),  # order by created_date descending order
-        )
     return inbox
+    #  {f"{Userinbox_table_name}.user_id": user_id, f"{Userinbox_table_name}.archived_mail": False},
+    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+
+    # return inbox
 
 
+# actually inbox sent mails archive draft all need join btw all table
 def inbox_view(environ, **kwargs):
     '''
     select is not loop, so row containing values which satisifes condition are retrieved
@@ -73,30 +49,34 @@ def inbox_view(environ, **kwargs):
         print(each_mail)
 
         link_html_tag = ''
+
         if each_mail.attachment is not None:
 
             file_name = each_mail.attachment.split("__")[-1]
             file_directory = '/media/'
             file_link = f"{file_directory}{each_mail.attachment}"
-            link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
+            print(file_link, "xas")
+            link_html_tag = f"<a download={file_name} href={file_link}>attachment link {file_link}</a>"
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
+        # <input type="submit" name="interaction" value="forward" placeholder="forward">
+        # <input type="submit" formaction="linktosomewhere" value="value to submit"> will work
+
         mail_div += f'''
 
         <div>
         <!-- add datetime sort Done -->
-      
-        
+
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>
-        <p>from:{User.objects.select_one(["email"], {"id":each_mail.sender})}</p>
+        <p>from:{each_mail.email}</p>
         <pre>{each_mail.body}</pre>
         {link_html_tag}
-        
-        <form action="/mail-user-interactions-inbox/{each_mail.id}" method="post">
+
+        <form action="/mail-user-interactions-inbox/{each_mail.mail_id}" method="post">
             <input type="submit" name="interaction" value="archive">
-            <input type="submit" name="interaction" value="reply" placeholder="reply">
-            <input type="submit" name="interaction" value="forward" placeholder="forward">
+            <button type="submit" formaction="/inbox/reply/{each_mail.mail_id}/">reply</button>
+            <button type="submit" formaction="/inbox/forward/{each_mail.mail_id}/">forward</button>
             <input type="submit" name="interaction" value="delete" placeholder="delete">
 
         </form>
@@ -105,6 +85,7 @@ def inbox_view(environ, **kwargs):
 
     # if for loop is not executed because there are no mails in inbox of user
     if mail_div == "":
+
         mail_div = "<h1>No mails in Inbox</h1>"
 
     context = {'title_of_page': "inbox", "mails": mail_div}

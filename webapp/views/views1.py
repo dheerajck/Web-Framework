@@ -20,12 +20,18 @@ def test(environ, **kwargs):
     return render_template("test.html", context={}), start_response_headers
 
 
+from ..utils.session_handler import get_username_from_environ
+
+
 def dashboard_view(environ, **kwargs):
+
     from pprint import pprint
 
+    username = get_username_from_environ(environ)
     # pprint(environ)
 
-    return render_template("dashboard.html", context={}), start_response_headers
+    # return render_template("dashboard.html", context={}), start_response_headers
+    return render_template("dashboard.html", context={"username": username}), start_response_headers
 
 
 def session(environ, **kwargs):
@@ -41,8 +47,10 @@ def session(environ, **kwargs):
 
 
 def view_403(environ, **kwargs):
+    start_response_headers["status"] = "403 Forbidden"
     return render_template("HTTP403.html", context={}), start_response_headers
 
 
 def view_404(environ, **kwargs):
+    start_response_headers["status"] = "404 Not Found"
     return render_template("HTTP404.html", context={}), start_response_headers
