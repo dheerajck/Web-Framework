@@ -16,7 +16,8 @@ URL_DICTIONARY = {
     '^draft-mails$': views.draft_mails_view,
     '^archives$': views.archives_view,
     '^real-time-chat$': views.real_time_chat_view,
-    '^real-time-chat/group/([a-zA-Z0-9_])+$': views.groups_view,
+    '^real-time-chat/group/([a-zA-Z0-9_])+$': views.chat_view,
+    '^real-time-chat/private-chat/[a-zA-Z0-9_-]+$': views.chat_view,
     # 'mail-user-interactions': views.mail_interactiions_view,
     '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
     '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
@@ -144,9 +145,11 @@ def url_handler(request_url):
 
     # _________________________________________________________________________
 
-    if view_name is views.groups_view:
-        kwargs_passing = {"group_name": request_url.split('/')[-1]}
-        print(kwargs_passing)
+    if view_name is views.chat_view:
+        # a = input()
+        kwargs_passing = {"chat_link": request_url.split('/')[-1]}
+        # a = input(f"kwargs {kwargs_passing}")
+        # print(kwargs_passing)
 
     # _________________________________________________________________________
 

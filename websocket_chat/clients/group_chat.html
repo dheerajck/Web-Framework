@@ -7,7 +7,7 @@
 </head>
 <body>
 
-    <h2>Group chat => $groupname</h2>
+    <h2>$chat_name</h2>
 
     <div id="message_container"></div>
 
@@ -29,8 +29,8 @@
     // Create WebSocket connection.
     document.addEventListener('DOMContentLoaded', function(){
         // console.log("hi console test")
-        const socket = new WebSocket('ws://localhost:5000/$groupname');
-        const group_auth_code = "$group_auth_code"
+        const socket = new WebSocket('ws://localhost:5000/$chat_link');
+        const chat_auth_code = "$chat_auth_code"
 
         // const messagesContainer = document.querySelector();
 
@@ -46,10 +46,10 @@
 
             sendMessageButton.onclick = function(){
                 // console.log("button_test")
-                // console.log(group_auth_code)
+                // console.log(chat_auth_code)
                 const username = "$username"
-                const group_auth_code = "$group_auth_code"
-                const message_object = {username:username, message:messageInput.value, group_auth_code: group_auth_code};
+                const chat_auth_code = "$chat_auth_code"
+                const message_object = {username:username, message:messageInput.value, chat_auth_code: chat_auth_code};
                 const final_message_json = JSON.stringify(message_object);
                 // console.log(final_message_json)
                 let finalmessage_json = username.concat(messageInput.value);

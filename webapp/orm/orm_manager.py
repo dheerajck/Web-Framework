@@ -300,8 +300,9 @@ class BaseManager:
         field_values = used_cursor.fetchone()
 
         # fetch one also returns a list and it contains every element specified in the select like ["name", "password"]
-        print(field_values, 111111111112)
-        print(field_values[0])
+        # print(field_values, 111111111112)
+        # print(field_values[0]) will throw error if result is empty
+        # print(field_values[0])
         # first index contain first field name, if email and id in select list, field_values[0] gives email field_values[1] gives id
         # return field_values[0]
         return field_values

@@ -37,6 +37,11 @@ class Session(BaseModel):
     table_name = "session"
 
 
+class UsersPrivateChatModel(BaseModel):
+    manager_class = BaseManager
+    table_name = "users_private_chat"
+
+
 if __name__ == "__main__":
     try:
         User.objects.create(

@@ -124,8 +124,24 @@ if __name__ == "__main__":
             id SERIAL PRIMARY KEY,
             session_key varchar(100) UNIQUE NOT NULL,
             expiry_date timestamp with time zone NOT NULL,
-            
+
             user_id integer REFERENCES app_users (id) UNIQUE NOT NULL
+        )
+    """
+
+    cursor.execute(query)
+
+    # ____________________________________________________________
+
+    # user_group
+
+    query = """
+        CREATE TABLE IF NOT EXISTS users_private_chat (
+            id SERIAL PRIMARY KEY,
+            user_id_1 integer REFERENCES app_users (id) NOT NULL,
+            user_id_2 integer REFERENCES app_users (id) NOT NULL,
+            private_chat_link varchar(100) UNIQUE NOT NULL,
+            UNIQUE (user_id_1, user_id_2)
         )
     """
 
