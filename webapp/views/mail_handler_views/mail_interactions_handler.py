@@ -103,12 +103,4 @@ def mail_interactions_view(environ, **kwargs):
         redirect_data_response_headers = redirect_view(status, url_to_redirect)
         return response_body, redirect_data_response_headers
 
-    elif user_interaction == "forward" and page == "sent":
-        url_to_redirect = f'/draft-mails/edit-draft/{mail_id}/'
-
-        response_body = ''
-        status = '302 FOUND'
-        redirect_data_response_headers = redirect_view(status, url_to_redirect)
-        return response_body, redirect_data_response_headers
-
     return response_body, redirect_data_response_headers

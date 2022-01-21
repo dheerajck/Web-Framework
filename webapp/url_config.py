@@ -29,6 +29,9 @@ URL_DICTIONARY = {
     '^inbox/forward/[0-9]+$': views.forward_mail_render_view,
     '^sent-mails/forward/[0-9]+$': views.forward_mail_render_view,
     '^archives/forward/[0-9]+$': views.forward_mail_render_view,
+    #
+    '^inbox/reply/[0-9]+$': views.reply_mail_render_view,
+    '^archives/reply/[0-9]+$': views.reply_mail_render_view,
 }
 
 
@@ -119,10 +122,10 @@ def url_handler(request_url):
 
     # _________________________________________________________________________
 
-    if view_name is views.forward_mail_render_view:
+    if view_name is views.forward_mail_render_view or view_name is views.reply_mail_render_view:
         print("forward options")
         url_split = request_url.split("/")
-        kwargs_passing = {"mail_id": int(url_split[-1]), "forward_from": url_split[0]}
+        kwargs_passing = {"mail_id": int(url_split[-1]), "forward_from": url_split[0], "action_to_do": url_split[1]}
         print(kwargs_passing)
 
     # __________________________________________________________________________

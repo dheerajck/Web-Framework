@@ -2,6 +2,7 @@ from .inbox_view import get_inbox
 from .archived_mail_view import get_archives
 from .sent_mail_view import get_send_mails
 from ...utils.template_handlers import render_template
+from ...utils.mail_utilites import get_attachment_link_from_name
 
 # from ...utils.session_handler import get_user_from_environ
 from ...utils.session_handler import get_user_details_from_environ
@@ -21,6 +22,8 @@ def forward_mail_render_view(environ, **kwagrs):
     user_id = get_user_details_from_environ(environ, ["id"])
     mail_id = kwagrs["mail_id"]
     forward_from = kwagrs["forward_from"]
+    # for reply
+    action_to_do = kwagrs['action_to_do']
 
     box_id_list = []
     if forward_from == "inbox":
@@ -66,39 +69,75 @@ def forward_mail_render_view(environ, **kwagrs):
     if Attachment:
         Attachment_link = get_attachment_link_from_name(Attachment) or ''
         # creating a label
+        # Attachment_link = f'<label for="attachment"> Uploaded file {Attachment_link}</label>'
         if Attachment_link:
-            Attachment_link = f'<label for="attachment"> Uploaded file {Attachment_link}</label>'
+            Attachment_link = f'<label for="attachment">{Attachment_link}</label>'
     # __________________________________________________________________________________________
 
-    Subject_to_print = f"Fwd: {Subject}"
-    print(Subject_to_print, "Xass")
+    if action_to_do == "forward":
+        Subject_to_print = f"Fwd: {Subject}"
+        print(Subject_to_print, "Xass")
+        print(From_Address, To_Address, "XXXXX")
+        Body = f"""
 
-    Body = f"""
 
-    ---------- Forwarded message ----------
-    From: {From_Name} 
-    <{From_Address}>
+---------- Forwarded message ----------
+    From: {From_Name}
+    {From_Address}
     Date: {Created_date}
     Subject: {Subject}
-    To: <{To_Address}>
-    
-    
+    To: {To_Address}
+
+
     {Body}
 
-    """
+    Attachment link: {Attachment_link}
+_______________________________________
+"""
 
-    context = {
-        "from": From_Address,
-        "from_name": From_Name,
-        #
-        "mail_id": mail_id,
-        "To": '',
-        "Title": Subject_to_print,
-        "Body": Body,
-        "Attachment_link": Attachment_link,
-        "link_to_redirect": "/compose-mail-post-view/",
-    }
+        context = {
+            "from": From_Address,
+            "from_name": From_Name,
+            #
+            "mail_id": mail_id,
+            "To": '',
+            "Title": Subject_to_print,
+            "Body": Body,
+            "Attachment_link": Attachment_link,
+            "link_to_redirect": "/compose-mail-post-view/",
+        }
+
+    # for reply
+    elif action_to_do == "reply":
+        Subject_to_print = f"Re: {Subject}"
+        Body = f"""
+
+
+---------- Replying to ----------
+On {Created_date}, {From_Name}, {From_Address} wrote:
+
+    {Body}
+
+    Attachment link: {Attachment_link}
+_______________________________________
+"""
+
+        context = {
+            # "from": From_Address,
+            # "from_name": From_Name,
+            #
+            # "mail_id": mail_id,
+            "To": From_Address,
+            "Title": Subject_to_print,
+            "Body": Body,
+            "Attachment_link": Attachment_link,
+            "link_to_redirect": "/compose-mail-post-view/",
+        }
 
     start_response_headers: dict = {}
 
     return render_template("edit-mail.html", context=context), start_response_headers
+
+
+def reply_mail_render_view(environ, **kwagrs):
+    return forward_mail_render_view(environ, **kwagrs)

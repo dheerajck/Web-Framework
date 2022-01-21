@@ -50,6 +50,7 @@ def get_mail_data_dict(form_field_object):
         # saves files to media folder
         # serve this file as downloadable or viewable if browser supports
         file_path = directory + new_file_name
+        print(file_path, "xxA")
         with open(file_path, mode='wb') as f:
             # print(form_field_object.getvalue('attachment'))
             f.write(form_field_object.getvalue('attachment'))

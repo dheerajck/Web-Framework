@@ -1,5 +1,4 @@
 from ...utils.template_handlers import render_template
-
 from ...utils.session_handler import get_user_from_environ
 from ...orm.models import User, UserGroup, Mails
 from ...orm.models import UserInbox, UserSent, User
@@ -17,7 +16,7 @@ def get_inbox(environ):
     query = f"""SELECT * FROM {Mails_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox  ON (Mail.id = Inbox.mail_id)
                 INNER JOIN  {Usersent_table_name} Sent ON (Inbox.mail_id = Sent.mail_id)
                 INNER JOIN {User_table_name} Users ON (Users.id = Sent.user_id)
-                
+
                 WHERE Inbox.user_id = %s AND Inbox.deleted = %s AND Inbox.archived_mail = %s
                 ORDER BY "created_date" DESC
             """
@@ -56,7 +55,8 @@ def inbox_view(environ, **kwargs):
             file_name = each_mail.attachment.split("__")[-1]
             file_directory = '/media/'
             file_link = f"{file_directory}{each_mail.attachment}"
-            link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
+            print(file_link, "xas")
+            link_html_tag = f"<a download={file_name} href={file_link}>attachment link {file_link}</a>"
         #  space present in comment tag after --  will make the template not render
         # <!-- add datetime sort Done -- >
         # <input type="submit" name="interaction" value="forward" placeholder="forward">
@@ -66,17 +66,16 @@ def inbox_view(environ, **kwargs):
 
         <div>
         <!-- add datetime sort Done -->
-      
-        
+
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>
         <p>from:{each_mail.email}</p>
         <pre>{each_mail.body}</pre>
         {link_html_tag}
-        
+
         <form action="/mail-user-interactions-inbox/{each_mail.mail_id}" method="post">
             <input type="submit" name="interaction" value="archive">
-            <input type="submit" name="interaction" value="reply" placeholder="reply">
+            <button type="submit" formaction="/inbox/reply/{each_mail.mail_id}/">reply</button>
             <button type="submit" formaction="/inbox/forward/{each_mail.mail_id}/">forward</button>
             <input type="submit" name="interaction" value="delete" placeholder="delete">
 
@@ -86,6 +85,7 @@ def inbox_view(environ, **kwargs):
 
     # if for loop is not executed because there are no mails in inbox of user
     if mail_div == "":
+
         mail_div = "<h1>No mails in Inbox</h1>"
 
     context = {'title_of_page': "inbox", "mails": mail_div}

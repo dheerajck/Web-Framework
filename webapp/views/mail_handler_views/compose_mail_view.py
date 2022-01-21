@@ -20,12 +20,13 @@ def compose_mail_post_view(environ, **kwargs):
     print()
     print("START")
     if environ['REQUEST_METHOD'].upper() != 'POST':
-        return redirect_to_dashboard
+        return redirect_to_dashboard_module()
         # pass  # dashboard
 
     form_field_storage = form_with_file_parsing(environ)
+    # print(form_field_storage, "xsdad")
     # print(form_field_storage.getvalue('attachment'))
-    print("sas/da")
+    # print("sas/da")
 
     # this wont throw error since form returns attachment with no datas
     fileitem = form_field_storage['attachment']

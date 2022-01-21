@@ -75,7 +75,7 @@ def archives_view(environ, **kwargs):
         
         <form action="/mail-user-interactions-archive/{each_mail.mail_id}" method="post">
             <input type="submit" name="interaction" value="unarchive">
-            <input type="submit" name="interaction" value="reply" placeholder="reply">
+            <button type="submit" formaction="/archives/reply/{each_mail.mail_id}/">reply</button>
             <button type="submit" formaction="/archives/forward/{each_mail.mail_id}/">forward</button>
             <input type="submit" name="interaction" value="delete" placeholder="delete">
 
