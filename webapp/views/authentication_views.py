@@ -5,7 +5,7 @@ from ..utils.redirect_functions import redirect_view
 
 from ..utils.session_handler import create_session_id_header, get_cookie_dict, delete_session_id
 from ..utils.redirect_functions import redirect_to_login_module
-from ..orm.models import User
+
 
 start_response_headers: dict = {}
 

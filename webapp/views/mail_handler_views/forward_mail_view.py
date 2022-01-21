@@ -9,17 +9,15 @@ from ...utils.session_handler import get_user_details_from_environ
 from ..views1 import view_403
 
 
-def check_user_permission(mail_id, box_id):
-    if mail_id not in box_mails or user_interaction not in allowed_actions[page]:
-        kwargs_passing = {}
-        print("no")
-        # Access denied
-        return view_403(environ, **kwargs_passing)
-
-
 def forward_mail_render_view(environ, **kwagrs):
+    # => get_user_from_environ returns a tuple containing fields queried in the order it was queried
+    # if there is no match get_user_from_environ returns an empty list
+    # get_user_details_from_environ will always have an match because its only check inside views and it gets use information from session data
+    # without which the user cant access datas on website, session middleware is implemented to prevent unauthorized access
     # user_id = get_user_from_environ(environ)
-    user_id = get_user_details_from_environ(environ, ["id"])
+    user_id: tuple = get_user_details_from_environ(environ, ["id"])
+    print(user_id)
+    print("yyyyyyyyyyyyyyyyyyo")
     mail_id = kwagrs["mail_id"]
     forward_from = kwagrs["forward_from"]
     # for reply

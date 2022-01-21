@@ -32,7 +32,7 @@ def serve_media_file(environ, **kwargs):
     # js dont care about content type, works with text/css
     response_headers = [
         (f'Content-type', "application/octet-stream"),
-        (f'Content-Disposition', f'inline; filename={file_name}'),
+        (f'Content-Disposition', f'inline; filename="{file_name}"'),
     ]
     # reponse_headers = {}
 

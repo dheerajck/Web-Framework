@@ -89,9 +89,9 @@ def check_static_url(request_url):
 
 def url_handler(request_url):
 
-    print(f"\n\n__________________ URL logger __________________\n\n")
-    print(f"URL logger, requested url is {request_url}")
-    print(f"\n\n__________________ DONE __________________\n\n")
+    print("\n\n__________________ URL logger __________________\n\n")
+    print("URL logger, requested url is {request_url}")
+    print("\n\n__________________ DONE __________________\n\n")
 
     static_file_name_or_false_value = check_static_url(request_url)
     if static_file_name_or_false_value:

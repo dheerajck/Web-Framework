@@ -84,7 +84,8 @@ def edit_draft_mail_render_view(environ, **kwargs):
 
 def edit_draft_mail_post_view(environ, **kwargs):
 
-    print(form_field_storage := form_with_file_parsing(environ))
+    form_field_storage = form_with_file_parsing(environ)
+    # print(form_field_storage)
     print("########################################################1")
     sender_id = get_user_from_environ(environ)
     mail_id = kwargs["mail_id"]
@@ -102,7 +103,7 @@ def edit_draft_mail_post_view(environ, **kwargs):
     # sender_id = get_user_from_environ(environ)
 
     if environ['REQUEST_METHOD'].upper() != 'POST':
-        return redirect_to_dashboard
+        return redirect_to_dashboard_module()
         # pass  # dashboard
 
     form_field_storage = form_with_file_parsing(environ)
