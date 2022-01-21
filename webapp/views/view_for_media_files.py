@@ -12,9 +12,20 @@ def serve_media_file(environ, **kwargs):
     file_directory = f'{directory}{file_name}'
     # reading only in binary format,
     # data is read and written in the form of bytes
-    print(file_directory)
-    with open(file_directory, mode='rb') as f:
-        static_file_data_in_bytes = f.read()
+
+    try:
+        # assert False
+        with open(file_directory, mode='rb') as f:
+            static_file_data_in_bytes = f.read()
+    except FileNotFoundError:
+
+        from .views1 import view_404
+
+        print("xdada")
+        kwargs = {}
+        # print(view_404(environ))
+        # print("xdada")
+        return view_404(environ)
 
     file_name = file_name.split("__")[-1]
 

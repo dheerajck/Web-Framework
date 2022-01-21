@@ -98,6 +98,7 @@ def application(environ, start_response, status=None, response_headers=None):
     html_response_body, start_response_headers = view(environ, **kwargs_to_views)
 
     # print(path, view)
+
     # print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhoiii")
 
     #  verifying data receievd from functions
