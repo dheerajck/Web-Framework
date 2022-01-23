@@ -6,6 +6,7 @@ from webapp.utils.session_handler import get_cookie_dict
 from webapp.utils.redirect_functions import redirect_to_login_module
 from webapp.utils.session_handler import check_validity_of_session_id
 
+from webapp.clean_print_function.print_enable_and_disable_function import enablePrint, blockPrint
 
 # assert False, "merge this branch and create new branch"
 # assert False, "Implement url / strip always" done url_config.url_strip()
@@ -107,6 +108,8 @@ class SessionMiddleware:
 
         print()
         print("\n\n__________________Middleware starts_________________\n\n")
+        # blockPrint()
+        # enablePrint()
         # print("Middleware starts")
 
         # print("yo")
@@ -171,5 +174,6 @@ if __name__ == "__main__":
     # server = make_server('localhost', 8000, app=Reverse_middleware(application))
 
     # gunicorn server:SessionMiddleware --reload
+    # gunicorn --workers=2 app:SessionMiddleware --reload
     print('Server started')
     server.serve_forever()

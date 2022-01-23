@@ -3,14 +3,16 @@ from string import Template  # Create a template that has placeholder for value 
 
 from ...utils.session_handler import get_user_details_from_environ
 from ...utils.session_handler import get_user_details_from_id
-from ...orm.models import UsersPrivateChatModel
+from ...orm.models import UsersPrivateChatModel, Groups
+from ...orm.models import UserGroup
+from ..views1 import view_403
 
 start_response_headers: dict = {}
 
 
 def chat_view(environ, **kwargs):
 
-    # 404 if group doesnt exist
+    # add 404 if group doesnt exist
     # username = get_username_from_environ(environ)
     user_details = get_user_details_from_environ(environ, ["id", "username"])
     user_id, username = user_details
@@ -18,12 +20,35 @@ def chat_view(environ, **kwargs):
     chat_link = kwargs['chat_link']
     # input(f'{chat_link}')
 
-    # select_one retuns a list containing fields in select,
-    # select_one returns a list of objects as results
+    # select_one retuns a list containing fields in select
+    # select_one returns a list of objects as results, if no result matches it returns None
 
     users_in_the_chat = UsersPrivateChatModel.objects.select_one(
         ["user_id_1", "user_id_2"], {"private_chat_link": chat_link}
     )
+
+    group_id = Groups.objects.select_one({"id"}, {"group_name": chat_link})
+    # groups_name = Groups.objects.select_one({"group_name"}, {"group_name": chat_link})
+    # input(f"{users_in_the_chat} {groups_name},test")
+    """
+    if group_id is None and users_in_the_chat is None:
+        # i dont need users to know even if those groups and private chat links exist if they dont have permission
+        # so HTTP 403 page is displayed
+        return view_403(environ)
+    """
+
+    if users_in_the_chat is None and group_id is None:
+        return view_403(environ)
+    if group_id is not None:
+        users_groups = UserGroup.objects.select_one([], {"user_id": user_id, "group_id": group_id})
+        if users_groups is None:
+            # users with groupgroup name will be prevented from accessing chat if user is not a member of that group
+            return view_403(environ)
+
+    if users_in_the_chat is not None:
+        if user_id not in users_in_the_chat:
+            # users somehow got private chat links of other users are blocked from masking and chatting with others
+            return view_403(environ)
 
     if users_in_the_chat:
         # private chat

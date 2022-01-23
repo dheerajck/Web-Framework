@@ -289,13 +289,17 @@ class BaseManager:
         # Execute query
         self._execute_query(query, params)
 
-    def select_one(self, field_name: list, conditions_dict: dict):
+    def select_one(self, field_name: list, conditions_dict: dict, OR=0):
         if len(field_name) == 0:
-            field_name = "*c"
+            field_name = "*"
 
         field_name = ", ".join(field_name)
+        logical_AND_OR = "AND"
+        if OR:
+            logical_AND_OR = "OR"
         conditions_value_placeholder = [f"({i} = %s)" for i in conditions_dict.keys()]
-        conditions_value_placeholder = ", ".join(conditions_value_placeholder)
+        # only do AND check, OR is not added with select_one
+        conditions_value_placeholder = logical_AND_OR.join(conditions_value_placeholder)
         query = f"SELECT {field_name} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
         parameters = list(conditions_dict.values())
         used_cursor = self._execute_query(query, parameters)

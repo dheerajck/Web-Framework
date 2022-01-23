@@ -38,6 +38,8 @@ def create_session_id_header(userid, days=1):
             # print(Session.select({}, {}))
             session_id = create_session_key()
             # to ensure no duplicate session key is created
+            # since the cookies are updated if some cookies exist
+            # same user cant login at the same time from differenttabs or browsers
             Session.objects.insert_or_update_data(
                 key=('user_id'), session_key=session_id, expiry_date=expiry_date, user_id=userid
             )
