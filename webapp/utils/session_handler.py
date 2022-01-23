@@ -74,8 +74,8 @@ def delete_session_id(session_id):
 
 def check_validity_of_session_id(session_id):
     curent_session_object = Session.objects.select({}, {'session_key': session_id})
-    l = len(curent_session_object)
-    if l == 0:
+    length_of_db_response = len(curent_session_object)
+    if length_of_db_response == 0:
         return False
 
     else:
@@ -84,7 +84,6 @@ def check_validity_of_session_id(session_id):
         if current_time >= curent_session_object.expiry_date:
             # deleted the expired session id
             delete_session_id(session_id)
-
             return False
         else:
             return curent_session_object.user_id
@@ -92,7 +91,8 @@ def check_validity_of_session_id(session_id):
 
 def get_cookie_dict(cookie_string):
     if cookie_string is None:
-        # precaution to make everything independent of othe
+        # the return value of  this fuunction is changed to dict from None
+        #  as a precaution to make everything independent
         return {}
     # dont give "; " ";" is enough
     cookies_list = cookie_string.split(";")

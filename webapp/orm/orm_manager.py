@@ -21,10 +21,12 @@ class BaseManager:
         cursor.execute(query, params)
 
         if "SELECT" in query:
-            # print(cursor)
 
-            field_names = [desc[0] for desc in cursor.description]
-        #     print(field_names)
+            pass
+            # print(cursor)
+            # field_names = [desc[0] for desc in cursor.description]
+            # print(field_names)
+
         print("\n\n__________________STOP ORM__________________\n\n")
 
         # to fetch data/ result cursor is passed to the method
@@ -370,7 +372,7 @@ class MetaModel(type):
         # print(f"class is {cls}")
         # <class 'webapp.orm.models.Mails'>
         print(cls.manager_class(model_class=cls))
-        print(f"\n\n__________________DONE__________________\n\n")
+        print("\n\n__________________DONE__________________\n\n")
         return cls.manager_class(model_class=cls)
 
     @property
@@ -398,6 +400,8 @@ class BaseModel(metaclass=MetaModel):
 
 
 if __name__ == "__main__":
+    pass
+    """
     emplyee = 1
     employees_data = [
         {"first_name": "Yan", "last_name": "KIKI", "salary": 10000},
@@ -419,16 +423,4 @@ if __name__ == "__main__":
     )
     # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
-    '''
-    user_id = get_user_from_environ(environ)
-    Usersent_table_name = UserSent.objects.model_class.table_name
-    Userinbox_table_name = UserInbox.objects.model_class.table_name
-    inbox = Mails.objects.select(
-        {f"{Usersent_table_name}.user_id as A", f"{Userinbox_table_name}.user_id as B"},
-        {f"{Userinbox_table_name}.user_id": user_id},
-        0,  # 0 => AND
-        1,  # 1 => field IN tuples , 0 => field=value
-        ("created_date",),  # order by created_date descending order
-        join_model=[(Userinbox_table_name, "id", "mail_id"), (Usersent_table_name, "mail_id", "mail_id")],
-    )
-    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+    """

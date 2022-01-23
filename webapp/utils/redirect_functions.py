@@ -24,7 +24,6 @@ def redirect_to_login_module(response_body=''):
     status = '302 FOUND'
 
     # url_to_redirect = 'http://localhost:8000/login/'
-    redirect_url_path = '/login/'
 
     status = '302 FOUND'
     start_response_headers: dict = redirect_view(status, url_to_redirect)

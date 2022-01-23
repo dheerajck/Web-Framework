@@ -1,7 +1,7 @@
 from ...utils.template_handlers import render_template
 from ...utils.session_handler import get_user_from_environ
-from ...orm.models import User, UserGroup, Mails
-from ...orm.models import UserInbox, UserSent, User
+from ...orm.models import User, Mails
+from ...orm.models import UserInbox, UserSent
 
 
 def get_inbox(environ):
@@ -21,15 +21,14 @@ def get_inbox(environ):
                 ORDER BY "created_date" DESC
             """
     parameters = [user_id, False, False]
-    print()
-    inbox = Mails.objects.raw_sql_query(query, parameters)
-    print(inbox)
 
-    return inbox
+    inbox = Mails.objects.raw_sql_query(query, parameters)
+    # print()
+    # print(inbox)
     #  {f"{Userinbox_table_name}.user_id": user_id, f"{Userinbox_table_name}.archived_mail": False},
     # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
-    # return inbox
+    return inbox
 
 
 # actually inbox sent mails archive draft all need join btw all table
@@ -42,11 +41,11 @@ def inbox_view(environ, **kwargs):
     only one copy will reach here since mail id is unique which is actually good
     '''
     inbox = get_inbox(environ)
-    print(inbox)
+    # print(inbox)
 
     mail_div = ''
     for each_mail in inbox:
-        print(each_mail)
+        # print(each_mail)
 
         link_html_tag = ''
 
@@ -57,15 +56,14 @@ def inbox_view(environ, **kwargs):
             file_link = f"{file_directory}{each_mail.attachment}"
             print(file_link, "xas")
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link {file_link}</a>"
-        #  space present in comment tag after --  will make the template not render
-        # <!-- add datetime sort Done -- >
+
         # <input type="submit" name="interaction" value="forward" placeholder="forward">
         # <input type="submit" formaction="linktosomewhere" value="value to submit"> will work
 
         mail_div += f'''
 
         <div>
-        <!-- add datetime sort Done -->
+
 
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>

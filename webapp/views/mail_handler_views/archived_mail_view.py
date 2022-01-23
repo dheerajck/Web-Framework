@@ -1,12 +1,11 @@
 from ...utils.template_handlers import render_template
 
 from ...utils.session_handler import get_user_from_environ
-from ...orm.models import User, UserGroup, Mails
-from ...orm.models import UserInbox, UserSent, User
-
+from ...orm.models import User, Mails
+from ...orm.models import UserInbox, UserSent
 
 """
-can replace using inbox view by passing one paarameter to view 
+can replace using inbox view by passing one paarameter to view
 which says if inbox or archive should be  shown in the display
 """
 
@@ -23,14 +22,14 @@ def get_archives(environ):
     query = f"""SELECT * FROM {Mails_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox  ON (Mail.id = Inbox.mail_id)
                 INNER JOIN  {Usersent_table_name} Sent ON (Inbox.mail_id = Sent.mail_id)
                 INNER JOIN {User_table_name} Users ON (Users.id = Sent.user_id)
-                
+
                 WHERE Inbox.user_id = %s AND Inbox.deleted = %s AND Inbox.archived_mail = %s
                 ORDER BY "created_date" DESC
             """
     parameters = [user_id, False, True]
     print()
     archives = Mails.objects.raw_sql_query(query, parameters)
-    print(archives)
+    # print(archives)
 
     return archives
 
@@ -45,11 +44,11 @@ def archives_view(environ, **kwargs):
     '''
 
     archives = get_archives(environ)
-    print(archives)
+    # print(archives)
 
     mail_div = ''
     for each_mail in archives:
-        print(each_mail)
+        # print(each_mail)
 
         link_html_tag = ''
 
@@ -65,14 +64,13 @@ def archives_view(environ, **kwargs):
 
         <div>
         <!-- add datetime sort Done -->
-      
-        
+
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>
         <p>from:{each_mail.email}</p>
         <pre>{each_mail.body}</pre>
         {link_html_tag}
-        
+
         <form action="/mail-user-interactions-archive/{each_mail.mail_id}" method="post">
             <input type="submit" name="interaction" value="unarchive">
             <button type="submit" formaction="/archives/reply/{each_mail.mail_id}/">reply</button>

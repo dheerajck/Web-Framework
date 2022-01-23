@@ -10,13 +10,9 @@ def render_template(template_name='test.html', context={}):
     directory = 'webapp/templates/'
     # print("\n\n__________________Template directory_________________\n\n")
     # print(f'{directory}{template_name}')
-    # print("\n\n__________________ COMPLETED _________________\n\n")
-    print()
-    print()
-    print()
-    print()
-    print("/////////////////////////////////")
     # print(context)
+    # print("\n\n__________________ COMPLETED _________________\n\n")
+
     with open(f'{directory}{template_name}', mode='r') as template_file:
 
         html_string = template_file.read()

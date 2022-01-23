@@ -16,15 +16,8 @@ def get_draft_mails(environ):
     sent_mails_mail_id = [i.mail_id for i in sent_mails]
     sent_mails_mail_tuple = tuple(sent_mails_mail_id)
 
-    # query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
-    #     FROM {Mail_table_name} Mail LEFT JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id)
-    #     INNER JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
-
-    #     WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
-    #     """
-
-    # all join is LEFT JOIN here because there is no sure/assurance there will be data having matching colimn since this is DRAFT
     draft_mails = []
+    # all join is LEFT JOIN here because there is no sure/assurance there will be data having matching colimn since this is DRAFT
     if len(sent_mails_mail_tuple) > 0:
         query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
                 FROM {Mail_table_name} Mail LEFT JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) LEFT JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
@@ -32,9 +25,9 @@ def get_draft_mails(environ):
                 """
         parameters = [sent_mails_mail_tuple, True]
         draft_mails = Mails.objects.raw_sql_query(query, parameters)
-    print(draft_mails)
-    return draft_mails
+    # print(draft_mails)
     # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+    return draft_mails
 
 
 def get_receivers_dict(draft_mails):
@@ -71,7 +64,7 @@ def get_receivers_dict(draft_mails):
 
     for key in receivers_dict:
         if None in receivers_dict[key]:
-            assert False, "None in receivers field"
+            assert False, "None in receivers field, its prevented above by not adding None if user.mail is none"
     return receivers_dict
 
 
@@ -80,11 +73,11 @@ def draft_mails_view(environ, **kwargs):
     # print(sent_mails)
     receivers_dict = get_receivers_dict(draft_mails)
 
-    print(len(draft_mails))
+    # print(len(draft_mails))
 
-    print(f"receivers dict is {receivers_dict=}")
-    print()
-    print()
+    # print(f"receivers dict is {receivers_dict=}")
+    # print()
+    # print()
 
     # eliminating duplicate since we got the group mail
     draft_mails = {mail.id: mail for mail in draft_mails}
@@ -114,11 +107,11 @@ def draft_mails_view(environ, **kwargs):
         receivers_list = receivers_dict.get(each_mail.id, [])
         receivers = ", ".join(receivers_list)
 
-        print("________________________")
-        print(receivers_dict)
-        print()
-        print(receivers_list, each_mail.id)
-        print("________________________")
+        # print("________________________")
+        # print(receivers_dict)
+        # print()
+        # print(receivers_list, each_mail.id)
+        # print("________________________")
 
         #  space present in comment tag after --  will make the template not render
 
@@ -127,9 +120,7 @@ def draft_mails_view(environ, **kwargs):
         mail_div += f'''
             <div>
             <!-- add datetime sort Done -->
-        
-           
-            
+
             <h3>{each_mail.created_date}</h3>
             <h2>{each_mail.title}</h2>
             <p>To:{receivers}</p>
@@ -139,9 +130,9 @@ def draft_mails_view(environ, **kwargs):
                 <input type="submit" name="interaction" value="edit" placeholder="edit">
                 <input type="submit" name="interaction" value="delete" placeholder="delete">
             </form>
-            
+
             <hr>
-            
+
             </div>'''
 
     print("s2")

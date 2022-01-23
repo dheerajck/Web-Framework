@@ -1,23 +1,12 @@
-from ..orm.models import User, Mails, UserSent, UserInbox, UserGroup
+from ..orm.models import User, Groups, UserGroup
 
-from ..orm.models import User, Groups
+from ..orm.models import Mails, UserSent, UserInbox
 
 from ..utils.datetime_module import get_current_time_tz
 import uuid
 
-# admin@admin.com
-# admin_test1@admin.com
-
-# group1@admin.com
-
-# admin_test2@admin.com
-# admin_test3@admin.com
-
 
 def get_mail_data_dict(form_field_object):
-    # print(form_field_object)
-    # print(11, form_field_object.getvalue('attachment'))
-    # print(form_field_object)
     # this should not return key error since this is name of a filed in the html form #
     #  this key will be always be present with a value or null string
     fileitem = form_field_object['attachment']
@@ -157,7 +146,6 @@ def send_mail(sender_id, user_list, group_list, form_field_object, draft=False):
 
 
 def send_draft(sender_id, user_list, group_list, form_field_object):
-    draft_data_dict = get_mail_data_dict(form_field_object)
     send_mail(sender_id, user_list, group_list, form_field_object, draft=True)
 
 

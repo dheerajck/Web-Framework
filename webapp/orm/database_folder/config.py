@@ -3,6 +3,7 @@ from configparser import ConfigParser
 # give full path from where this connection is called at the beginning
 # to create table from same directory set path 'database_folder/db_config.ini'
 
+
 # def config(filename='database_folder/db_config.ini', section='postgresql'):
 def config(filename='webapp/orm/database_folder/db_config.ini', section='postgresql'):
     # create a parser

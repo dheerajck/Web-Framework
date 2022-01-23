@@ -81,7 +81,8 @@ def form_with_file_parsing(environ):
     # print(form_field_storage)
 
     # fileitem = form_field_storage['file']
-    # here 'file' should be name of html  form field, not type, fileitem.name gives this name
+    # here 'file' should be name of html form field, not type
+    # fileitem.name gives this name of the html form field which is 'file' in the html form now
     # fileitem.filename gives file name => xyz.fileformat
     # form_field_storage.getvalue('file') gives content of file in binary
 

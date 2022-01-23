@@ -9,7 +9,7 @@ def message_format_and_authentication(message_dict):
     chat_auth_code = "2fcfdcedfb6290fa404c8a06e366a35555f4392293c6435ff326aa06f2ebd755"
     message_auth_code_from_client = message_dict["chat_auth_code"]
     if chat_auth_code == message_auth_code_from_client:
-        print("matched")
+        # print("matched")
         user = message_dict["username"]
         message = message_dict["message"]
         final_message = f"{user}: {message}"
@@ -20,7 +20,6 @@ def message_format_and_authentication(message_dict):
 
 connected = set()
 connection_path = {}
-import json
 
 
 async def server_handler(websocket, path):
@@ -39,7 +38,7 @@ async def server_handler(websocket, path):
             message_dict = literal_eval(message)
 
             user_message = message_format_and_authentication(message_dict)
-            print(user_message)
+            # print(user_message)
             # user_message = True
             if user_message:
                 # print(message_dict, type(message_dict))

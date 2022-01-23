@@ -41,9 +41,10 @@ def edit_draft_mail_render_view(environ, **kwargs):
     
     '''>>> "a" or ""
     'a'
-    """
-    To = receivers = ", ".join(receivers_of_this_mail) or ''
 
+    """
+
+    To = receivers = ", ".join(receivers_of_this_mail) or ''
     # important
     # 'Mails' object is not subscriptable mail_to_edit["title"] will give Type error because mail_to_edit => Mail object is not subscriptable
 

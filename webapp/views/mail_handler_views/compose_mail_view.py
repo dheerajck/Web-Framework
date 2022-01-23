@@ -1,11 +1,9 @@
 from ...utils.template_handlers import render_template
 from ...utils.redirect_functions import redirect_to_dashboard_module
 
-from ...utils.post_form_handler import form_with_file_parsing, cgiFieldStorageToDict
+from ...utils.post_form_handler import form_with_file_parsing
 from ...utils.mail_utilites import send_mail, send_draft, get_receivers_id_from_mail
-
 from ...utils.session_handler import get_user_from_environ
-
 
 start_response_headers: dict = {}
 
@@ -19,17 +17,15 @@ def compose_mail_post_view(environ, **kwargs):
     sender_id = get_user_from_environ(environ)
     print()
     print("START")
+
     if environ['REQUEST_METHOD'].upper() != 'POST':
         return redirect_to_dashboard_module()
         # pass  # dashboard
 
     form_field_storage = form_with_file_parsing(environ)
-    # print(form_field_storage, "xsdad")
-    # print(form_field_storage.getvalue('attachment'))
-    # print("sas/da")
 
     # this wont throw error since form returns attachment with no datas
-    fileitem = form_field_storage['attachment']
+    # fileitem = form_field_storage['attachment']
 
     button = form_field_storage.getvalue('submit_input')
     print(button)

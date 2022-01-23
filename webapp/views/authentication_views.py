@@ -36,10 +36,8 @@ def authenticating_view(environ, **kwargs):
         # create session id, if user already have a session id replace it with new session id
         # set cookie here
         cookie_headers: list = create_session_id_header(user_id)
-        print('cookieheaders')
-        print(cookie_headers)
+        print(f'{cookie_headers=}')
 
-        print("||||||||||||||||||||||||||||||\\")
         # http_host_is_not_needed_in_current_case
         # http_host = environ.get('HTTP_HOST')
         # redirect_url_path = '/dashboard/'
@@ -55,19 +53,13 @@ def authenticating_view(environ, **kwargs):
         current_list_of_response_headers: list = start_response_headers['response_headers']
 
         current_list_of_response_headers.extend(cookie_headers)
-        print(1, current_list_of_response_headers)
-        start_response_headers['response_headers'] = current_list_of_response_headers
-        print(2, start_response_headers['response_headers'])
-        print()
 
-        print("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{")
-        print("on view", start_response_headers)
+        start_response_headers['response_headers'] = current_list_of_response_headers
 
         return response_body, start_response_headers
 
 
 def login_view(environ, **kwargs):
-    from pprint import pprint
 
     print("LOGIN")
     # pprint(environ)
@@ -78,24 +70,23 @@ def login_view(environ, **kwargs):
 def logout_view(environ, **kwargs):
 
     SESSION_KEY_NAME = "session_key"
-    from pprint import pprint
 
-    pprint(environ)
-    print("yess")
-    print()
-    print(cookie_string := environ.get('HTTP_COOKIE'))
-    print()
+    # pprint(environ)
+    # print("yess")
+    # print()
+    # print(cookie_string := environ.get('HTTP_COOKIE'))
+    # print()
     cookie_string = environ.get('HTTP_COOKIE')
-    print("///")
-    print(cookie_string is None)
+    # print("///")
+    # print(cookie_string is None)
 
     # we need to make sure HTTP_COOKIE is not None, so cookie_string is not None should return True to proceed
     assert cookie_string is not None, "No cookies, then how stayed in the website till now"
     # get our apps session_id from cookies
     cookie_dict = get_cookie_dict(cookie_string)
-    print()
-    print("////////////")
-    print(cookie_dict)
+    # print()
+    # print("////////////")
+    # print(cookie_dict)
 
     # session_key_value = cookie_dict.get(SESSION_KEY_NAME)
     # if condition false raise error

@@ -1,4 +1,5 @@
 from . import views
+import re
 from .clean_print_function.clean_print import first_clean_print_function
 
 URL_DICTIONARY = {
@@ -42,8 +43,6 @@ for url with kwarg pk
 
 can use regex
 '''
-
-import re
 
 
 def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
@@ -151,30 +150,10 @@ def url_handler(request_url):
         # a = input(f"kwargs {kwargs_passing}")
         # print(kwargs_passing)
 
-    # _________________________________________________________________________
-
-    # Replace using regex
-    # done
-    # ___________________________________________________
-    # if request_url.startswith('mail-user-interactions'):
-    #     kwargs = {
-    #         "mail_id": int(request_url.split('/')[-1]),
-    #     }
-    #     if request_url.split('/')[-1] == "mail-user-interactions":
-    #         # if no mail id is passed
-    #         return views.view_404, {}
-
-    #     return views.mail_interactiions_view, kwargs
-    # ___________________________________________________
-
-    # view_name = URL_DICTIONARY.get(request_url, None)
-    # view_name = url_lookup(request_url)
-    # if not (request_url == 'favicon.ico'):
-
     first_clean_print_function(f"{request_url} ================> {view_name}")
 
     if view_name is None:
-        print("not here")
+        print("not match of url view found here")
         # if url not in url
         return views.view_404, {}
 

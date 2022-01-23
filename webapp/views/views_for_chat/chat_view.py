@@ -1,7 +1,7 @@
 from string import Template  # Create a template that has placeholder for value of x
 
 
-from ...utils.session_handler import get_username_from_environ, get_user_details_from_environ
+from ...utils.session_handler import get_user_details_from_environ
 from ...utils.session_handler import get_user_details_from_id
 from ...orm.models import UsersPrivateChatModel
 

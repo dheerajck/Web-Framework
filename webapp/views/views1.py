@@ -1,9 +1,13 @@
 from ..utils.template_handlers import render_template
+from ..utils.session_handler import get_username_from_environ
+
 
 start_response_headers: dict = {}
 
 # only using kwargs since args might create unwanted problems and nkeyword arguments will be better its explicit
 # changed to named parameters because its better to not accept unwanted keyword argument, this throws cant unpack error so avoiding for now
+
+
 def root(environ, **kwargs):
     return render_template("root.html", context={}), start_response_headers
 
@@ -20,12 +24,7 @@ def test(environ, **kwargs):
     return render_template("test.html", context={}), start_response_headers
 
 
-from ..utils.session_handler import get_username_from_environ
-
-
 def dashboard_view(environ, **kwargs):
-
-    from pprint import pprint
 
     username = get_username_from_environ(environ)
     # pprint(environ)
@@ -35,9 +34,8 @@ def dashboard_view(environ, **kwargs):
 
 
 def session(environ, **kwargs):
-    from pprint import pprint
 
-    pprint(environ)
+    # pprint(environ)
     print("session view")
 
     html_to_render = render_template("session_test.html", context={})

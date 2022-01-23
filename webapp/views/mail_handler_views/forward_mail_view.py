@@ -10,14 +10,15 @@ from ..views1 import view_403
 
 
 def forward_mail_render_view(environ, **kwagrs):
-    # => get_user_from_environ returns a tuple containing fields queried in the order it was queried
-    # if there is no match get_user_from_environ returns an empty list
-    # get_user_details_from_environ will always have an match because its only check inside views and it gets use information from session data
-    # without which the user cant access datas on website, session middleware is implemented to prevent unauthorized access
-    # user_id = get_user_from_environ(environ)
+    '''
+    => get_user_from_environ returns a tuple containing fields queried in the order it was queried
+    if there is no match get_user_from_environ returns an empty list
+    get_user_details_from_environ will always have an match because its only check inside views and it gets use information from session data
+    without which the user cant access datas on website, session middleware is implemented to prevent unauthorized access
+    user_id = get_user_from_environ(environ)
     user_id: tuple = get_user_details_from_environ(environ, ["id"])
     print(user_id)
-    print("yyyyyyyyyyyyyyyyyyo")
+    '''
     mail_id = kwagrs["mail_id"]
     forward_from = kwagrs["forward_from"]
     # for reply
@@ -44,7 +45,7 @@ def forward_mail_render_view(environ, **kwagrs):
     # if the forwarded from location is not in these three, which is double checked
     # from url handler and here or if mail id not in the forward requesint box mail's
     # permission is denied
-    print(box_id_dict.keys(), "xp")
+    # print(box_id_dict.keys(), "xp")
     # if mail_id not in box_id_list:
     if mail_id not in box_id_dict:
         # Access denied
