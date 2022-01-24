@@ -131,7 +131,8 @@ class BaseManager:
                 query += f"ORDER BY {order_by[0]} DESC"
 
         new_cursor_object, connection = self._get_cursor_and_connection()
-        new_cursor_object._new_execute_query(query, parameters)
+
+        self._new_execute_query(new_cursor_object, query, parameters)
 
         # print("_______________________________++++++++++++++++==")
         # print(query)
@@ -185,9 +186,9 @@ class BaseManager:
         # id and 'id' both are returning data correctly
 
         new_cursor_object, connection = self._get_cursor_and_connection()
-        new_cursor_object._new_execute_query(query, parameters)
+        self._new_execute_query(new_cursor_object, query, parameters)
         # result of the sql query is obtained from the cursor which executed the sql statements
-        value_returned = returned_created_row_id_cursor.fetchone()
+        value_returned = new_cursor_object.fetchone()
         disconnect(new_cursor_object, connection)
         assert type(value_returned) == tuple, "datatype errors"
         print("tuple")
@@ -207,7 +208,7 @@ class BaseManager:
 
         if len(conditions_dict) == 0:
             new_cursor_object, connection = self._get_cursor_and_connection()
-            new_cursor_object._new_execute_query(query, parameters)
+            self._new_execute_query(new_cursor_object, query, parameters)
             disconnect(new_cursor_object, connection)
         else:
             conditions_column = conditions_dict.keys()
@@ -229,7 +230,7 @@ class BaseManager:
             parameters += conditions_value_parameters
             # Execute query
             new_cursor_object, connection = self._get_cursor_and_connection()
-            new_cursor_object._new_execute_query(query, parameters)
+            self._new_execute_query(new_cursor_object, query, parameters)
             disconnect(new_cursor_object, connection)
 
     def insert_or_update_data(self, **kwargs):
@@ -274,7 +275,7 @@ class BaseManager:
         # print("///////////////////////////////////////////////////////////////////////////////////////////////")
 
         new_cursor_object, connection = self._get_cursor_and_connection()
-        new_cursor_object._new_execute_query(query, parameters)
+        self._new_execute_query(new_cursor_object, query, parameters)
         disconnect(new_cursor_object, connection)
         return True
 
@@ -302,7 +303,7 @@ class BaseManager:
 
         # Execute query
         new_cursor_object, connection = self._get_cursor_and_connection()
-        new_cursor_object._new_execute_query(query, parameters)
+        self._new_execute_query(new_cursor_object, query, parameters)
         disconnect(new_cursor_object, connection)
 
     def select_one(self, field_name: list, conditions_dict: dict, OR=0):
@@ -319,7 +320,7 @@ class BaseManager:
         query = f"SELECT {field_name} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
         parameters = list(conditions_dict.values())
         new_cursor_object, connection = self._get_cursor_and_connection()
-        new_cursor_object._new_execute_query(query, parameters)
+        self._new_execute_query(new_cursor_object, query, parameters)
 
         field_values = new_cursor_object.fetchone()
         disconnect(new_cursor_object, connection)
@@ -345,12 +346,12 @@ class BaseManager:
 
         # Execute query
         new_cursor_object, connection = self._get_cursor_and_connection()
-        new_cursor_object._new_execute_query(query, parameters)
+        self._new_execute_query(new_cursor_object, query, parameters)
         disconnect(new_cursor_object, connection)
 
     def raw_sql_query(self, query, parameters=[], chunk_size=2000):
         new_cursor_object, connection = self._get_cursor_and_connection()
-        new_cursor_object._new_execute_query(query, parameters)
+        self._new_execute_query(new_cursor_object, query, parameters)
 
         field_names = [desc[0] for desc in new_cursor_object.description]
         # print(field_names)

@@ -89,20 +89,6 @@ if __name__ == "__main__":
 
     # ____________________________________________________________
 
-    # groups
-
-    query = """
-    CREATE TABLE IF NOT EXISTS groups (
-        id SERIAL PRIMARY KEY,
-        group_name varchar(50) UNIQUE NOT NULL,
-        group_mail varchar(50) UNIQUE NOT NULL
-    )
-    """
-
-    cursor.execute(query)
-
-    # ____________________________________________________________
-
     # user_group
 
     query = """
@@ -125,7 +111,7 @@ if __name__ == "__main__":
             session_key varchar(100) UNIQUE NOT NULL,
             expiry_date timestamp with time zone NOT NULL,
 
-            user_id integer REFERENCES app_users (id) UNIQUE NOT NULL
+            user_id integer REFERENCES app_users (id) NOT NULL
         )
     """
 

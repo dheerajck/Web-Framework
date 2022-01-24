@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Socket Thing1</title>
+    <link rel="shortcut icon" href="#">
 </head>
 <body>
 
@@ -38,7 +39,7 @@
         const messageInput = document.querySelector("[name=message_input]");
         const sendMessageButton = document.querySelector("[name=send_button]");
 
-
+	
         socket.onopen = function(){
             console.log('Connected to the websocket server')
             // console.log(group_auth_code)
@@ -67,7 +68,7 @@
             };
 
         };
-
+	
         socket.onclose = function(){
             console.log('Closed connection to the websocket server')
 
@@ -79,8 +80,6 @@
 
 });
     
-
-z
     
    
 </script>

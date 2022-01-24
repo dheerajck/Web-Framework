@@ -40,9 +40,11 @@ def create_session_id_header(userid, days=1):
             # to ensure no duplicate session key is created
             # since the cookies are updated if some cookies exist
             # same user cant login at the same time from differenttabs or browsers
-            Session.objects.insert_or_update_data(
-                key=('user_id'), session_key=session_id, expiry_date=expiry_date, user_id=userid
-            )
+
+            Session.objects.create(new_data={'user_id': userid, 'session_key': session_id, 'expiry_date': expiry_date})
+            # Session.objects.insert_or_update_data(
+            #     key=('user_id'), session_key=session_id, expiry_date=expiry_date, user_id=userid
+            # )
             first_header: tuple = create_cookie_header("session_key", session_id)
             # second_header: tuple = create_cookie_header("user_id", userid) might result in security issue
 

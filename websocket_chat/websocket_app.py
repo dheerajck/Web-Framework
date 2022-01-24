@@ -18,7 +18,6 @@ def message_format_and_authentication(message_dict):
         False
 
 
-connected = set()
 connection_path = {}
 
 
@@ -32,25 +31,36 @@ async def server_handler(websocket, path):
         connection_path[path] = {websocket}
 
     print(path)
+    print(connection_path)
     try:
         async for message in websocket:
             # print(message)
             message_dict = literal_eval(message)
-
             user_message = message_format_and_authentication(message_dict)
+
             # print(user_message)
             # user_message = True
             if user_message:
                 # print(message_dict, type(message_dict))
-                for conn in connection_path[path]:
-                    # if conn != websocket:
-                    # always show message of a user to him so he ccan verify message sending to others is succesfull
-                    # if 1:
-                    await conn.send(user_message)
-                    # print(message)
-                    # print(f'{message}')
-                    # await conn.send(user_message)
-                    # await conn.send(f'Got a new MSG FOR YOU: {message}')
+                for conn in set(connection_path[path]):
+                    print(conn.open, "xkcad")
+                    if conn.open:
+
+                        # if conn != websocket:
+                        # always show message of a user to him so he ccan verify message sending to others is succesfull
+                        # if 1:
+                        await conn.send(user_message)
+                        # print(message)
+                        # print(f'{message}')
+                        # await conn.send(user_message)
+                        # await conn.send(f'Got a new MSG FOR YOU: {message}')
+                    else:
+                        tp = connection_path[path]
+                        tp.remove(conn)
+                        connection_path[path] = tp
+                        print("e8888qwkjmldhvkqwdnckdslkdsjn")
+                        print()
+
             else:
                 available_connections = connection_path[path]
                 available_connections.remove(websocket)
@@ -62,10 +72,12 @@ async def server_handler(websocket, path):
         # Unregister.
         # if websocket in connected:
         #     connected.remove(websocket)
+        print("yooooooooooooo", websocket)
         if websocket in connection_path[path]:
             available_connections = connection_path[path]
             available_connections.remove(websocket)
             connection_path[path] = available_connections
+        print("yooooooooooooo", websocket)
 
 
 async def main():
