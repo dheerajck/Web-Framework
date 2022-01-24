@@ -4,21 +4,22 @@ from ..clean_print_function.print_enable_and_disable_function import enablePrint
 
 class BaseManager:
     @classmethod
-    def _get_cursor(cls):
+    def _get_cursor_and_connection(cls):
         connection = connect()
         connection.autocommit = True
-        return connection.cursor()
+        return connection.cursor(), connection
 
     @classmethod
-    def _execute_query(cls, query, params=None):
-        # blockPrint()
-        cursor = cls._get_cursor()
+    def _new_execute_query(cls, cursor, query, parameters=None):
 
+        # blockPrint()
+        if parameters == []:
+            parameters = None
         print("\n\n__________________START ORM__________________\n\n")
 
-        print(params)
-        print("Current sql query", query, params)
-        cursor.execute(query, params)
+        print(parameters)
+        print("Current sql query", query, parameters)
+        cursor.execute(query, parameters)
 
         if "SELECT" in query:
 
@@ -63,8 +64,9 @@ class BaseManager:
 
             if len(order_by) == 1:
                 query += f"ORDER BY {order_by[0]} DESC"
+                parameters = []
 
-            used_cursor_object = self._execute_query(query)
+            # new_cursor_object = self._execute_query(query)
         elif ALL_IN == 1:
 
             conditions_column = conditions_dict.keys()
@@ -96,7 +98,7 @@ class BaseManager:
 
             if len(order_by) == 1:
                 query += f"ORDER BY {order_by[0]} DESC"
-            used_cursor_object = self._execute_query(query, parameters)
+            # new_cursor_object = self._execute_query(query, parameters)
 
         else:
             # AND
@@ -116,7 +118,8 @@ class BaseManager:
             conditions_value_placeholder = [f"{i}=%s" for i in conditions_column]
             conditions_value_placeholder = LOGIC_SELECTOR.join(conditions_value_placeholder)
 
-            conditions_value_parameters = list(conditions_dict.values())
+            # conditions_value_parameters = list(conditions_dict.values())
+            parameters = list(conditions_dict.values())
             query = f"SELECT {fields_format} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
 
             # # Execute query
@@ -126,11 +129,13 @@ class BaseManager:
             # cursor.execute(query, conditions_value_parameters)
             if len(order_by) == 1:
                 query += f"ORDER BY {order_by[0]} DESC"
-            used_cursor_object = self._execute_query(query, conditions_value_parameters)
+
+        new_cursor_object, connection = self._get_cursor_and_connection()
+        new_cursor_object._new_execute_query(query, parameters)
 
         # print("_______________________________++++++++++++++++==")
         # print(query)
-        field_names = [desc[0] for desc in used_cursor_object.description]
+        field_names = [desc[0] for desc in new_cursor_object.description]
         # print(field_names)
         # print("_______________________________++++++++++++++++==")
 
@@ -143,7 +148,7 @@ class BaseManager:
         # print("start")
         while not is_fetching_completed:
             # print(is_fetching_completed)
-            result = used_cursor_object.fetchmany(size=chunk_size)
+            result = new_cursor_object.fetchmany(size=chunk_size)
 
             # print(len(result))
             # print()
@@ -161,14 +166,15 @@ class BaseManager:
 
             # print('stop')
         # print("fetching done")
+        disconnect(new_cursor_object, connection)
         return model_objects
 
     def create(self, new_data: dict):
         field_names = new_data.keys()
         field_names_formated = ",".join(field_names)
 
-        params = field_name_values = new_data.values()
-        params = list(params)
+        parameters = field_name_values = new_data.values()
+        parameters = list(parameters)
         values_placeholder_format = ", ".join([f'{", ".join(["%s"] * len(field_names))}'])
         query = f'''
         INSERT INTO {self.model_class.table_name}
@@ -178,9 +184,11 @@ class BaseManager:
         '''
         # id and 'id' both are returning data correctly
 
-        returned_created_row_id_cursor = self._execute_query(query, params)
+        new_cursor_object, connection = self._get_cursor_and_connection()
+        new_cursor_object._new_execute_query(query, parameters)
         # result of the sql query is obtained from the cursor which executed the sql statements
         value_returned = returned_created_row_id_cursor.fetchone()
+        disconnect(new_cursor_object, connection)
         assert type(value_returned) == tuple, "datatype errors"
         print("tuple")
 
@@ -191,14 +199,16 @@ class BaseManager:
     #     pass
 
     def update(self, new_data: dict, conditions_dict: dict):
-        # Build UPDATE query and params
+        # Build UPDATE query and parameters
         field_names = new_data.keys()
         placeholder_format = ', '.join([f'{field_name} = %s' for field_name in field_names])
         query = f"UPDATE {self.model_class.table_name} SET {placeholder_format}"
-        params = list(new_data.values())
+        parameters = list(new_data.values())
 
         if len(conditions_dict) == 0:
-            self._execute_query(query, params)
+            new_cursor_object, connection = self._get_cursor_and_connection()
+            new_cursor_object._new_execute_query(query, parameters)
+            disconnect(new_cursor_object, connection)
         else:
             conditions_column = conditions_dict.keys()
             print()
@@ -216,9 +226,11 @@ class BaseManager:
             )
 
             conditions_value_parameters = list(conditions_dict.values())
-            params += conditions_value_parameters
+            parameters += conditions_value_parameters
             # Execute query
-            self._execute_query(query, params)
+            new_cursor_object, connection = self._get_cursor_and_connection()
+            new_cursor_object._new_execute_query(query, parameters)
+            disconnect(new_cursor_object, connection)
 
     def insert_or_update_data(self, **kwargs):
         # Class.objects.insert_or_update_data(feild1=12,fiedl2=432, ..., keys=('keyname'))
@@ -261,13 +273,15 @@ class BaseManager:
         # print(query)
         # print("///////////////////////////////////////////////////////////////////////////////////////////////")
 
-        self._execute_query(query, parameters)
+        new_cursor_object, connection = self._get_cursor_and_connection()
+        new_cursor_object._new_execute_query(query, parameters)
+        disconnect(new_cursor_object, connection)
         return True
 
     def bulk_insert(self, rows: list):
         print(rows)
 
-        # Build INSERT query and params:
+        # Build INSERT query and parameters:
         field_names = rows[0].keys()
         assert all(row.keys() == field_names for row in rows[1:])  # confirm that all rows have the same fields
 
@@ -279,15 +293,17 @@ class BaseManager:
         query = f"INSERT INTO {self.model_class.table_name} ({fields_format}) " f"VALUES {values_placeholder_format}"
         print(rows)
         print("done row")
-        params = list()
+        parameters = list()
         for row in rows:
             print('start')
             row_values = [row[field_name] for field_name in field_names]
             print(row_values)
-            params += row_values
+            parameters += row_values
 
         # Execute query
-        self._execute_query(query, params)
+        new_cursor_object, connection = self._get_cursor_and_connection()
+        new_cursor_object._new_execute_query(query, parameters)
+        disconnect(new_cursor_object, connection)
 
     def select_one(self, field_name: list, conditions_dict: dict, OR=0):
         if len(field_name) == 0:
@@ -302,8 +318,11 @@ class BaseManager:
         conditions_value_placeholder = logical_AND_OR.join(conditions_value_placeholder)
         query = f"SELECT {field_name} FROM {self.model_class.table_name} WHERE {conditions_value_placeholder}"
         parameters = list(conditions_dict.values())
-        used_cursor = self._execute_query(query, parameters)
-        field_values = used_cursor.fetchone()
+        new_cursor_object, connection = self._get_cursor_and_connection()
+        new_cursor_object._new_execute_query(query, parameters)
+
+        field_values = new_cursor_object.fetchone()
+        disconnect(new_cursor_object, connection)
 
         # fetch one also returns a list and it contains every element specified in the select like ["name", "password"]
         # print(field_values, 111111111112)
@@ -322,18 +341,18 @@ class BaseManager:
         field_name, field_value = next(iter(kwargs.items()))
         # Build DELETE query
         query = f"DELETE FROM {self.model_class.table_name} WHERE {field_name}=%s"
-        parameter = [field_value]
+        parameters = [field_value]
 
         # Execute query
-        self._execute_query(query, parameter)
+        new_cursor_object, connection = self._get_cursor_and_connection()
+        new_cursor_object._new_execute_query(query, parameters)
+        disconnect(new_cursor_object, connection)
 
-    def raw_sql_query(self, query, paramaters=[], chunk_size=2000):
-        if paramaters == []:
-            used_cursor_object = self._execute_query(query)
-        else:
-            used_cursor_object = self._execute_query(query, paramaters)
+    def raw_sql_query(self, query, parameters=[], chunk_size=2000):
+        new_cursor_object, connection = self._get_cursor_and_connection()
+        new_cursor_object._new_execute_query(query, parameters)
 
-        field_names = [desc[0] for desc in used_cursor_object.description]
+        field_names = [desc[0] for desc in new_cursor_object.description]
         # print(field_names)
         # print("_______________________________++++++++++++++++==")
 
@@ -346,7 +365,7 @@ class BaseManager:
         # print("start")
         while not is_fetching_completed:
             # print(is_fetching_completed)
-            result = used_cursor_object.fetchmany(size=chunk_size)
+            result = new_cursor_object.fetchmany(size=chunk_size)
 
             # print(len(result))
             # print()
@@ -364,6 +383,7 @@ class BaseManager:
 
             # print('stop')
         # print("fetching done")
+        disconnect(new_cursor_object, connection)
         return model_objects
 
 
