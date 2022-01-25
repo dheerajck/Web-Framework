@@ -216,3 +216,22 @@ def get_attachment_link_from_name(attachment_name):
         file_link = f"{file_directory}{attachment_name}"
         link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
     return link_html_tag
+
+def is_mail_empty(form_object):
+
+    form_object.getvalue('title')
+
+    fileitem = form_object['attachment']
+
+    title = form_object.getvalue('title').strip()
+    file_name = fileitem.filename.strip()
+    body = form_object.getvalue('body').strip()
+
+    if {title, body, file_name} == {''}:
+        return True
+    return False
+
+
+
+
+

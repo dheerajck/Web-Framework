@@ -55,6 +55,7 @@ def forward_mail_render_view(environ, **kwagrs):
     forwarding_mails_object = box_id_dict[mail_id]
 
     if forward_from in ["inbox", "archives"]:
+        # forward details of sent-mails configured above
         From_Address, From_Name = forwarding_mails_object.email, forwarding_mails_object.name
 
         # get_user_details_from_environ returns a list containing needed field value, empty list if no match
@@ -131,6 +132,8 @@ _______________________________________
             "Body": Body,
             "Attachment_link": Attachment_link,
             "link_to_redirect": "/compose-mail-post-view/",
+            "to_mail_warning": '',
+            "need_some_data_to_send_mail_warning": ''
         }
 
     start_response_headers: dict = {}

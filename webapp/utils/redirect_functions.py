@@ -9,6 +9,17 @@ def redirect_view(status, url_to_redirect):
     return start_response_headers_dict
 
 
+def redirect_view_with_response_body(status, url_to_redirect):
+
+    response_headers = [
+        ('Location', url_to_redirect),
+    ]
+    # this dict should contain status and al headers separately
+    # add response body response later, redirect doesnt need any response body from users in normal case
+    start_response_headers_dict = {'status': status, 'response_headers': response_headers}
+    response_body = ''
+    return response_body, start_response_headers_dict
+
 def redirect_to_dashboard_module(response_body=''):
     url_to_redirect = '/dashboard/'
     status = '302 FOUND'

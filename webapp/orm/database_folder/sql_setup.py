@@ -28,7 +28,7 @@ def connect():
 
 
 def disconnect(cursor, connection):
-    print('Disconnecting from db...Successfull')
+    # print('Disconnecting from db...Successfull')
     connection.close()
     cursor.close()
 

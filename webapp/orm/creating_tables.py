@@ -134,3 +134,18 @@ if __name__ == "__main__":
     cursor.execute(query)
 
     # ____________________________________________________________
+
+    query = """
+            CREATE TABLE IF NOT EXISTS session_db_table (
+                id SERIAL PRIMARY KEY,
+                user_id integer REFERENCES app_users (id) ON DELETE CASCADE NOT NULL,
+                mail_id integer REFERENCES mails(id) ON DELETE CASCADE,
+                data_serialized text 
+            )
+        """
+
+    cursor.execute(query)
+
+    # ____________________________________________________________
+    
+    disconnect(cursor, connection)

@@ -18,7 +18,8 @@
 		  <form class="sent-mail-form" action="{link_to_redirect}"  method="post" enctype="multipart/form-data">
 			<label for="To">To</label>
 			<!-- better to close input tags like this -->
-			<input id="TO" name="to_list" type="email"  multiple value='{To}'> 
+			<input id="TO" name="to_list" type="email"  multiple value='{To}'>
+			<label class="warning" for="To">{to_mail_warning}</label>
 
 			<br>
 			
@@ -49,10 +50,11 @@
 		
 			<br>
 
-			<input type="submit" name="submit_input" value="send" />
-			<input type="submit" name="submit_input" value="draft" />
+			<input type="submit" name="submit_input" value="send">
+			<input type="submit" name="submit_input" value="draft">
 			
 		  </form>
+		  <label class="warning" for="To">{need_some_data_to_send_mail_warning}</label>
 
 
 		</div>

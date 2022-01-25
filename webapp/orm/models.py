@@ -41,6 +41,10 @@ class UsersPrivateChatModel(BaseModel):
     manager_class = BaseManager
     table_name = "users_private_chat"
 
+class SessionDb(BaseModel):
+    manager_class = BaseManager
+    table_name = "session_db_table"
+
 
 if __name__ == "__main__":
     try:
