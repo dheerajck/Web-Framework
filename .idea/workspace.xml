@@ -2,15 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="358204f6-0b5f-4448-a5b8-dc3cffb03297" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Web framework.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Web framework.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/orm/creating_tables.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/orm/creating_tables.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/orm/database_folder/sql_setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/orm/database_folder/sql_setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/orm/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/orm/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/static/css/sent-mail.css" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/static/css/sent-mail.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/templates/edit-mail.html" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/templates/edit-mail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/utils/mail_utilites.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/utils/mail_utilites.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/utils/redirect_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/utils/redirect_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/views/mail_handler_views/edit_draft_mail_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/views/mail_handler_views/edit_draft_mail_view.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/webapp/views/mail_handler_views/compose_mail_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/views/mail_handler_views/compose_mail_view.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/webapp/views/mail_handler_views/forward_mail_view.py" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/views/mail_handler_views/forward_mail_view.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

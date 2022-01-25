@@ -232,6 +232,56 @@ def is_mail_empty(form_object):
     return False
 
 
+from ast import literal_eval
+from ..orm.models import SessionDb
+from .template_handlers import render_template
+
+def data_from_session_save_load(data_from_db:list):
+
+    data = data_from_db[0]
+    session_id_to_delete = data.id
+
+    data_string_save = data.data_serialized
+    data_dict = literal_eval(data_string_save)
+
+    # use get per doc of get_receivers_dict method
+    receivers_of_this_mail = data_dict["receivers"]
+    To = receivers_of_this_mail
+
+    Title = data_dict["title"]
+    # print(f"{Title=}")
+    Body = data_dict["body"]
+    Attachment = data_dict["attachment"]
+    to_mail_warning = data_dict["to_mail_warning"]
+    need_some_data_to_send_mail_warning = data_dict["need_some_data_to_send_mail_warning"]
+    SessionDb.objects.delete(id=session_id_to_delete)
+
+    Attachment_link = ''
+    if Attachment:
+        Attachment_link = get_attachment_link_from_name(Attachment) or ''
+        # creating a label
+        # Attachment_link = f'<label for="attachment"> Uploaded file {Attachment_link}</label>'
+        if Attachment_link:
+            Attachment_link = f'<label for="attachment">{Attachment_link}</label>'
+
+    context = {
+        # "from": From_Address,
+        # "from_name": From_Name,
+        #
+        # "mail_id": mail_id,
+        "To": To,
+        "Title": Title,
+        "Body": Body,
+        "Attachment_link": Attachment_link,
+        "link_to_redirect": "/compose-mail-post-view/",
+        "to_mail_warning": to_mail_warning,
+        "need_some_data_to_send_mail_warning": need_some_data_to_send_mail_warning
+    }
+
+    start_response_headers: dict = {}
+
+    return render_template("edit-mail.html", context=context), start_response_headers
+
 
 
 

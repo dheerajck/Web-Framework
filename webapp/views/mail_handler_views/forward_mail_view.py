@@ -8,8 +8,15 @@ from ...utils.mail_utilites import get_attachment_link_from_name
 from ...utils.session_handler import get_user_details_from_environ
 from ..views1 import view_403
 
+from ...utils.session_handler import get_user_from_environ
 
-def forward_mail_render_view(environ, **kwagrs):
+from ...utils.mail_utilites import data_from_session_save_load
+
+from ...orm.models import SessionDb
+
+
+
+def forward_mail_render_view(environ, **kwargs):
     '''
     => get_user_from_environ returns a tuple containing fields queried in the order it was queried
     if there is no match get_user_from_environ returns an empty list
@@ -19,10 +26,17 @@ def forward_mail_render_view(environ, **kwagrs):
     user_id: tuple = get_user_details_from_environ(environ, ["id"])
     print(user_id)
     '''
-    mail_id = kwagrs["mail_id"]
-    forward_from = kwagrs["forward_from"]
+
+    sender_id = get_user_from_environ(environ)
+    mail_id = kwargs["mail_id"]
+    data_from_db = SessionDb.objects.select([], {"user_id": sender_id, "mail_id": mail_id})
+    if len(data_from_db) != 0:
+        return data_from_session_save_load(data_from_db)
+
+
+    forward_from = kwargs["forward_from"]
     # for reply
-    action_to_do = kwagrs['action_to_do']
+    action_to_do = kwargs['action_to_do']
 
     box_id_list = []
     if forward_from == "inbox":
@@ -65,6 +79,8 @@ def forward_mail_render_view(environ, **kwagrs):
     Subject = forwarding_mails_object.title
     Body = forwarding_mails_object.body
     Attachment = forwarding_mails_object.attachment or ''
+    # _______________________________________________________________________________________________
+
     Attachment_link = ''
     if Attachment:
         Attachment_link = get_attachment_link_from_name(Attachment) or ''
@@ -105,6 +121,8 @@ _______________________________________
             "Body": Body,
             "Attachment_link": Attachment_link,
             "link_to_redirect": "/compose-mail-post-view/",
+            "to_mail_warning": '',
+            "need_some_data_to_send_mail_warning": ''
         }
 
     # for reply

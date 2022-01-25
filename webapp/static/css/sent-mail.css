@@ -113,6 +113,31 @@
 .container .info span .fa {
   color: #EF3B3A;
 }
+
+.warning {
+  font-family: "Roboto", sans-serif;
+  outline: 0;
+  background: white;
+  width: 100%;
+  border: 0;
+  margin: 0 0 15px;
+
+  box-sizing: border-box;
+  font-size: 14px;
+
+  text-align: left;
+  float: left;
+}
+
+.warning_text
+{
+color: blue;
+font-size: 15px;
+/* font-weight: 500; */
+font-weight: bold;
+}
+
+
 body {
   background: #000039; /* fallback for old browsers */
   background: -webkit-linear-gradient(right, #000039 #000039);
