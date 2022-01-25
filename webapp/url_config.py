@@ -1,4 +1,5 @@
 from . import views
+from . import api
 import re
 from .clean_print_function.clean_print import first_clean_print_function
 
@@ -37,12 +38,44 @@ URL_DICTIONARY = {
 }
 
 
+URL_DICTIONARY_API = {
+    '^api/login$': api.login_api_view,
+    '^api/logout$': api.logout_api_view,
+    #
+    '^api/send-mail$': views.compose_mail_post_view,
+    '^api/inbox$': views.inbox_view,
+    '^api/sent-mails$': views.sent_mail_view,
+    '^api/draft-mails$': views.draft_mails_view,
+    '^api/archives$': views.archives_view,
+    #
+    # '^real-time-chat$': views.real_time_chat_view,
+    # '^real-time-chat/group/([a-zA-Z0-9_])+$': views.chat_view,
+    # '^real-time-chat/private-chat/[a-zA-Z0-9_-]+$': views.chat_view,
+    # # 'mail-user-interactions': views.mail_interactiions_view,
+    # '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
+    # '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
+    # '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
+    # '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
+    # #
+    # '^draft-mails/edit-draft/[0-9]+$': views.edit_draft_mail_render_view,
+    # '^draft/edit-draft-mail-post/[0-9]+$': views.edit_draft_mail_post_view,
+    # #
+    # '^inbox/forward/[0-9]+$': views.forward_mail_render_view,
+    # '^sent-mails/forward/[0-9]+$': views.forward_mail_render_view,
+    # '^archives/forward/[0-9]+$': views.forward_mail_render_view,
+    # #
+    # '^inbox/reply/[0-9]+$': views.reply_mail_render_view,
+    # '^archives/reply/[0-9]+$': views.reply_mail_render_view,
+}
+
 '''
 home/<str:pk>/
 for url with kwarg pk
 
 can use regex
 '''
+
+URL_DICTIONARY.update(URL_DICTIONARY_API)
 
 
 def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
@@ -90,7 +123,7 @@ def check_static_url(request_url):
 def url_handler(request_url):
 
     print("\n\n__________________ URL logger __________________\n\n")
-    print("URL logger, requested url is {request_url}")
+    print(f"URL logger, requested url is {request_url}")
     print("\n\n__________________ DONE __________________\n\n")
 
     static_file_name_or_false_value = check_static_url(request_url)
