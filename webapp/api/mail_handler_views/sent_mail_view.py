@@ -1,7 +1,24 @@
-from ...utils.template_handlers import render_template
 from ...utils.session_handler import get_user_from_environ
 
 from ...orm.models import User, Mails, UserSent, UserInbox, Groups
+
+from webapp.api.views1 import api_view_405
+
+import json
+
+def success_api_response(message):
+    status = "200 OK"
+    response_headers = [
+        ('Content-type', 'application/json'),
+    ]
+
+    response_body = {'message': message, 'status': status}
+    response_body = json.dumps(response_body, indent=4)
+    
+
+    response_headers.append(('Content-length', str(len(response_body))))
+    start_response_headers: dict = {'status': status, 'response_headers': response_headers}
+    return response_body, start_response_headers
 
 
 def get_send_mails(environ):
@@ -31,14 +48,17 @@ def get_send_mails(environ):
     # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
 
-def sent_mail_view(environ, **kwargs):
+def sent_mail_api_view(environ, **kwargs):
+    
+    if environ['REQUEST_METHOD'].upper() != 'GET':
+        kwargs = {"allowed": ("GET",)}
+        return api_view_405(environ, **kwargs)
+
+
 
     sent_mails = get_send_mails(environ)
     # print(sent_mails)
     receivers_dict = {}
-
-    print('strtasdsa')
-    print(len(sent_mails))
 
     for mail in sent_mails:
 
@@ -57,92 +77,42 @@ def sent_mail_view(environ, **kwargs):
             else:
                 receivers_dict[mail.id] = {mail.user_mail}
 
-    print(f"receivers dict is {receivers_dict=}")
-    print()
-    print()
 
     # eliminating duplicate since we got the group mail
     sent_mails = {mail.id: mail for mail in sent_mails}
 
-    mail_div = ''
-    print(f"{sent_mails=}\nlength {len(sent_mails)}")
-    print()
-    print()
-    # duplicated eliminated by making mail id a key and iterating through value to get mail object
+    result_list = []
 
-    # for a, each_mail in sent_mails.items():
+
     for each_mail in sent_mails.values():
         # print(f"{a=} {receivers_dict[a]=}") helped to debug similar name confusing error mail.id and each_mail.id
-        link_html_tag = ''
+        link_html_tag = False
         if each_mail.attachment is not None:
             file_name = each_mail.attachment.split("__")[-1]
             file_directory = '/media/'
             file_link = f"{file_directory}{each_mail.attachment}"
-            link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
-
-        # Generate all receivers of a sent mail
-        # No issue of None because sent mails will have receivers
+            link_html_tag = f"{file_link}"
+         
+         
         receivers_list = ", ".join(receivers_dict[each_mail.id])
-        print("________________________")
-        print(receivers_dict)
-        print()
-        print(receivers_list, mail.id)
-        print("________________________")
+         
+        dictionary_of_mail_object = {
+            "Created_date": each_mail.created_date.isoformat(),
+            "Title": each_mail.title,
+            "Receivers_list": receivers_list,
+            "Body": each_mail.body,
+        }   
 
-        #  space present in comment tag after --  will make the template not render
 
-        # <!-- add datetime sort Done -- >
-        #    <h3>{each_mail.id}</h3>
-        mail_div += f'''
-            <div>
-            <!-- add datetime sort Done -->
+        if link_html_tag:
+            dictionary_of_mail_object["attachment_link"] = link_html_tag
+
+        result_list += [dictionary_of_mail_object]
         
-        
-            
-            <h3>{each_mail.created_date}</h3>
-            <h2>{each_mail.title}</h2>
-            <p>To:{receivers_list}</p>
-            <pre>{each_mail.body}</pre>
-            {link_html_tag}
-            <form action="/mail-user-interactions-sent/{each_mail.id}" method="post">
-                <button type="submit" formaction="/sent-mails/forward/{each_mail.id}/">forward</button>
-                <input type="submit" name="interaction" value="delete" placeholder="delete">
-            </form>
-            <hr>
-            </div>'''
-    print("s2")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.....")
 
-    if mail_div == "":
-        mail_div = "<h1>No Sent mails</h1>"
+    # if result_list == []: result_list = ["No sent mails"]
+    if result_list == []: result_list = "No sent mails"
 
-    context = {'title_of_page': "inbox", "mails": mail_div}
-    response_body = render_template('list-mail-template.html', context)
-    # print(users_groups)
-    # print(response_body)
-    start_response_headers = response_header_basic = {
-        "status": "200 OK",
-        "response_body": [
-            ('Content-type', 'text/html'),
-            ('Content-length', str(len(response_body))),
-        ],
-    }
-    return response_body, start_response_headers
+    return success_api_response(result_list)
 
 
-if __name__ == "__main__":
-    pass
-    # this wasnt working because of user id
-    # inbox = Mails.objects.model_independent_select_join(
-    # {},
-    # {f"{Usersent_table_name}.user_id": user_id, f"{Mail_table_name}.draft": False},
-    # 0,  # 0 => AND
-    # 1,  # 1 => field IN tuples , 0 => field=value
-    # ("created_date",),  # order by created_date descending order
-    # join_model=[
-    #     (Groups_table_name, "id", "group_id"),
-    #     (Userinbox_table_name, "X", "user_id"),
-    #     (Mail_table_name, "user_id", "id"),
-    #     (Usersent_table_name, "id", "user_id"),
-    #     (User_table_name, "user_id", "id"),
-    # ],

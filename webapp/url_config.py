@@ -42,11 +42,11 @@ URL_DICTIONARY_API = {
     '^api/login$': api.login_api_view,
     '^api/logout$': api.logout_api_view,
     #
-    '^api/send-mail$': views.compose_mail_post_view,
-    '^api/inbox$': views.inbox_view,
-    '^api/sent-mails$': views.sent_mail_view,
-    '^api/draft-mails$': views.draft_mails_view,
-    '^api/archives$': views.archives_view,
+    '^api/compose-mail$': api.compose_mail_api_view,
+    '^api/inbox$': api.inbox_api_view,
+    '^api/sent-mails$': api.sent_mail_api_view,
+    '^api/draft-mails$': api.draft_mails_api_view,
+    '^api/archives$': api.archives_api_view,
     #
     # '^real-time-chat$': views.real_time_chat_view,
     # '^real-time-chat/group/([a-zA-Z0-9_])+$': views.chat_view,
@@ -184,6 +184,10 @@ def url_handler(request_url):
         # print(kwargs_passing)
 
     first_clean_print_function(f"{request_url} ================> {view_name}")
+
+    if view_name is None:
+        if request_url.startswith('api/'):
+            return api.api_view_404, {}
 
     if view_name is None:
         print("not match of url view found here")

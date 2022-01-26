@@ -4,6 +4,7 @@ from ..utils.authentication_functions import authentication_user
 from ..utils.session_handler import create_session_id_header, get_cookie_dict, delete_session_id
 
 import json
+from webapp.api.views1 import api_view_405
 
 
 def login_api_view(environ, **kwargs):
@@ -13,19 +14,15 @@ def login_api_view(environ, **kwargs):
     ]
 
     if environ['REQUEST_METHOD'].upper() != 'POST':
-
-        response_body = ''
-        status = "405 Method Not Allowed"
-        response_headers.append(('Allow', ('POST')))
-        response_headers.append(('Content-length', str(len(response_body))))
-        start_response_headers: dict = {'status': status, 'response_headers': response_headers}
-        return response_body, start_response_headers
+        kwargs = {"allowed": ("POST",)}
+        return api_view_405(environ, **kwargs)
 
     form_field_storage = form_with_file_parsing(environ)
 
     username = form_field_storage.getvalue('username')
     password = form_field_storage.getvalue('password')
     print(username, password)
+
     if type(username) == str and type(password) == str:
         pass
     else:

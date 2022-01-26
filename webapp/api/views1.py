@@ -44,11 +44,40 @@ def session(environ, **kwargs):
     return html_to_render, start_response_headers
 
 
-def view_403(environ, **kwargs):
-    start_response_headers["status"] = "403 Forbidden"
-    return render_template("HTTP403.html", context={}), start_response_headers
+def api_view_403(environ, **kwargs):
+    response_body = ''
+    response_headers = [
+        ('Content-type', 'application/json'),
+    ]
+
+    status = "403 Forbidden"
+    response_headers.append(('Content-length', str(len(response_body))))
+    start_response_headers: dict = {'status': status, 'response_headers': response_headers}
+    return response_body, start_response_headers
 
 
-def view_404(environ, **kwargs):
-    start_response_headers["status"] = "404 Not Found"
-    return render_template("HTTP404.html", context={}), start_response_headers
+def api_view_405(environ, **kwargs):
+    response_body = ''
+    response_headers = [
+        ('Content-type', 'application/json'),
+    ]
+    allowed_methods: tuple = kwargs.get("allowed")
+    allowed_methods: str = ", ".join(allowed_methods)
+    
+    status = "405 Method Not Allowed"
+    response_headers.append(('Allow', allowed_methods))
+    response_headers.append(('Content-length', str(len(response_body))))
+    start_response_headers: dict = {'status': status, 'response_headers': response_headers}
+    return response_body, start_response_headers
+
+
+def api_view_404(environ, **kwargs):
+    response_body = ''
+    response_headers = [
+        ('Content-type', 'application/json'),
+    ]
+
+    status = "404 Not Found"
+    response_headers.append(('Content-length', str(len(response_body))))
+    start_response_headers: dict = {'status': status, 'response_headers': response_headers}
+    return response_body, start_response_headers

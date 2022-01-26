@@ -1,13 +1,25 @@
-from ...utils.template_handlers import render_template
-
 from ...utils.session_handler import get_user_from_environ
+
 from ...orm.models import User, Mails
 from ...orm.models import UserInbox, UserSent
 
-"""
-can replace using inbox view by passing one paarameter to view
-which says if inbox or archive should be  shown in the display
-"""
+from webapp.api.views1 import api_view_405
+
+import json
+
+def success_api_response(message):
+    status = "200 OK"
+    response_headers = [
+        ('Content-type', 'application/json'),
+    ]
+
+    response_body = {'message': message, 'status': status}
+    response_body = json.dumps(response_body, indent=4)
+    
+
+    response_headers.append(('Content-length', str(len(response_body))))
+    start_response_headers: dict = {'status': status, 'response_headers': response_headers}
+    return response_body, start_response_headers
 
 
 def get_archives(environ):
@@ -34,66 +46,43 @@ def get_archives(environ):
     return archives
 
 
-def archives_view(environ, **kwargs):
-    '''
-    select is not loop, so row containing values which satisifes condition are retrieved
-    rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
-    important => data retireved never greater than data in the table
-    if a user sends same mail through user, groups
-    only one copy will reach here since mail id is unique which is actually good
-    '''
+def archives_api_view(environ, **kwargs):
+
+    if environ['REQUEST_METHOD'].upper() != 'GET':
+        kwargs = {"allowed": ("GET",)}
+        return api_view_405(environ, **kwargs)
 
     archives = get_archives(environ)
-    # print(archives)
 
-    mail_div = ''
+    result_list = []
     for each_mail in archives:
         # print(each_mail)
 
-        link_html_tag = ''
+        link_html_tag = False
+
 
         if each_mail.attachment is not None:
 
             file_name = each_mail.attachment.split("__")[-1]
             file_directory = '/media/'
             file_link = f"{file_directory}{each_mail.attachment}"
-            link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
-        #  space present in comment tag after --  will make the template not render
-        # <!-- add datetime sort Done -- >
-        mail_div += f'''
+            print(file_link, "xas")
+            # link_html_tag = f"<a href={file_link}>attachment link</a>"
+            link_html_tag = f"{file_link}"
+            
+        dictionary_of_mail_object = {
+            "Created_date": each_mail.created_date.isoformat(),
+            "Title": each_mail.title,
+            "From": each_mail.email,
+            "Body": each_mail.body,
+        }
 
-        <div>
-        <!-- add datetime sort Done -->
 
-        <h3>{each_mail.created_date}</h3>
-        <h2>{each_mail.title}</h2>
-        <p>from:{each_mail.email}</p>
-        <pre>{each_mail.body}</pre>
-        {link_html_tag}
+        if link_html_tag:
+            dictionary_of_mail_object["attachment_link"] = link_html_tag
 
-        <form action="/mail-user-interactions-archive/{each_mail.mail_id}" method="post">
-            <input type="submit" name="interaction" value="unarchive">
-            <button type="submit" formaction="/archives/reply/{each_mail.mail_id}/">reply</button>
-            <button type="submit" formaction="/archives/forward/{each_mail.mail_id}/">forward</button>
-            <input type="submit" name="interaction" value="delete" placeholder="delete">
+        result_list += [dictionary_of_mail_object]
 
-        </form>
-        <hr>
-        </div>'''
-
-    # if for loop is not executed because there are no mails in inbox of user
-    if mail_div == "":
-        mail_div = "<h1>No Archived mails</h1>"
-
-    context = {'title_of_page': "inbox", "mails": mail_div}
-    response_body = render_template('list-mail-template.html', context)
-    # print(users_groups)
-    # print(response_body)
-    start_response_headers = response_header_basic = {
-        "status": "200 OK",
-        "response_body": [
-            ('Content-type', 'text/html'),
-            ('Content-length', str(len(response_body))),
-        ],
-    }
-    return response_body, start_response_headers
+    if result_list == []: result_list = "No mail in archive"
+    return success_api_response(result_list)
+  

@@ -219,13 +219,26 @@ def get_attachment_link_from_name(attachment_name):
 
 def is_mail_empty(form_object):
 
-    form_object.getvalue('title')
+    # fileitem = form_object['attachment']
+    fileitem = '' 
+    file_name= ''
+    if 'attachment' in form_object:
+        fileitem = form_object['attachment']
+        file_name = fileitem.filename.strip()
 
-    fileitem = form_object['attachment']
 
-    title = form_object.getvalue('title').strip()
-    file_name = fileitem.filename.strip()
-    body = form_object.getvalue('body').strip()
+    params = {}
+    for key in form_object.keys():
+        if key == "attachment":
+            continue
+        value = form_object[key].value
+        params[key] = value
+    
+    # form field object doesnt have get method
+    # title = form_object.getvalue('title').strip()
+    # body = form_object.getvalue('body').strip()
+    title = params.get("title", "").strip()
+    body = params.get("body", "").strip()
 
     if {title, body, file_name} == {''}:
         return True

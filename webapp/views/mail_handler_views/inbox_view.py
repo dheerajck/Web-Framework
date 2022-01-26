@@ -55,7 +55,7 @@ def inbox_view(environ, **kwargs):
             file_directory = '/media/'
             file_link = f"{file_directory}{each_mail.attachment}"
             print(file_link, "xas")
-            link_html_tag = f"<a download={file_name} href={file_link}>attachment link {file_link}</a>"
+            link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
 
         # <input type="submit" name="interaction" value="forward" placeholder="forward">
         # <input type="submit" formaction="linktosomewhere" value="value to submit"> will work
