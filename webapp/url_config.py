@@ -58,19 +58,8 @@ URL_DICTIONARY_API = {
     #
     '^api/archive-mail/[0-9]+$': api.archive_mail_api_view,
     '^api/unarchive-mail/[0-9]+$': api.unarchive_mail_api_view,
-
-    # '^real-time-chat$': views.real_time_chat_view,
-    # '^real-time-chat/group/([a-zA-Z0-9_])+$': views.chat_view,
-    # '^real-time-chat/private-chat/[a-zA-Z0-9_-]+$': views.chat_view,
-    # # 'mail-user-interactions': views.mail_interactiions_view,
-    # '^mail-user-interactions-inbox/[0-9]+$': views.mail_interactions_view,
-    # '^mail-user-interactions-sent/[0-9]+$': views.mail_interactions_view,
-    # '^mail-user-interactions-archive/[0-9]+$': views.mail_interactions_view,
-    # '^mail-user-interactions-draft/[0-9]+$': views.mail_interactions_view,
-    # #
-    # '^draft-mails/edit-draft/[0-9]+$': views.edit_draft_mail_render_view,
-    # '^draft/edit-draft-mail-post/[0-9]+$': views.edit_draft_mail_post_view,
-    # #
+    #
+    '^api/draft-mails/edit-draft/[0-9]+$': api.edit_draft_mail_api_view,
     # '^inbox/forward/[0-9]+$': views.forward_mail_render_view,
     # '^sent-mails/forward/[0-9]+$': views.forward_mail_render_view,
     # '^archives/forward/[0-9]+$': views.forward_mail_render_view,
@@ -232,7 +221,12 @@ def url_handler(request_url):
         mail_id: int = int(parsing_url[3])
         kwargs_passing = {"box": box, "action": action, "mail_id": mail_id}
 
-    if   view_name in [api.archive_mail_api_view, api.unarchive_mail_api_view]:
+    if  view_name in [api.archive_mail_api_view, api.unarchive_mail_api_view]:
+        parsing_url = get_url_path(request_url)
+        mail_id: int = int(parsing_url[-1])
+        kwargs_passing = {"mail_id": mail_id}
+
+    if view_name is api.edit_draft_mail_api_view:
         parsing_url = get_url_path(request_url)
         mail_id: int = int(parsing_url[-1])
         kwargs_passing = {"mail_id": mail_id}

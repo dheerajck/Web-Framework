@@ -94,13 +94,13 @@ def sent_mail_api_view(environ, **kwargs):
             link_html_tag = f"{file_link}"
          
          
-        receivers_list = ", ".join(receivers_dict[each_mail.id])
+        receivers_string = ", ".join(receivers_dict[each_mail.id])
          
         dictionary_of_mail_object = {
             "mail_id": each_mail.id,
             "Created_date": each_mail.created_date.isoformat(),
             "Title": each_mail.title,
-            "Receivers_list": receivers_list,
+            "Receivers_list": receivers_string,
             "Body": each_mail.body,
         }   
 

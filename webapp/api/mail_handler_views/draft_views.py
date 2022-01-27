@@ -13,6 +13,7 @@ def success_api_response(message):
     ]
 
     response_body = {'message': message, 'status': status}
+
     response_body = json.dumps(response_body, indent=4)
     
 
@@ -116,13 +117,13 @@ def draft_mails_api_view(environ, **kwargs):
         
 
         receivers_list = receivers_dict.get(each_mail.id, [])
-        receivers = ", ".join(receivers_list)
+        receivers_string = ", ".join(receivers_list)
 
         dictionary_of_mail_object = {
             "mail_id": each_mail.id,
             "Created_date": each_mail.created_date.isoformat(),
             "Title": each_mail.title,
-            "Receivers_list": receivers_list,
+            "Receivers_list": receivers_string,
             "Body": each_mail.body,
         }   
         
