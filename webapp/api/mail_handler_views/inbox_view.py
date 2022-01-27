@@ -78,6 +78,7 @@ def inbox_api_view(environ, **kwargs):
             link_html_tag = f"{file_link}"
 
         dictionary_of_mail_object = {
+            "mail_id": each_mail.mail_id,
             "Created_date": each_mail.created_date.isoformat(),
             "Title": each_mail.title,
             "From": each_mail.email,

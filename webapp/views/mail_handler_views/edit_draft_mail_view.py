@@ -168,7 +168,10 @@ def edit_draft_mail_post_view(environ, **kwargs):
         invalid_mails = ", ".join(invalid_email_list)
         if warning_dict["to_mail_warning"] == '':
             # if not already set
-            warning_dict["to_mail_warning"] = f'{invalid_mails} are invalid mails'
+            if len(invalid_email_list) == 1:
+                warning_dict["to_mail_warning"] = f'{invalid_mails} is an invalid mail'
+            else:
+                warning_dict["to_mail_warning"] = f'{invalid_mails} are invalid mails'
         # invalid email id present
         pass
     if set(warning_dict.values()) != {''}:

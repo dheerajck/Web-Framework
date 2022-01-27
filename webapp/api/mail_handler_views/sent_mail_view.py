@@ -97,6 +97,7 @@ def sent_mail_api_view(environ, **kwargs):
         receivers_list = ", ".join(receivers_dict[each_mail.id])
          
         dictionary_of_mail_object = {
+            "mail_id": each_mail.id,
             "Created_date": each_mail.created_date.isoformat(),
             "Title": each_mail.title,
             "Receivers_list": receivers_list,

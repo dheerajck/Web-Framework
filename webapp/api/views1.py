@@ -1,11 +1,13 @@
 from ..utils.template_handlers import render_template
 from ..utils.session_handler import get_username_from_environ
 
+import json
 
 start_response_headers: dict = {}
 
 # only using kwargs since args might create unwanted problems and nkeyword arguments will be better its explicit
 # changed to named parameters because its better to not accept unwanted keyword argument, this throws cant unpack error so avoiding for now
+
 
 
 def root(environ, **kwargs):
@@ -45,13 +47,19 @@ def session(environ, **kwargs):
 
 
 def api_view_403(environ, **kwargs):
-    response_body = ''
-    response_headers = [
-        ('Content-type', 'application/json'),
-    ]
 
     status = "403 Forbidden"
-    response_headers.append(('Content-length', str(len(response_body))))
+    # message = {"message": "Forbidden"}
+    # response_body = {'message': message, 'status': status}
+    message = "Forbidden"
+    response_body = {'message': message, 'status': status}
+    response_body = json.dumps(response_body, indent=4)
+
+    # response_headers = [('Content-type', 'application/json')]
+    # response_headers.append(('Content-length', str(len(response_body))))
+
+    response_headers = [('Content-type', 'application/json'), ('Content-length', str(len(response_body)))]
+
     start_response_headers: dict = {'status': status, 'response_headers': response_headers}
     return response_body, start_response_headers
 
@@ -80,4 +88,18 @@ def api_view_404(environ, **kwargs):
     status = "404 Not Found"
     response_headers.append(('Content-length', str(len(response_body))))
     start_response_headers: dict = {'status': status, 'response_headers': response_headers}
+    return response_body, start_response_headers
+
+
+def success_api_response(message, status_code="200 OK"):
+
+    response_headers = [
+        ('Content-type', 'application/json'),
+    ]
+
+    response_body = {'message': message, 'status': status_code}
+    response_body = json.dumps(response_body, indent=4)
+
+    response_headers.append(('Content-length', str(len(response_body))))
+    start_response_headers: dict = {'status': status_code, 'response_headers': response_headers}
     return response_body, start_response_headers
