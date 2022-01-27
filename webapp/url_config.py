@@ -51,6 +51,7 @@ URL_DICTIONARY_API = {
     '^api/draft-mails$': api.draft_mails_api_view,
     '^api/archives$': api.archives_api_view,
     #
+    # different view used to delete mails from each box
     '^api/inbox/delete/[0-9]+$': api.delete_inbox_api_view,
     '^api/sent-mails/delete/[0-9]+$': api.delete_sent_mail_api_view,
     '^api/draft-mails/delete$/[0-9]+': api.delete_draft_mails_api_view,
@@ -60,12 +61,14 @@ URL_DICTIONARY_API = {
     '^api/unarchive-mail/[0-9]+$': api.unarchive_mail_api_view,
     #
     '^api/draft-mails/edit-draft/[0-9]+$': api.edit_draft_mail_api_view,
-    # '^inbox/forward/[0-9]+$': views.forward_mail_render_view,
-    # '^sent-mails/forward/[0-9]+$': views.forward_mail_render_view,
-    # '^archives/forward/[0-9]+$': views.forward_mail_render_view,
+    #
+    # same view used to forward mail from each box
+    '^api/inbox/forward/[0-9]+$': api.forward_mail_api_view,
+    '^api/sent-mails/forward/[0-9]+$': api.forward_mail_api_view,
+    '^api/archives/forward/[0-9]+$': api.forward_mail_api_view,
     # #
-    # '^inbox/reply/[0-9]+$': views.reply_mail_render_view,
-    # '^archives/reply/[0-9]+$': views.reply_mail_render_view,
+    '^api/inbox/reply/[0-9]+$': api.reply_mail_api_view,
+    '^api/archives/reply/[0-9]+$': api.reply_mail_api_view,
 }
 
 '''
@@ -230,6 +233,12 @@ def url_handler(request_url):
         parsing_url = get_url_path(request_url)
         mail_id: int = int(parsing_url[-1])
         kwargs_passing = {"mail_id": mail_id}
+
+    if view_name in [api.forward_mail_api_view, api.reply_mail_api_view]:
+        parsing_url = get_url_path(request_url)
+        mail_id: int = int(parsing_url[-1])
+        box = parsing_url[1]
+        kwargs_passing = {"mail_id": mail_id, "box": box}
 
 
     # add more if needed
