@@ -2,50 +2,15 @@ from ...utils.post_form_handler import form_with_file_parsing
 from ...utils.mail_utilites import draft_edit
 from ...utils.session_handler import get_user_from_environ
 
-from ...utils.mail_utilites import get_receivers_id_from_mail, get_attachment_link_from_name
+from ...utils.mail_utilites import get_receivers_id_from_mail
 
 from ...utils.mail_utilites import is_mail_empty
-from .draft_views import  get_draft_mails
-from ..views1 import api_view_403, success_api_response, api_view_405
+from .draft_views import get_draft_mails
 
-import json
-
+from ..views1 import success_api_response, error_api_response_codes
+from ..views1 import api_view_403, api_view_405
 
 start_response_headers: dict = {}
-
-
-def error_api_response_codes(status, message):
-    status = status
-    response_headers = [
-        ("Content-type", "application/json"),
-    ]
-
-    response_body = {"message": message, "status": status}
-    response_body = json.dumps(response_body, indent=4)
-
-    response_headers.append(("Content-length", str(len(response_body))))
-    start_response_headers: dict = {
-        "status": status,
-        "response_headers": response_headers,
-    }
-    return response_body, start_response_headers
-
-
-def success_api_response(message):
-    status = "200 OK"
-    response_headers = [
-        ("Content-type", "application/json"),
-    ]
-
-    response_body = {"message": message, "status": status}
-    response_body = json.dumps(response_body)
-
-    response_headers.append(("Content-length", str(len(response_body))))
-    start_response_headers: dict = {
-        "status": status,
-        "response_headers": response_headers,
-    }
-    return response_body, start_response_headers
 
 
 def edit_draft_mail_api_view(environ, **kwargs):
@@ -61,6 +26,10 @@ def edit_draft_mail_api_view(environ, **kwargs):
 
     mail_id = kwargs["mail_id"]
 
+    if environ["REQUEST_METHOD"].upper() != "PUT":
+        kwargs = {"allowed": ("PUT",)}
+        return api_view_405(environ, **kwargs)
+
     draft_mails = get_draft_mails(environ)
 
     draft_mails_dictionary = {mail.id: mail for mail in draft_mails}
@@ -70,12 +39,6 @@ def edit_draft_mail_api_view(environ, **kwargs):
         # kwargs is important
         kwargs_passing = {}
         return api_view_403(environ, **kwargs_passing)
-
-
-
-    if environ["REQUEST_METHOD"].upper() != "PUT":
-        kwargs = {"allowed": ("PUT",)}
-        return api_view_405(environ, **kwargs)
 
     form_field_storage = form_with_file_parsing(environ)
 
@@ -95,7 +58,6 @@ def edit_draft_mail_api_view(environ, **kwargs):
     no_client_errors_flag = True
     if button == "send":
         if empty_mail:
-            warning_dict["to_mail_warning"] = "Enter a mail id"
             status_code = "422 Unprocessable Entity"
             no_client_errors_flag = False
 
@@ -104,9 +66,7 @@ def edit_draft_mail_api_view(environ, **kwargs):
             message = "There should be some data to send a mail"
             no_client_errors_flag = False
 
-    group_list, user_list, invalid_email_list = get_receivers_id_from_mail(
-        receivers_mails
-    )
+    group_list, user_list, invalid_email_list = get_receivers_id_from_mail(receivers_mails)
 
     if len(invalid_email_list) > 0 and button == "send":
         status_code = "422 Unprocessable Entity"

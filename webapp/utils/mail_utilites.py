@@ -6,6 +6,11 @@ from ..utils.datetime_module import get_current_time_tz
 import uuid
 
 
+from ast import literal_eval
+from ..orm.models import SessionDb
+from .template_handlers import render_template
+
+
 def get_mail_data_dict(form_field_object):
     # this should not return key error since this is name of a filed in the html form #
     #  this key will be always be present with a value or null string
@@ -257,11 +262,6 @@ def is_mail_empty(form_object):
     return False
 
 
-from ast import literal_eval
-from ..orm.models import SessionDb
-from .template_handlers import render_template
-
-
 def data_from_session_save_load(data_from_db: list):
 
     data = data_from_db[0]
@@ -279,9 +279,7 @@ def data_from_session_save_load(data_from_db: list):
     Body = data_dict["body"]
     Attachment = data_dict["attachment"]
     to_mail_warning = data_dict["to_mail_warning"]
-    need_some_data_to_send_mail_warning = data_dict[
-        "need_some_data_to_send_mail_warning"
-    ]
+    need_some_data_to_send_mail_warning = data_dict["need_some_data_to_send_mail_warning"]
     SessionDb.objects.delete(id=session_id_to_delete)
 
     Attachment_link = ""

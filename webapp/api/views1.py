@@ -9,7 +9,6 @@ start_response_headers: dict = {}
 # changed to named parameters because its better to not accept unwanted keyword argument, this throws cant unpack error so avoiding for now
 
 
-
 def root(environ, **kwargs):
     return render_template("root.html", context={}), start_response_headers
 
@@ -71,7 +70,7 @@ def api_view_405(environ, **kwargs):
     ]
     allowed_methods: tuple = kwargs.get("allowed")
     allowed_methods: str = ", ".join(allowed_methods)
-    
+
     status = "405 Method Not Allowed"
     response_headers.append(('Allow', allowed_methods))
     response_headers.append(('Content-length', str(len(response_body))))
@@ -102,4 +101,21 @@ def success_api_response(message, status_code="200 OK"):
 
     response_headers.append(('Content-length', str(len(response_body))))
     start_response_headers: dict = {'status': status_code, 'response_headers': response_headers}
+    return response_body, start_response_headers
+
+
+def error_api_response_codes(status, message):
+    status = status
+    response_headers = [
+        ("Content-type", "application/json"),
+    ]
+
+    response_body = {"message": message, "status": status}
+    response_body = json.dumps(response_body, indent=4)
+
+    response_headers.append(("Content-length", str(len(response_body))))
+    start_response_headers: dict = {
+        "status": status,
+        "response_headers": response_headers,
+    }
     return response_body, start_response_headers

@@ -1,27 +1,28 @@
 from .inbox_view import get_inbox
 from .archived_mail_view import get_archives
 from .sent_mail_view import get_send_mails
-from ...utils.template_handlers import render_template
 from ...utils.mail_utilites import get_attachment_link_from_name
 
 from ...utils.post_form_handler import form_with_file_parsing
-from ...utils.mail_utilites import send_mail, send_draft, get_receivers_id_from_mail
+from ...utils.mail_utilites import get_receivers_id_from_mail
 
 
 # from ...utils.session_handler import get_user_from_environ
 from ...utils.session_handler import get_user_details_from_environ
-from ..views1 import success_api_response, api_view_403
-from ...utils.mail_utilites import send_mail, send_draft, get_receivers_id_from_mail, is_mail_empty
+
+from ..views1 import success_api_response, error_api_response_codes
+from ..views1 import api_view_403, api_view_405
+
 
 from ...utils.session_handler import get_user_from_environ
 
-from ...utils.mail_utilites import data_from_session_save_load
 
-from ...orm.models import User, Groups, UserGroup
+from ...orm.models import UserGroup
 
 from ...orm.models import Mails, UserSent, UserInbox
 
 from ...utils.datetime_module import get_current_time_tz
+
 
 import uuid
 
@@ -35,7 +36,6 @@ def get_mail_data_dict_from_dict(datas_from_db):
         # traversal file name
         file_name = fileitem.filename
     else:
-        # traversal file name
         file_name = False
 
     # form_field_storage gives all fields except files on string format, files on binary format
@@ -59,12 +59,8 @@ def get_mail_data_dict_from_dict(datas_from_db):
         file_path = directory + new_file_name
         print(file_path, "xxA")
         with open(file_path, mode="wb") as f:
-            f.write(form_field_object.getvalue("attachment"))
+            f.write(datas_from_db.getvalue("attachment"))
     return mail_data
-
-
-def reply_mail_render_view(environ, **kwagrs):
-    return forward_mail_render_view(environ, **kwagrs)
 
 
 def send_mail_draft_with_validation_fields(
@@ -99,9 +95,7 @@ def send_mail_draft_with_validation_fields(
             message = "There should be some data to send a mail"
             no_client_errors_flag = False
 
-    group_list, user_list, invalid_email_list = get_receivers_id_from_mail(
-        receivers_mails
-    )
+    group_list, user_list, invalid_email_list = get_receivers_id_from_mail(receivers_mails)
 
     if len(invalid_email_list) > 0 and button == "send":
         status_code = "422 Unprocessable Entity"
@@ -111,20 +105,25 @@ def send_mail_draft_with_validation_fields(
         }
         no_client_errors_flag = False
 
+    data_forwarding = get_mail_data_dict_from_dict({"title": subject_of_mail, "body": body_of_mail})
     if button == "send" and no_client_errors_flag:
         # {"attachment": "", "title": "", "body": ""}
-        {"title": "", "body": ""}
+        # {"title": "", "body": ""}
         # receivers_mails, Subject_to_print, Body
-        data_forwarding = get_mail_data_dict_from_dict(
-            {"title": subject_of_mail, "body": body_of_mail}
-        )
+        data_forwarding = get_mail_data_dict_from_dict({"title": subject_of_mail, "body": body_of_mail})
         send_mail_with_data_dict(
             sender_id,
             user_list,
             group_list,
             data_forwarding,
         )
-        message = "Mail send successfully"
+
+        if data_forwarding['title'].startswith("Fwd:"):
+            message = "Forwarded the mail successfully"
+        elif data_forwarding['title'].startswith("Re:"):
+            message = "Replied to the mail successfully"
+        else:
+            message = "Mail send successfully"
         return success_api_response(message)
 
     elif button == "draft" and no_client_errors_flag:
@@ -150,7 +149,7 @@ def send_mail_with_data_dict(sender_id, user_list, group_list, data_dict, draft=
     data_forwarding = data_dict
 
     if draft is True:
-        mail_data_dict["draft"] = True
+        data_forwarding["draft"] = True
     # add to mail table
     mail_id = Mails.objects.create(new_data=data_forwarding)
 
@@ -186,8 +185,8 @@ def send_mail_with_data_dict(sender_id, user_list, group_list, data_dict, draft=
         UserInbox.objects.bulk_insert(list_of_datas_user_with_group_id)
 
 
-def send_draft_with_data_dict(sender_id, user_list, group_list, form_field_object):
-    send_mail(sender_id, user_list, group_list, form_field_object, draft=True)
+def send_draft_with_data_dict(sender_id, user_list, group_list, data_dict):
+    send_mail_with_data_dict(sender_id, user_list, group_list, data_dict, draft=True)
 
 
 def forward_mail_api_view(environ, **kwargs):
@@ -197,9 +196,11 @@ def forward_mail_api_view(environ, **kwargs):
 
     sender_id = get_user_from_environ(environ)
     mail_id = kwargs["mail_id"]
-
     forward_from = kwargs["box"]
-    # for reply
+
+    if environ["REQUEST_METHOD"].upper() != "POST":
+        kwargs = {"allowed": ("POST",)}
+        return api_view_405(environ, **kwargs)
 
     box_id_list = []
     if forward_from == "inbox":
@@ -211,9 +212,7 @@ def forward_mail_api_view(environ, **kwargs):
         box_id_dict = {mail.mail_id: mail for mail in box_id_list}
 
     elif forward_from == "sent-mails":
-        From_Address, From_Name = get_user_details_from_environ(
-            environ, ["email", "name"]
-        )
+        From_Address, From_Name = get_user_details_from_environ(environ, ["email", "name"])
 
         box_id_list = get_send_mails(environ)
         box_id_dict = {mail.id: mail for mail in box_id_list}
@@ -240,9 +239,7 @@ def forward_mail_api_view(environ, **kwargs):
         )
 
         # get_user_details_from_environ returns a list containing needed field value, empty list if no match
-        To_Address = get_user_details_from_environ(environ, ["email"])[
-            0
-        ]  # access 0th element
+        To_Address = get_user_details_from_environ(environ, ["email"])[0]  # access 0th element
 
     Created_date = forwarding_mails_object.created_date
     Subject = forwarding_mails_object.title
@@ -258,7 +255,6 @@ def forward_mail_api_view(environ, **kwargs):
         if Attachment_link:
             Attachment_link = f'<label for="attachment">{Attachment_link}</label>'
     # __________________________________________________________________________________________
-
 
     Subject_to_print = f"Fwd: {Subject}"
     print(Subject_to_print, "Xass")
@@ -280,9 +276,7 @@ Attachment link: {Attachment_link}
 _______________________________________
 """
 
-    return send_mail_draft_with_validation_fields(
-        button, sender_id, to_list, Subject_to_print, Body
-    )
+    return send_mail_draft_with_validation_fields(button, sender_id, to_list, Subject_to_print, Body)
 
 
 def reply_mail_api_view(environ, **kwargs):
@@ -296,6 +290,10 @@ def reply_mail_api_view(environ, **kwargs):
 
     forward_from = kwargs["box"]
     # for reply
+
+    if environ["REQUEST_METHOD"].upper() != "POST":
+        kwargs = {"allowed": ("POST",)}
+        return api_view_405(environ, **kwargs)
 
     box_id_list = []
     if forward_from == "inbox":
@@ -325,9 +323,7 @@ def reply_mail_api_view(environ, **kwargs):
         )
 
         # get_user_details_from_environ returns a list containing needed field value, empty list if no match
-        To_Address = get_user_details_from_environ(environ, ["email"])[
-            0
-        ]  # access 0th element
+        To_Address = get_user_details_from_environ(environ, ["email"])[0]  # access 0th element
 
     Created_date = replying_mails_object.created_date
     Subject = replying_mails_object.title
@@ -344,7 +340,6 @@ def reply_mail_api_view(environ, **kwargs):
             Attachment_link = f'<label for="attachment">{Attachment_link}</label>'
     # __________________________________________________________________________________________
 
-
     Subject_to_print = f"Re: {Subject}"
     replied_mail_body = f"""
 
@@ -359,6 +354,4 @@ _______________________________________
 
     body = body + replied_mail_body
 
-    return send_mail_draft_with_validation_fields(
-        button, sender_id, From_Address, Subject_to_print, body
-    )
+    return send_mail_draft_with_validation_fields(button, sender_id, From_Address, Subject_to_print, body)

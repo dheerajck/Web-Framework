@@ -86,9 +86,7 @@ def application(environ, start_response, status=None, response_headers=None):
         ("Content-length", str(len(html_response_body))),
     ]
 
-    response_headers = start_response_headers.get(
-        "response_headers", response_header_basic
-    )
+    response_headers = start_response_headers.get("response_headers", response_header_basic)
     print(f"{status}12121")
     start_response(status, response_headers)
     print(
@@ -148,19 +146,13 @@ class SessionMiddleware:
         # for api, entire api request is handled and directed from api_handler
         # content type and session authentication is handled there separately
         if path.startswith("api"):
-            api_login = api_handler(
-                path=path, environ=environ, start_response=start_response
-            )
+            api_login = api_handler(path=path, environ=environ, start_response=start_response)
             return api_login
 
         # _________________________API HANDLER STOP________________________________
 
         cookie_string = environ.get("HTTP_COOKIE")
-        if (
-            path == "login"
-            or path == "authentication"
-            or path.startswith("static/login")
-        ):
+        if path == "login" or path == "authentication" or path.startswith("static/login"):
             print("so user needs to Sign in to site")
             wrapped_app_response: list = self.wrapped_app(environ, start_response)
             return iter(wrapped_app_response)
@@ -168,16 +160,11 @@ class SessionMiddleware:
         # assert cookie_string is None, "No cookies"
         # no cookies ?? redirect to login page
         # get our apps session_id from cookies
-        cookie_dict = get_cookie_dict(
-            cookie_string
-        )  # returns None, NOW RETURNS EMPTY DICT
+        cookie_dict = get_cookie_dict(cookie_string)  # returns None, NOW RETURNS EMPTY DICT
         session_key_value = cookie_dict.get(SESSION_KEY_NAME)
         # OR do shortcut circuiting so check_validity_of_session_id(session_key_value)
         # will be evaluated onlny if session_key_value is not None
-        if (
-            session_key_value is None
-            or check_validity_of_session_id(session_key_value) is False
-        ):
+        if session_key_value is None or check_validity_of_session_id(session_key_value) is False:
             response_body, start_response_headers = redirect_to_login_module()
             status = start_response_headers["status"]
             response_headers = start_response_headers["response_headers"]

@@ -16,7 +16,6 @@ def success_api_response(message):
 
     response_body = {'message': message, 'status': status}
     response_body = json.dumps(response_body, indent=4)
-    
 
     response_headers.append(('Content-length', str(len(response_body))))
     start_response_headers: dict = {'status': status, 'response_headers': response_headers}
@@ -59,7 +58,7 @@ def inbox_api_view(environ, **kwargs):
     if environ['REQUEST_METHOD'].upper() != 'GET':
         kwargs = {"allowed": ("GET",)}
         return api_view_405(environ, **kwargs)
-    
+
     inbox = get_inbox(environ)
     # print(inbox)
 
@@ -89,9 +88,10 @@ def inbox_api_view(environ, **kwargs):
             dictionary_of_mail_object["attachment_link"] = link_html_tag
 
         result_list += [dictionary_of_mail_object]
-        
+
     # converted to json above
     # json_list = json.dumps(result_list, indent=4)
     # return success_api_response(json_list)
-    if result_list == []: result_list = "No mail in inbox"
+    if result_list == []:
+        result_list = "No mail in inbox"
     return success_api_response(result_list)
