@@ -36,7 +36,6 @@ def get_mail_data_dict(form_field_object):
     print(mail_data)
     # print(22, form_field_object.getvalue('attachment'))
     if file_name:
-        file_name = mail_data["attachment"]
         random_string = str(uuid.uuid4())
         new_file_name = f"{random_string}__{file_name}"
         mail_data["attachment"] = new_file_name
