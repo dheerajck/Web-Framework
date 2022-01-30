@@ -75,7 +75,8 @@ def api_handler(path, environ, start_response):
         print(
             "\n\n\n\n________________________________________ COMPLETED ONE REQUEST RESPONSE________________________________________________\n\n\n\n"
         )
-
+        # start response should be called before returning anything to webserver and this is important
+        start_response(status, response_headers)
         return iter([response_body.encode('utf-8')])
 
     wrapped_app_response = wrapped_app(environ, start_response)
