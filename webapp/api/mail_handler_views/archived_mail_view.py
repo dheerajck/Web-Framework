@@ -23,9 +23,7 @@ def get_archives(environ):
                 ORDER BY "created_date" DESC
             """
     parameters = [user_id, False, True]
-    print()
     archives = Mails.objects.raw_sql_query(query, parameters)
-    # print(archives)
 
     return archives
 
@@ -40,8 +38,6 @@ def archives_api_view(environ, **kwargs):
 
     result_list = []
     for each_mail in archives:
-        # print(each_mail)
-
         link_html_tag = False
 
         if each_mail.attachment is not None:

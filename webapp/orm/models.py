@@ -41,6 +41,7 @@ class UsersPrivateChatModel(BaseModel):
     manager_class = BaseManager
     table_name = "users_private_chat"
 
+
 class SessionDb(BaseModel):
     manager_class = BaseManager
     table_name = "session_db_table"
@@ -53,39 +54,9 @@ if __name__ == "__main__":
         )
 
     except psycopg2.errors.UniqueViolation:
-        print("what check")
+        print("data with same field value on unique field exist in db")
 
     try:
         Groups.objects.create(new_data={'group_mail': 'group@group.mail'})
     except psycopg2.errors.UniqueViolation:
-        print("what duplicate is not allowed using unique constraint")
-    # Groups.objects.update(new_data={'group_mail': "A"}, conditions_dict={'id': 1})
-    # a = Groups.objects.select({}, {'id': 1})
-    # print(a)
-    # Groups.objects.create(new_data={'group_mail': "1"})
-    # a = Groups.objects.select({}, {'id': 2})
-
-    # print(1)
-    # print(a)
-    # print(vars(a[0]))
-
-    # a = Groups.objects.select({}, {'id': 2})
-
-    # print(1)
-    # print(a)
-    # print("_________________________________________________________-----")
-    # print('first printing')
-    # print(a[0].group_mail)
-    # print(a)
-    # print("_________________________________________________________-----")
-    # print(vars(a[0]))
-
-    # Groups.objects.update(new_data={'group_mail': "a1"})
-
-    # a = Groups.objects.select({}, {})
-
-    # print("_________________________________________________________-----")
-    # print(a[0].group_mail)
-    # print(a)
-    # print("_________________________________________________________-----")
-    # print(vars(a[0]))
+        print("data with same field value on unique field exist in db")

@@ -8,7 +8,6 @@ from .archived_mail_view import get_archives
 from .sent_mail_view import get_send_mails
 from .draft_views import get_draft_mails
 
-
 from ...orm.models import UserInbox, UserSent
 
 

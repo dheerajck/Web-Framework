@@ -58,8 +58,7 @@ def form_with_file_parsing(environ):
 
     # This must be done to avoid a bug in cgi.FieldStorage
     environ.setdefault('QUERY_STRING', '')
-    a = environ['wsgi.input']
-    # print(1, environ['wsgi.input'])
+    # print(environ['wsgi.input'])
     # print(environ['wsgi.input'])
     # better give variable instead of again taking environ['wsgi.input'] since wsgi
     form_field_storage = cgi.FieldStorage(fp=wsgi_input, environ=environ, keep_blank_values=True)

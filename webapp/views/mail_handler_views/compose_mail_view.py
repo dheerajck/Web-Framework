@@ -5,10 +5,12 @@ from ...utils.post_form_handler import form_with_file_parsing
 from ...utils.mail_utilites import send_mail, send_draft, get_receivers_id_from_mail
 from ...utils.session_handler import get_user_from_environ
 
-from ...orm.models import SessionDb
-from ...utils.mail_utilites import data_from_session_save_load, is_mail_empty
 
+from ...utils.mail_utilites import data_from_session_save_load, is_mail_empty
 from ...utils.redirect_functions import redirect_view_with_response_body
+from ...utils.post_form_handler import cgiFieldStorageToDict
+
+from ...orm.models import SessionDb
 
 
 start_response_headers: dict = {}
@@ -55,13 +57,12 @@ def compose_mail_post_view(environ, **kwargs):
     empty_mail = False
 
     receivers_mails: list = form_field_storage.getvalue('to_list').split(",")  # [''] if empty
-    if receivers_mails == ['']: empty_mail = True
+    if receivers_mails == ['']:
+        empty_mail = True
 
     warning_dict = {"to_mail_warning": '', "need_some_data_to_send_mail_warning": ''}
 
     # draft can have no senders email this is checked here  to bypass draft mails
-
-
 
     if button == "send":
 
@@ -74,7 +75,6 @@ def compose_mail_post_view(environ, **kwargs):
         if is_mail_empty(form_field_storage):
             warning_dict["need_some_data_to_send_mail_warning"] = 'Empty mail cant be send'
 
-
     # get_receivers_id_from_mail accepts a list of receiver mails and returns a list of "user id", "group id"and "invalid mail"
     group_list, user_list, invalid_email_list = get_receivers_id_from_mail(receivers_mails)
 
@@ -86,12 +86,10 @@ def compose_mail_post_view(environ, **kwargs):
                 warning_dict["to_mail_warning"] = f'{invalid_mails} is an invalid mail'
             else:
                 warning_dict["to_mail_warning"] = f'{invalid_mails} are invalid mails'
-        # invalid email id present
-    # a = input(f"{warning_dict.values()}")
+
     if set(warning_dict.values()) != {''}:
-        # a = input("hi")
         # warnings are present so dont send the mail
-        from ...utils.post_form_handler import cgiFieldStorageToDict
+
         form_data_dict = cgiFieldStorageToDict(form_field_storage)
         form_data_dict.update(warning_dict)
 
@@ -102,21 +100,17 @@ def compose_mail_post_view(environ, **kwargs):
             receivers_mails.remove(invalid)
         receiver_list = receivers_mails
 
-        print(receivers_mails, 11)
         receivers = ", ".join(receiver_list)
         receivers = receivers.strip()
         form_data_dict["receivers"] = receivers
         form_data_dict["save_type"] = "inbox"
         serialized_data_string = str(form_data_dict)
-        SessionDb.objects.create(
-            new_data={"user_id": sender_id, "data_serialized": serialized_data_string})
+        SessionDb.objects.create(new_data={"user_id": sender_id, "data_serialized": serialized_data_string})
 
         status = '302 FOUND'
         url_to_redirect = f'/dashboard/compose-mail/'
         data_to_return = redirect_view_with_response_body(status, url_to_redirect)
         return data_to_return
-
-
 
     if button == "send":
         print('send')

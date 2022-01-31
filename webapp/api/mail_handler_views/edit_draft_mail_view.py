@@ -43,9 +43,6 @@ def edit_draft_mail_api_view(environ, **kwargs):
     form_field_storage = form_with_file_parsing(environ)
 
     button = form_field_storage.getvalue("mail_draft")
-    # button = "send" if button else "draft"
-    print(button)
-    # input(f"{button}")
 
     receivers_mails: list = form_field_storage.getvalue("to_list").split(",")
     empty_mail = False

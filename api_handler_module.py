@@ -7,8 +7,6 @@ import json
 
 def api_application(environ, start_response, status=None, response_headers=None):
 
-    # response_body = {'message': 'message', 'status': 'status_code}
-
     html_response_body = ''
     path = environ.get('PATH_INFO')
     path = url_strip(path)
@@ -18,14 +16,11 @@ def api_application(environ, start_response, status=None, response_headers=None)
 
     start_response_headers: dict = {}
 
-    print("kwargs passing to view")
-    print(kwargs_to_views)
     html_response_body, start_response_headers = view(environ, **kwargs_to_views)
 
     status_basic = '200 OK'
     status = start_response_headers.get('status', status_basic)
 
-    # api views should have response headers always set to avoid t=using this response headers
     response_header_basic = [
         ('Content-type', 'application/json'),
         ('Content-length', str(len(html_response_body))),
@@ -45,7 +40,7 @@ def api_application(environ, start_response, status=None, response_headers=None)
 
 
 def api_handler(path, environ, start_response):
-    print("API HANDLING")
+    # "API HANDLING"
 
     wrapped_app = api_application
     status = "200 OK"
@@ -70,12 +65,11 @@ def api_handler(path, environ, start_response):
         response_body = json.dumps(response_body)
         response_headers.append(('Content-length', str(len(response_body))))
         start_response_headers: dict = {'status': status, 'response_headers': response_headers}
-        print(start_response_headers)
 
         print(
             "\n\n\n\n________________________________________ COMPLETED ONE REQUEST RESPONSE________________________________________________\n\n\n\n"
         )
-        # start response should be called before returning anything to webserver and this is important
+        # start response should be called before returning anything to webserver
         start_response(status, response_headers)
         return iter([response_body.encode('utf-8')])
 

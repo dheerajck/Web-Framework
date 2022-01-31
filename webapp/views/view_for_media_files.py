@@ -1,3 +1,6 @@
+from .views1 import view_404
+
+
 def serve_media_file(environ, **kwargs):
 
     file_name = kwargs['file_name']
@@ -19,9 +22,6 @@ def serve_media_file(environ, **kwargs):
             static_file_data_in_bytes = f.read()
     except FileNotFoundError:
 
-        from .views1 import view_404
-
-        print("xdada")
         kwargs = {}
         # print(view_404(environ))
         # print("xdada")
@@ -34,10 +34,5 @@ def serve_media_file(environ, **kwargs):
         ('Content-type', "application/octet-stream"),
         ('Content-Disposition', f'inline; filename="{file_name}"'),
     ]
-    # reponse_headers = {}
 
-    # because assertion is done to ensure data received on app from view is always a string and a dict
-    # static_file_data_in_bytes = static_file_data_in_bytes.decode()
-
-    # print(static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_header_basic_value})
     return static_file_data_in_bytes, {'status': '200 OK', 'response_headers': response_headers}

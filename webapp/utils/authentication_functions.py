@@ -2,10 +2,8 @@ from ..orm.models import User
 
 
 def authentication_user(username, password):
-    print("entered")
-    # print("Created a Userobject and inserted")
 
-    print("here")
+    # print("Created a Userobject and inserted")
     UserObject = User.objects.select({'id'}, {'username': username, 'password': password})
     # both username an password fields are required so doing assert not None here
     assert None not in (username, password)

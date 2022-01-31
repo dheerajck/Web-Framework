@@ -27,9 +27,8 @@ def get_send_mails(environ):
                 """
         parameters = [sent_mails_mail_tuple, False]
         sent_mails = Mails.objects.raw_sql_query(query, parameters)
-    print(sent_mails)
+
     return sent_mails
-    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
 
 def sent_mail_api_view(environ, **kwargs):
@@ -39,7 +38,6 @@ def sent_mail_api_view(environ, **kwargs):
         return api_view_405(environ, **kwargs)
 
     sent_mails = get_send_mails(environ)
-    # print(sent_mails)
     receivers_dict = {}
 
     for mail in sent_mails:
@@ -65,7 +63,6 @@ def sent_mail_api_view(environ, **kwargs):
     result_list = []
 
     for each_mail in sent_mails.values():
-        # print(f"{a=} {receivers_dict[a]=}") helped to debug similar name confusing error mail.id and each_mail.id
         link_html_tag = False
         if each_mail.attachment is not None:
             file_name = each_mail.attachment.split("__")[-1]
@@ -88,7 +85,6 @@ def sent_mail_api_view(environ, **kwargs):
 
         result_list += [dictionary_of_mail_object]
 
-    # if result_list == []: result_list = ["No sent mails"]
     if result_list == []:
         result_list = "No sent mails"
 

@@ -15,11 +15,11 @@ from ast import literal_eval
 
 
 def edit_draft_mail_render_view(environ, **kwargs):
-    # user_id = get_user_from_environ(environ)
-    # start
+
     sender_id = get_user_from_environ(environ)
     mail_id = kwargs["mail_id"]
     data = SessionDb.objects.select([], {"user_id": sender_id, "mail_id": mail_id})
+
     if len(data) == 0:
 
         draft_mails = get_draft_mails(environ)
@@ -40,16 +40,6 @@ def edit_draft_mail_render_view(environ, **kwargs):
         # use get per doc of get_receivers_dict method
         receivers_of_this_mail = receivers_dict.get(mail_id, [])
 
-        """
-        Used to replace None ffrom fields by empty string ''
-        >>> None or ""
-        ''
-        
-        '''>>> "a" or ""
-        'a'
-    
-        """
-
         To = receivers = ", ".join(receivers_of_this_mail) or ''
         # important
         # 'Mails' object is not subscriptable mail_to_edit["title"] will give Type error because mail_to_edit => Mail object is not subscriptable
@@ -63,6 +53,7 @@ def edit_draft_mail_render_view(environ, **kwargs):
         need_some_data_to_send_mail_warning = ''
 
     # _________________________________________________________
+
     else:
         data = data[0]
         session_id_to_delete = data.id
@@ -84,7 +75,6 @@ def edit_draft_mail_render_view(environ, **kwargs):
 
     # _________________________________________________________
 
-
     Attachment_link = ''
     if Attachment:
         Attachment_link = get_attachment_link_from_name(Attachment) or ''
@@ -92,7 +82,6 @@ def edit_draft_mail_render_view(environ, **kwargs):
         if Attachment_link:
             Attachment_link = f'<label for="attachment"> Uploaded file {Attachment_link}</label>'
     # _________________________________________________________
-
 
     context = {
         "from": "",
@@ -105,7 +94,7 @@ def edit_draft_mail_render_view(environ, **kwargs):
         "Attachment_link": Attachment_link,
         "link_to_redirect": f"/draft/edit-draft-mail-post/{mail_id}/",
         "to_mail_warning": to_mail_warning,
-        "need_some_data_to_send_mail_warning": need_some_data_to_send_mail_warning
+        "need_some_data_to_send_mail_warning": need_some_data_to_send_mail_warning,
     }
 
     print(context)
@@ -118,8 +107,7 @@ def edit_draft_mail_render_view(environ, **kwargs):
 def edit_draft_mail_post_view(environ, **kwargs):
 
     form_field_storage = form_with_file_parsing(environ)
-    # print(form_field_storage)
-    print("########################################################1")
+
     sender_id = get_user_from_environ(environ)
     mail_id = kwargs["mail_id"]
 
@@ -141,9 +129,9 @@ def edit_draft_mail_post_view(environ, **kwargs):
 
     form_field_storage = form_with_file_parsing(environ)
     empty_mail = False
-    receivers_mails: list = form_field_storage.getvalue('to_list').split(",") # [''] if empty
-    if receivers_mails == ['']: empty_mail = True
-
+    receivers_mails: list = form_field_storage.getvalue('to_list').split(",")  # [''] if empty
+    if receivers_mails == ['']:
+        empty_mail = True
 
     button = form_field_storage.getvalue('submit_input')
 
@@ -177,23 +165,26 @@ def edit_draft_mail_post_view(environ, **kwargs):
     if set(warning_dict.values()) != {''}:
         # warnings are present so dont send the mail
         from ...utils.post_form_handler import cgiFieldStorageToDict
+
         form_data_dict = cgiFieldStorageToDict(form_field_storage)
         form_data_dict.update(warning_dict)
 
-        #removing invalid mails
+        # removing invalid mails
         # receivers mail is list
         print(receivers_mails, invalid_email_list)
         for invalid in invalid_email_list:
             receivers_mails.remove(invalid)
         receiver_list = receivers_mails
 
-        print(receivers_mails,11)
+        print(receivers_mails, 11)
         receivers = ", ".join(receiver_list)
         receivers = receivers.strip()
         form_data_dict["receivers"] = receivers
         form_data_dict["save_type"] = "draft"
         serialized_data_string = str(form_data_dict)
-        SessionDb.objects.create(new_data={"user_id": sender_id, "mail_id": mail_id, "data_serialized": serialized_data_string})
+        SessionDb.objects.create(
+            new_data={"user_id": sender_id, "mail_id": mail_id, "data_serialized": serialized_data_string}
+        )
 
         status = '302 FOUND'
         url_to_redirect = f'/draft-mails/edit-draft/{mail_id}/'
@@ -202,13 +193,8 @@ def edit_draft_mail_post_view(environ, **kwargs):
 
     # _____________________________________________________________________________________
 
-
-
-    print("xyx")
-    print(button)
     if button in {"send", "draft"}:
 
-        print(f'doing{button}')
         # draft_edit sends the mail or save it in draft depending on the button
         draft_edit(
             mail_id,

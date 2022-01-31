@@ -16,50 +16,33 @@ def get_private_chat_link(user1, user2):
             WHERE user_id_1 = {user1} AND user_id_2 = {user2} OR user_id_1 = {user2} AND user_id_2 = {user1}
             '''
     )
-    print(f"result is {result}")
-    # if no link, generate a link
-    '''
-    >>> result = []
-    >>> result is []
-    False
-    >>> result == []
-    True
-    >>>
-    '''
-    if result == []:
-        # a = input(f"why here result = {result}")
-        while True:
 
+    # if no link, generate a link
+    if result == []:
+        while True:
             try:
                 private_link = create_random_link()
-
                 UsersPrivateChatModel.objects.create(
                     new_data={"user_id_1": user1, "user_id_2": user2, "private_chat_link": private_link}
                 )
-
             except psycopg2.errors.UniqueViolation:
                 pass
             else:
                 private_link = private_link
                 break
-
     else:
         private_link = result[0].link
-        print(result)
-        print(private_link)
-    print(f"private chat link of the users {user1} and {user2} is {private_link}")
+    # print(f"private chat link of the users {user1} and {user2} is {private_link}")
     return private_link
 
 
 def real_time_chat_view(environ, **kwargs):
     user_id = get_user_from_environ(environ)
-    print(user_id)
     groups_object = UserGroup.objects.select({"group_id"}, {"user_id": user_id})
-    print(groups_object)
     groups_id = [each.group_id for each in groups_object]
     groups_id_tuple = tuple(groups_id)
 
-    # Important if no element in group tuple, dont do orm  elect
+    # Important if no element in group tuple, dont do orm select
     if len(groups_id_tuple) > 0:
         joined_group = Groups.objects.select({}, {"id": groups_id_tuple}, 0, 1)
     else:
@@ -77,13 +60,10 @@ def real_time_chat_view(environ, **kwargs):
     if group_template == "":
         group_template = "No groups"
 
-    # user_id
     User_table = User.objects.model_class.table_name
-    # <> didnt work
     query = f"SELECT * from {User_table} WHERE id != %s"
     parameter = [user_id]
     users_list = User.objects.raw_sql_query(query, parameter)
-    print(users_list)
 
     for user in users_list:
         users_list
@@ -93,8 +73,6 @@ def real_time_chat_view(environ, **kwargs):
     for users_in_chat in users_list:
 
         private_chat_link = get_private_chat_link(user_id, users_in_chat.id)
-        # input breakpoint debugging
-        # a = input(f"private_chat_link {private_chat_link}")
         users_template += f"""<div>
                                 <h3>{users_in_chat.name} | {users_in_chat.username}</h3>
                                 <a href='private-chat/{private_chat_link}/'> chat link</a>

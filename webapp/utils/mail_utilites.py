@@ -31,9 +31,8 @@ def get_mail_data_dict(form_field_object):
     }
 
     print("########################################################")
-    print(mail_data)
+
     mail_data = {key: value for key, value in mail_data.items() if value != ""}
-    print(mail_data)
     # print(22, form_field_object.getvalue('attachment'))
     if file_name:
         random_string = str(uuid.uuid4())
@@ -75,7 +74,6 @@ def is_mail_user(mail):
 
 # mail sending util
 def get_receivers_id_from_mail(receivers_list):
-    # get_receivers_id_from_mail accepts a list of receiver mails and returns a list of "user id", "group id"and "invalid mail"
 
     group_list = []
     user_list = []
@@ -108,7 +106,6 @@ def send_mail(sender_id, user_list, group_list, form_field_object, draft=False):
 
     # add to mail table
     mail_id = Mails.objects.create(new_data=mail_data_dict)
-    print(mail_id)
     # added mail link to UserSent Model
     UserSent.objects.create(new_data={"user_id": sender_id, "mail_id": mail_id})
 
@@ -145,12 +142,6 @@ def send_mail(sender_id, user_list, group_list, form_field_object, draft=False):
         add users who received the mail
         """
         UserInbox.objects.bulk_insert(list_of_datas_user_with_group_id)
-
-    # multiple insert orm create
-
-    # multiple insert user foreign key
-
-    # multiple insert group foreign key
 
 
 def send_draft(sender_id, user_list, group_list, form_field_object):
@@ -177,7 +168,6 @@ def draft_edit(
         data_dict["draft"] = True
 
     mail_id = Mails.objects.create(new_data=data_dict)
-    print(mail_id)
     # added mail link to UserSent Model
     UserSent.objects.create(new_data={"user_id": sender_id, "mail_id": mail_id})
 
@@ -185,12 +175,11 @@ def draft_edit(
 
     for user_id in user_list:
         list_of_datas_user.append({"user_id": user_id, "mail_id": mail_id})
-    print(list_of_datas_user, "xxak")
+
     if len(list_of_datas_user) != 0:
         """
         add users who received the mail
         """
-
         UserInbox.objects.bulk_insert(list_of_datas_user)
 
     memebers_list_from_all_groups = []
@@ -216,12 +205,6 @@ def draft_edit(
         """
         UserInbox.objects.bulk_insert(list_of_datas_user_with_group_id)
 
-    #
-    # if user_input_submit_value is "send":
-    #     # does automatic by mail_data_dict["draft"] = True, wait it dont do it
-    #     mail_data_dict["draft"] = False
-    #     # sender is still the same, no change, its his draft
-
 
 def get_attachment_link_from_name(attachment_name):
     link_html_tag = ""
@@ -235,7 +218,6 @@ def get_attachment_link_from_name(attachment_name):
 
 def is_mail_empty(form_object):
 
-    # fileitem = form_object['attachment']
     fileitem = ""
     file_name = ""
     if "attachment" in form_object:
@@ -250,9 +232,6 @@ def is_mail_empty(form_object):
         value = form_object[key].value
         params[key] = value
 
-    # form field object doesnt have get method
-    # title = form_object.getvalue('title').strip()
-    # body = form_object.getvalue('body').strip()
     title = params.get("title", "").strip()
     body = params.get("body", "").strip()
 

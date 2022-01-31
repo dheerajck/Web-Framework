@@ -23,27 +23,18 @@ def authenticating_view(environ, **kwargs):
     username = form_field_storage.getvalue('username')
     password = form_field_storage.getvalue('password')
     print(username, password)
-    # whycalled two times
-    # print(authentication_user(username, password))
+
     authentication_response = authentication_user(username, password)
 
     if not authentication_response:
         return redirect_to_login_module()
 
     else:
-
-        user_id = authentication_response
         # login succesfull
         # create session id, if user already have a session id replace it with new session id
         # set cookie here
+        user_id = authentication_response
         cookie_headers: list = create_session_id_header(user_id)
-        print(f'{cookie_headers=}')
-
-        # http_host_is_not_needed_in_current_case
-        # http_host = environ.get('HTTP_HOST')
-        # redirect_url_path = '/dashboard/'
-        # button = form_field_storage.getvalue('password')
-        # if form_field_storage.getvalue('input_pressed') == 'regiser':
 
         # Launched external handler for 'localhost:8000//dashboard/'.
         # url_to_redirect = f'{http_host}/{redirect_url_path}'
@@ -58,15 +49,10 @@ def authenticating_view(environ, **kwargs):
         current_list_of_response_headers.extend(cookie_headers)
 
         start_response_headers['response_headers'] = current_list_of_response_headers
-
         return response_body, start_response_headers
 
 
 def login_view(environ, **kwargs):
-
-    print("LOGIN")
-    # pprint(environ)
-
     return render_template("authentication-templates/login-register.html", context={}), start_response_headers
 
 
@@ -74,22 +60,12 @@ def logout_view(environ, **kwargs):
 
     SESSION_KEY_NAME = "session_key"
 
-    # pprint(environ)
-    # print("yess")
-    # print()
-    # print(cookie_string := environ.get('HTTP_COOKIE'))
-    # print()
     cookie_string = environ.get('HTTP_COOKIE')
-    # print("///")
-    # print(cookie_string is None)
 
     # we need to make sure HTTP_COOKIE is not None, so cookie_string is not None should return True to proceed
     # assert cookie_string is not None, "No cookies, then how stayed in the website till now"
     # get our apps session_id from cookies
     cookie_dict = get_cookie_dict(cookie_string)
-    # print()
-    # print("////////////")
-    # print(cookie_dict)
 
     # session_key_value = cookie_dict.get(SESSION_KEY_NAME)
     # if condition false raise error

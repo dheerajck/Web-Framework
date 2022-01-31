@@ -3,10 +3,9 @@ from .archived_mail_view import get_archives
 from .sent_mail_view import get_send_mails
 from .draft_views import get_draft_mails
 
-
 from ...orm.models import UserInbox, UserSent
-
 from ..views1 import api_view_403, success_api_response, api_view_405
+
 
 allowed_actions = {
     "inbox": {"archive", "reply", "forward", "delete"},

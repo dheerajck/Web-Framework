@@ -2,7 +2,6 @@ from ...utils.session_handler import get_user_from_environ
 
 from ...orm.models import User, Mails
 from ...orm.models import UserInbox, UserSent
-
 from webapp.api.views1 import api_view_405
 
 import json
@@ -23,7 +22,6 @@ def success_api_response(message):
 
 
 def get_inbox(environ):
-
     user_id = get_user_from_environ(environ)
 
     Mails_table_name = Mails.objects.model_class.table_name
@@ -41,15 +39,9 @@ def get_inbox(environ):
     parameters = [user_id, False, False]
 
     inbox = Mails.objects.raw_sql_query(query, parameters)
-    # print()
-    # print(inbox)
-    #  {f"{Userinbox_table_name}.user_id": user_id, f"{Userinbox_table_name}.archived_mail": False},
-    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
-
     return inbox
 
 
-# actually inbox sent mails archive draft all need join btw all table
 def inbox_api_view(environ, **kwargs):
     '''
     no parameters are needed
@@ -61,19 +53,14 @@ def inbox_api_view(environ, **kwargs):
 
     inbox = get_inbox(environ)
     # print(inbox)
-
     result_list = []
     for each_mail in inbox:
-        # print(each_mail)
-
         link_html_tag = False
 
         if each_mail.attachment is not None:
             file_name = each_mail.attachment.split("__")[-1]
             file_directory = '/media/'
             file_link = f"{file_directory}{each_mail.attachment}"
-            print(file_link, "xas")
-            # link_html_tag = f"<a href={file_link}>attachment link</a>"
             link_html_tag = f"{file_link}"
 
         dictionary_of_mail_object = {
@@ -89,9 +76,6 @@ def inbox_api_view(environ, **kwargs):
 
         result_list += [dictionary_of_mail_object]
 
-    # converted to json above
-    # json_list = json.dumps(result_list, indent=4)
-    # return success_api_response(json_list)
     if result_list == []:
         result_list = "No mail in inbox"
     return success_api_response(result_list)

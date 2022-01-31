@@ -3,10 +3,8 @@ from ..utils.session_handler import get_username_from_environ
 
 import json
 
-start_response_headers: dict = {}
 
-# only using kwargs since args might create unwanted problems and nkeyword arguments will be better its explicit
-# changed to named parameters because its better to not accept unwanted keyword argument, this throws cant unpack error so avoiding for now
+start_response_headers: dict = {}
 
 
 def root(environ, **kwargs):
@@ -14,31 +12,18 @@ def root(environ, **kwargs):
 
 
 def test(environ, **kwargs):
-    # from ..clean_print_function.clean_print import first_clean_print_function
-    # first_clean_print_function(environ)
-    from pprint import pprint
-
     response_body = {str(key): str(value) for key, value in sorted(environ.items())}
     response_body = '\n'.join(response_body)
-    pprint(response_body)
-
     return render_template("test.html", context={}), start_response_headers
 
 
 def dashboard_view(environ, **kwargs):
-
     username = get_username_from_environ(environ)
-    # pprint(environ)
-
-    # return render_template("dashboard.html", context={}), start_response_headers
     return render_template("dashboard.html", context={"username": username}), start_response_headers
 
 
 def session(environ, **kwargs):
-
-    # pprint(environ)
-    print("session view")
-
+    # print("session view")
     html_to_render = render_template("session_test.html", context={})
     html_to_render += f"<h1>{environ.get('HTTP_COOKIE')}"
 
@@ -46,7 +31,6 @@ def session(environ, **kwargs):
 
 
 def api_view_403(environ, **kwargs):
-
     status = "403 Forbidden"
     # message = {"message": "Forbidden"}
     # response_body = {'message': message, 'status': status}
@@ -91,7 +75,6 @@ def api_view_404(environ, **kwargs):
 
 
 def success_api_response(message, status_code="200 OK"):
-
     response_headers = [
         ('Content-type', 'application/json'),
     ]

@@ -1,12 +1,8 @@
 from ...utils.post_form_handler import form_with_file_parsing
 from ...utils.mail_utilites import send_mail, send_draft, get_receivers_id_from_mail
 from ...utils.session_handler import get_user_from_environ
-
 from ...utils.mail_utilites import is_mail_empty
-
-
 from webapp.api.views1 import api_view_405
-
 
 import json
 
@@ -22,7 +18,6 @@ def error_api_response_codes(status, message):
 
     response_body = {'message': message, 'status': status}
     response_body = json.dumps(response_body, indent=4)
-    
 
     response_headers.append(('Content-length', str(len(response_body))))
     start_response_headers: dict = {'status': status, 'response_headers': response_headers}
@@ -48,9 +43,9 @@ def compose_mail_api_view(environ, **kwargs):
     '''
     to_list: emails separated by comma
     title: mail title should be specified
-    body: mail body should be specified 
+    body: mail body should be specified
     attachment: attachments if any
-    mail_draft: send to send mail, draft to save it as a draft 
+    mail_draft: send to send mail, draft to save it as a draft
 
     '''
 
@@ -59,14 +54,12 @@ def compose_mail_api_view(environ, **kwargs):
     print("START")
 
     if environ['REQUEST_METHOD'].upper() != 'POST':
-        kwargs = {"allowed": ("POST", )}
+        kwargs = {"allowed": ("POST",)}
         return api_view_405(environ, **kwargs)
 
     form_field_storage = form_with_file_parsing(environ)
 
     button = form_field_storage.getvalue('mail_draft')
-    # button = "send" if button else "draft"
-    print(button)
 
     receivers_mails: list = form_field_storage.getvalue('to_list').split(",")
     empty_mail = False
@@ -122,9 +115,7 @@ def compose_mail_api_view(environ, **kwargs):
         message = 'Draft saved'
         return success_api_response(message)
     elif no_client_errors_flag:
-        # no other error code till now so its bad request
+        # no other error code till now so it should be handled as bad request
         status_code = "400 Bad Request"
         message = "The server could not understand the request due to invalid syntax."
     return error_api_response_codes(status_code, message)
-        
-    

@@ -20,6 +20,7 @@ def redirect_view_with_response_body(status, url_to_redirect):
     response_body = ''
     return response_body, start_response_headers_dict
 
+
 def redirect_to_dashboard_module(response_body=''):
     url_to_redirect = '/dashboard/'
     status = '302 FOUND'
@@ -38,5 +39,4 @@ def redirect_to_login_module(response_body=''):
 
     status = '302 FOUND'
     start_response_headers: dict = redirect_view(status, url_to_redirect)
-
     return response_body, start_response_headers

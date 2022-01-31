@@ -27,29 +27,16 @@ def get_archives(environ):
                 ORDER BY "created_date" DESC
             """
     parameters = [user_id, False, True]
-    print()
-    archives = Mails.objects.raw_sql_query(query, parameters)
-    # print(archives)
 
+    archives = Mails.objects.raw_sql_query(query, parameters)
     return archives
 
 
 def archives_view(environ, **kwargs):
-    '''
-    select is not loop, so row containing values which satisifes condition are retrieved
-    rows are not multiplied here, every row with mail_id in LIST which are Archived are retrievd,
-    important => data retireved never greater than data in the table
-    if a user sends same mail through user, groups
-    only one copy will reach here since mail id is unique which is actually good
-    '''
 
     archives = get_archives(environ)
-    # print(archives)
-
     mail_div = ''
     for each_mail in archives:
-        # print(each_mail)
-
         link_html_tag = ''
 
         if each_mail.attachment is not None:
@@ -58,12 +45,10 @@ def archives_view(environ, **kwargs):
             file_directory = '/media/'
             file_link = f"{file_directory}{each_mail.attachment}"
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
-        #  space present in comment tag after --  will make the template not render
-        # <!-- add datetime sort Done -- >
+
         mail_div += f'''
 
         <div>
-        <!-- add datetime sort Done -->
 
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>

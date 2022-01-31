@@ -26,7 +26,6 @@ def create_cookie_header(cookie_name, cookie_value, days=1):
     session_header = ('Set-Cookie', '{}={}; Max-Age={}; Path=/'.format(cookie_name, cookie_value, max_age))
     # session_header = ('Set-Cookie', '{}={}; Max-Age={};'.format(cookie_name, cookie_value, max_age))
     # default path should be given or the session wont be returned
-
     return session_header
 
 
@@ -35,39 +34,20 @@ def create_session_id_header(userid, days=1):
     expiry_date = datetime.now(tz=timezone) + timedelta(days=days)
     while True:
         try:
-            # print(Session.select({}, {}))
+
             session_id = create_session_key()
-            # to ensure no duplicate session key is created
-            # since the cookies are updated if some cookies exist
-            # same user cant login at the same time from differenttabs or browsers
 
             Session.objects.create(new_data={'user_id': userid, 'session_key': session_id, 'expiry_date': expiry_date})
-            # Session.objects.insert_or_update_data(
-            #     key=('user_id'), session_key=session_id, expiry_date=expiry_date, user_id=userid
-            # )
             first_header: tuple = create_cookie_header("session_key", session_id)
-            # second_header: tuple = create_cookie_header("user_id", userid) might result in security issue
 
         except psycopg2.errors.UniqueViolation:
             pass
         else:
             break
 
-    # import os
-
-    # os.system('cls' if os.name == 'nt' else 'clear')
     headers = []
 
-    # headers.extend([first_header, second_header])
-    print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
     headers.append(first_header)
-    print(headers)
-    # headers.append(second_header)
-    print(headers)
-    print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
-
-    print('inside')
-    print(headers)
     return headers
 
 
@@ -98,6 +78,7 @@ def get_cookie_dict(cookie_string):
         # the return value of  this fuunction is changed to dict from None
         #  as a precaution to make everything independent
         return {}
+
     # dont give "; " ";" is enough
     cookies_list = cookie_string.split(";")
     cookie_dict = {}

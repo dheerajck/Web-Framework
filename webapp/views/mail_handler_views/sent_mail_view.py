@@ -19,26 +19,20 @@ def get_send_mails(environ):
     sent_mails = []
     if len(sent_mails_mail_tuple) > 0:
         query = f"""SELECT Mail.id as id, Mail.created_date as created_date, Mail.title as title, Mail.body as body, Mail.attachment as attachment, Inbox.user_id as user_id, Groups.group_mail as group_mail, Users.email as user_mail
-                FROM {Mail_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id) 
+                FROM {Mail_table_name} Mail INNER JOIN {Userinbox_table_name} Inbox ON (Mail.id = Inbox.mail_id) LEFT JOIN {Groups_table_name} Groups ON (Inbox.group_id=Groups.id)
                 INNER JOIN {User_table_name} Users ON (Users.id=Inbox.user_id)
-                
+
                 WHERE Mail.id IN %s AND Mail.draft=%s ORDER BY "created_date" DESC
                 """
         parameters = [sent_mails_mail_tuple, False]
         sent_mails = Mails.objects.raw_sql_query(query, parameters)
-    print(sent_mails)
     return sent_mails
-    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
 
 
 def sent_mail_view(environ, **kwargs):
 
     sent_mails = get_send_mails(environ)
-    # print(sent_mails)
     receivers_dict = {}
-
-    print('strtasdsa')
-    print(len(sent_mails))
 
     for mail in sent_mails:
 
@@ -57,20 +51,13 @@ def sent_mail_view(environ, **kwargs):
             else:
                 receivers_dict[mail.id] = {mail.user_mail}
 
-    print(f"receivers dict is {receivers_dict=}")
-    print()
-    print()
-
     # eliminating duplicate since we got the group mail
     sent_mails = {mail.id: mail for mail in sent_mails}
 
     mail_div = ''
-    print(f"{sent_mails=}\nlength {len(sent_mails)}")
-    print()
-    print()
+
     # duplicated eliminated by making mail id a key and iterating through value to get mail object
 
-    # for a, each_mail in sent_mails.items():
     for each_mail in sent_mails.values():
         # print(f"{a=} {receivers_dict[a]=}") helped to debug similar name confusing error mail.id and each_mail.id
         link_html_tag = ''
@@ -83,22 +70,10 @@ def sent_mail_view(environ, **kwargs):
         # Generate all receivers of a sent mail
         # No issue of None because sent mails will have receivers
         receivers_list = ", ".join(receivers_dict[each_mail.id])
-        print("________________________")
-        print(receivers_dict)
-        print()
-        print(receivers_list, mail.id)
-        print("________________________")
 
-        #  space present in comment tag after --  will make the template not render
-
-        # <!-- add datetime sort Done -- >
-        #    <h3>{each_mail.id}</h3>
         mail_div += f'''
             <div>
-            <!-- add datetime sort Done -->
-        
-        
-            
+
             <h3>{each_mail.created_date}</h3>
             <h2>{each_mail.title}</h2>
             <p>To:{receivers_list}</p>
@@ -110,16 +85,13 @@ def sent_mail_view(environ, **kwargs):
             </form>
             <hr>
             </div>'''
-    print("s2")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.....")
 
     if mail_div == "":
         mail_div = "<h1>No Sent mails</h1>"
 
     context = {'title_of_page': "inbox", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)
-    # print(users_groups)
-    # print(response_body)
+
     start_response_headers = response_header_basic = {
         "status": "200 OK",
         "response_body": [
@@ -132,17 +104,3 @@ def sent_mail_view(environ, **kwargs):
 
 if __name__ == "__main__":
     pass
-    # this wasnt working because of user id
-    # inbox = Mails.objects.model_independent_select_join(
-    # {},
-    # {f"{Usersent_table_name}.user_id": user_id, f"{Mail_table_name}.draft": False},
-    # 0,  # 0 => AND
-    # 1,  # 1 => field IN tuples , 0 => field=value
-    # ("created_date",),  # order by created_date descending order
-    # join_model=[
-    #     (Groups_table_name, "id", "group_id"),
-    #     (Userinbox_table_name, "X", "user_id"),
-    #     (Mail_table_name, "user_id", "id"),
-    #     (Usersent_table_name, "id", "user_id"),
-    #     (User_table_name, "user_id", "id"),
-    # ],

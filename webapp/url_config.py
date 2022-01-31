@@ -71,12 +71,6 @@ URL_DICTIONARY_API = {
     '^api/archives/reply/[0-9]+$': api.reply_mail_api_view,
 }
 
-'''
-home/<str:pk>/
-for url with kwarg pk
-
-can use regex
-'''
 
 URL_DICTIONARY.update(URL_DICTIONARY_API)
 
@@ -84,34 +78,15 @@ URL_DICTIONARY.update(URL_DICTIONARY_API)
 def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
     print(url_to_check)
     for pattern, value in url_dict_to_check.items():
-        # print("@@")
-        # print()
-        # print(pattern, value)
-        # print()
-        # print("@@")
+
         if re.search(pattern, url_to_check):
-            # print(url_to_check, pattern, value)
-            # print("yes")
-            print(value, "zxzx")
             return value
+
     return None
 
 
 def get_url_path(url):
-    return PurePosixPath(
-        unquote(
-            urlparse(
-                url
-            ).path
-        )
-    ).parts
-
-def parse_url_last_strin(url, key):
-    pass
-
-
-def parse_last_id(url, key):
-    pass
+    return PurePosixPath(unquote(urlparse(url).path)).parts
 
 
 def url_strip(url):
@@ -140,19 +115,18 @@ def url_handler(request_url):
 
     static_file_name_or_false_value = check_static_url(request_url)
     if static_file_name_or_false_value:
-        # if asking for static content
+        # asking for static content
         kwargs = {'file_name': static_file_name_or_false_value}
         return views.serve_static_file, kwargs
 
     media_file_name_or_false_value = check_media_url(request_url)
     if media_file_name_or_false_value:
+        # asking for media files
         kwargs = {'file_name': media_file_name_or_false_value}
         return views.serve_media_file, kwargs
 
     view_name = url_lookup(request_url)
     kwargs_passing = {}
-    # print(view_name, views.mail_interactions_view)
-    # print(view_name is views.mail_interactions_view)
 
     # _________________________________________________________________________
 
@@ -168,15 +142,13 @@ def url_handler(request_url):
     # _________________________________________________________________________
 
     if view_name is views.forward_mail_render_view or view_name is views.reply_mail_render_view:
-        print("forward options")
+
         url_split = request_url.split("/")
         kwargs_passing = {"mail_id": int(url_split[-1]), "forward_from": url_split[0], "action_to_do": url_split[1]}
-        print(kwargs_passing)
 
     # __________________________________________________________________________
 
     if view_name is views.mail_interactions_view:
-        print("mail_interaction")
         url_split = request_url.split('/')
 
         url_without_message_id: str = "/".join(url_split[:-1])
@@ -185,28 +157,21 @@ def url_handler(request_url):
         url_message_id = int(url_split[-1])
 
         kwargs_passing = {"mail_id": url_message_id, "page": url_action}
-        print(kwargs_passing)
 
     # _________________________________________________________________________
 
     if view_name is views.chat_view:
-        # a = input()
         kwargs_passing = {"chat_link": request_url.split('/')[-1]}
-        # a = input(f"kwargs {kwargs_passing}")
-        # print(kwargs_passing)
 
     first_clean_print_function(f"{request_url} ================> {view_name}")
 
-
     if view_name is None:
         print("not match of url view found here")
-        # if url not in url
-        # to avoid doing if its starts with api
         if not request_url.startswith('api/'):
             view_name = views.view_404
             kwargs_passing = {}
 
-     # ______________________________________________________________
+    # ______________________________________________________________
 
     if view_name is None:
         print(request_url)
@@ -214,17 +179,21 @@ def url_handler(request_url):
             view_name = api.api_view_404
             kwargs_passing = {}
 
-    if view_name in [api.delete_inbox_api_view, api.delete_sent_mail_api_view,
-                     api.delete_draft_mails_api_view, api.delete_archives_api_view]:
+    if view_name in [
+        api.delete_inbox_api_view,
+        api.delete_sent_mail_api_view,
+        api.delete_draft_mails_api_view,
+        api.delete_archives_api_view,
+    ]:
         parsing_url = get_url_path(request_url)
-        # api / inbox / delete / [0 - 9]
+
         box = parsing_url[1]
         action = parsing_url[2]
         # mail id should be int
         mail_id: int = int(parsing_url[3])
         kwargs_passing = {"box": box, "action": action, "mail_id": mail_id}
 
-    if  view_name in [api.archive_mail_api_view, api.unarchive_mail_api_view]:
+    if view_name in [api.archive_mail_api_view, api.unarchive_mail_api_view]:
         parsing_url = get_url_path(request_url)
         mail_id: int = int(parsing_url[-1])
         kwargs_passing = {"mail_id": mail_id}
@@ -239,12 +208,6 @@ def url_handler(request_url):
         mail_id: int = int(parsing_url[-1])
         box = parsing_url[1]
         kwargs_passing = {"mail_id": mail_id, "box": box}
-
-
-    # add more if needed
-    # for the view root, dont send anyother kwargs
-
-    # try regex for url matching and template parsing later dont do this first, important works first
 
     return view_name, kwargs_passing
 

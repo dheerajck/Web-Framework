@@ -41,12 +41,10 @@ def inbox_view(environ, **kwargs):
     only one copy will reach here since mail id is unique which is actually good
     '''
     inbox = get_inbox(environ)
-    # print(inbox)
 
     mail_div = ''
-    for each_mail in inbox:
-        # print(each_mail)
 
+    for each_mail in inbox:
         link_html_tag = ''
 
         if each_mail.attachment is not None:
@@ -57,13 +55,9 @@ def inbox_view(environ, **kwargs):
             print(file_link, "xas")
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
 
-        # <input type="submit" name="interaction" value="forward" placeholder="forward">
-        # <input type="submit" formaction="linktosomewhere" value="value to submit"> will work
-
         mail_div += f'''
 
         <div>
-
 
         <h3>{each_mail.created_date}</h3>
         <h2>{each_mail.title}</h2>

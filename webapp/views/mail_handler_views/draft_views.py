@@ -25,8 +25,7 @@ def get_draft_mails(environ):
                 """
         parameters = [sent_mails_mail_tuple, True]
         draft_mails = Mails.objects.raw_sql_query(query, parameters)
-    # print(draft_mails)
-    # print(len(inbox), type(inbox)) # 0 => <class 'list'>
+
     return draft_mails
 
 
@@ -70,14 +69,8 @@ def get_receivers_dict(draft_mails):
 
 def draft_mails_view(environ, **kwargs):
     draft_mails = get_draft_mails(environ)
-    # print(sent_mails)
+
     receivers_dict = get_receivers_dict(draft_mails)
-
-    # print(len(draft_mails))
-
-    # print(f"receivers dict is {receivers_dict=}")
-    # print()
-    # print()
 
     # eliminating duplicate since we got the group mail
     draft_mails = {mail.id: mail for mail in draft_mails}
@@ -95,31 +88,11 @@ def draft_mails_view(environ, **kwargs):
             file_link = f"{file_directory}{each_mail.attachment}"
             link_html_tag = f"<a download={file_name} href={file_link}>attachment link</a>"
 
-        # generate all receivers of a sent mail
-
-        # receivers_list = receivers_dict[each_mail.id]
-        # receivers_list.remove(None)
-        # if len(receivers_list) == 0:
-        #     receivers = ""
-        # else:
-        #     receivers = ", ".join(receivers_list)
-
         receivers_list = receivers_dict.get(each_mail.id, [])
         receivers = ", ".join(receivers_list)
 
-        # print("________________________")
-        # print(receivers_dict)
-        # print()
-        # print(receivers_list, each_mail.id)
-        # print("________________________")
-
-        #  space present in comment tag after --  will make the template not render
-
-        # <!-- add datetime sort Done -- >
-        # <h3>{each_mail.id}</h3>
         mail_div += f'''
             <div>
-            <!-- add datetime sort Done -->
 
             <h3>{each_mail.created_date}</h3>
             <h2>{each_mail.title}</h2>
@@ -135,17 +108,12 @@ def draft_mails_view(environ, **kwargs):
 
             </div>'''
 
-    print("s2")
-    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.....")
-
     if mail_div == "":
         mail_div = "<h1>No Draft mails</h1>"
 
     context = {'title_of_page': "inbox", "mails": mail_div}
     response_body = render_template('list-mail-template.html', context)
 
-    # print(users_groups)
-    # print(response_body)
     start_response_headers = response_header_basic = {
         "status": "200 OK",
         "response_body": [

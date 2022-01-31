@@ -4,7 +4,7 @@ from .sent_mail_view import get_send_mails
 from ...utils.template_handlers import render_template
 from ...utils.mail_utilites import get_attachment_link_from_name
 
-# from ...utils.session_handler import get_user_from_environ
+
 from ...utils.session_handler import get_user_details_from_environ
 from ..views1 import view_403
 
@@ -13,7 +13,6 @@ from ...utils.session_handler import get_user_from_environ
 from ...utils.mail_utilites import data_from_session_save_load
 
 from ...orm.models import SessionDb
-
 
 
 def forward_mail_render_view(environ, **kwargs):
@@ -32,7 +31,6 @@ def forward_mail_render_view(environ, **kwargs):
     data_from_db = SessionDb.objects.select([], {"user_id": sender_id, "mail_id": mail_id})
     if len(data_from_db) != 0:
         return data_from_session_save_load(data_from_db)
-
 
     forward_from = kwargs["forward_from"]
     # for reply
@@ -122,7 +120,7 @@ _______________________________________
             "Attachment_link": Attachment_link,
             "link_to_redirect": "/compose-mail-post-view/",
             "to_mail_warning": '',
-            "need_some_data_to_send_mail_warning": ''
+            "need_some_data_to_send_mail_warning": '',
         }
 
     # for reply
@@ -151,7 +149,7 @@ _______________________________________
             "Attachment_link": Attachment_link,
             "link_to_redirect": "/compose-mail-post-view/",
             "to_mail_warning": '',
-            "need_some_data_to_send_mail_warning": ''
+            "need_some_data_to_send_mail_warning": '',
         }
 
     start_response_headers: dict = {}

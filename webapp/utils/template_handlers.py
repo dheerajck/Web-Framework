@@ -17,8 +17,4 @@ def render_template(template_name='test.html', context={}):
 
         html_string = template_file.read()
     html_string = html_string.format(**context)
-    # template tag regex template small engine
-    # print()
-    # print()
-    # print(type(html_string))
     return html_string

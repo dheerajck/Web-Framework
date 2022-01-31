@@ -28,8 +28,6 @@ def login_api_view(environ, **kwargs):
     else:
         pass
 
-    # whycalled two times
-    # print(authentication_user(username, password))
     authentication_response = authentication_user(username, password)
 
     if not authentication_response:
@@ -39,17 +37,14 @@ def login_api_view(environ, **kwargs):
         response_body = json.dumps(response_body)
         response_headers.append(('Content-length', str(len(response_body))))
         start_response_headers: dict = {'status': status, 'response_headers': response_headers}
-        # print(start_response_headers)
-        print("xzc")
-
         return response_body, start_response_headers
 
     else:
 
-        user_id = authentication_response
         # login succesfull
         # create session id, if user already have a session id replace it with new session id
         # set cookie here
+        user_id = authentication_response
         cookie_headers: list = create_session_id_header(user_id)
 
         status = "200 OK"
@@ -63,7 +58,6 @@ def login_api_view(environ, **kwargs):
         current_list_of_response_headers.extend(cookie_headers)
 
         start_response_headers['response_headers'] = current_list_of_response_headers
-
         return response_body, start_response_headers
 
 
@@ -97,5 +91,4 @@ def logout_api_view(environ, **kwargs):
     response_headers.append(('Content-length', str(len(response_body))))
 
     start_response_headers: dict = {'status': status, 'response_headers': response_headers}
-
     return response_body, start_response_headers
