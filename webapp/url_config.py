@@ -1,6 +1,10 @@
 from . import views
+from . import api
 import re
 from .clean_print_function.clean_print import first_clean_print_function
+
+from urllib.parse import unquote, urlparse
+from pathlib import PurePosixPath
 
 URL_DICTIONARY = {
     '^$': views.root,
@@ -37,12 +41,44 @@ URL_DICTIONARY = {
 }
 
 
+URL_DICTIONARY_API = {
+    '^api/login$': api.login_api_view,
+    '^api/logout$': api.logout_api_view,
+    #
+    '^api/compose-mail$': api.compose_mail_api_view,
+    '^api/inbox$': api.inbox_api_view,
+    '^api/sent-mails$': api.sent_mail_api_view,
+    '^api/draft-mails$': api.draft_mails_api_view,
+    '^api/archives$': api.archives_api_view,
+    #
+    # different view used to delete mails from each box
+    '^api/inbox/delete/[0-9]+$': api.delete_inbox_api_view,
+    '^api/sent-mails/delete/[0-9]+$': api.delete_sent_mail_api_view,
+    '^api/draft-mails/delete$/[0-9]+': api.delete_draft_mails_api_view,
+    '^api/archives/delete/[0-9]+$': api.delete_archives_api_view,
+    #
+    '^api/archive-mail/[0-9]+$': api.archive_mail_api_view,
+    '^api/unarchive-mail/[0-9]+$': api.unarchive_mail_api_view,
+    #
+    '^api/draft-mails/edit-draft/[0-9]+$': api.edit_draft_mail_api_view,
+    #
+    # same view used to forward mail from each box
+    '^api/inbox/forward/[0-9]+$': api.forward_mail_api_view,
+    '^api/sent-mails/forward/[0-9]+$': api.forward_mail_api_view,
+    '^api/archives/forward/[0-9]+$': api.forward_mail_api_view,
+    # #
+    '^api/inbox/reply/[0-9]+$': api.reply_mail_api_view,
+    '^api/archives/reply/[0-9]+$': api.reply_mail_api_view,
+}
+
 '''
 home/<str:pk>/
 for url with kwarg pk
 
 can use regex
 '''
+
+URL_DICTIONARY.update(URL_DICTIONARY_API)
 
 
 def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
@@ -60,6 +96,15 @@ def url_lookup(url_to_check, url_dict_to_check=URL_DICTIONARY):
             return value
     return None
 
+
+def get_url_path(url):
+    return PurePosixPath(
+        unquote(
+            urlparse(
+                url
+            ).path
+        )
+    ).parts
 
 def parse_url_last_strin(url, key):
     pass
@@ -90,7 +135,7 @@ def check_static_url(request_url):
 def url_handler(request_url):
 
     print("\n\n__________________ URL logger __________________\n\n")
-    print("URL logger, requested url is {request_url}")
+    print(f"URL logger, requested url is {request_url}")
     print("\n\n__________________ DONE __________________\n\n")
 
     static_file_name_or_false_value = check_static_url(request_url)
@@ -152,10 +197,49 @@ def url_handler(request_url):
 
     first_clean_print_function(f"{request_url} ================> {view_name}")
 
+
     if view_name is None:
         print("not match of url view found here")
         # if url not in url
-        return views.view_404, {}
+        # to avoid doing if its starts with api
+        if not request_url.startswith('api/'):
+            view_name = views.view_404
+            kwargs_passing = {}
+
+     # ______________________________________________________________
+
+    if view_name is None:
+        print(request_url)
+        if request_url.startswith('api/'):
+            view_name = api.api_view_404
+            kwargs_passing = {}
+
+    if view_name in [api.delete_inbox_api_view, api.delete_sent_mail_api_view,
+                     api.delete_draft_mails_api_view, api.delete_archives_api_view]:
+        parsing_url = get_url_path(request_url)
+        # api / inbox / delete / [0 - 9]
+        box = parsing_url[1]
+        action = parsing_url[2]
+        # mail id should be int
+        mail_id: int = int(parsing_url[3])
+        kwargs_passing = {"box": box, "action": action, "mail_id": mail_id}
+
+    if  view_name in [api.archive_mail_api_view, api.unarchive_mail_api_view]:
+        parsing_url = get_url_path(request_url)
+        mail_id: int = int(parsing_url[-1])
+        kwargs_passing = {"mail_id": mail_id}
+
+    if view_name is api.edit_draft_mail_api_view:
+        parsing_url = get_url_path(request_url)
+        mail_id: int = int(parsing_url[-1])
+        kwargs_passing = {"mail_id": mail_id}
+
+    if view_name in [api.forward_mail_api_view, api.reply_mail_api_view]:
+        parsing_url = get_url_path(request_url)
+        mail_id: int = int(parsing_url[-1])
+        box = parsing_url[1]
+        kwargs_passing = {"mail_id": mail_id, "box": box}
+
 
     # add more if needed
     # for the view root, dont send anyother kwargs
