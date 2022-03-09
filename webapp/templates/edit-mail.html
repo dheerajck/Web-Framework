@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Edit mail</title>
+	<!-- <link rel="stylesheet" href="/static/style.css">  works  / starts from root-->
+	<link rel="stylesheet" href="/static/sent-mail.css">
+	<link rel="shortcut icon" href="#">
+	
+</head>
+
+<body>
+	
+
+	<div class="sent-mail-page">
+		<div class="form">
+		
+		  <form class="sent-mail-form" action="{link_to_redirect}"  method="post" enctype="multipart/form-data">
+			<label for="To">To</label>
+			<!-- better to close input tags like this -->
+			<input id="TO" name="to_list" type="email"  multiple value='{To}'>
+			<label class="warning" for="To"> <span class="warning_text">{to_mail_warning}</span></label>
+
+			<br>
+			
+
+			<label for="title">Title</label>
+			<!-- enter value after type -->
+			<!-- value without quotes around it removess ebvery word after space, using quotes will solve this issue -->
+			<input id="title" name="title"  type="text" value='{Title}'>
+
+			<br>
+
+
+			<label for="body">Body</label>
+			<!-- dont define style here, it will cause issues with parsing, enctype not saving was the problem  -->
+			<!-- <input id="body" name="body" type="text"/> -->
+			<!-- <input id="body" name="body" value={Body}  > -->
+			<textarea id="body" name="body" rows="10" cols="50">{Body}</textarea>
+
+			<br>
+
+			<label for="attachment">attachment</label>
+            <!-- if attachmnent display field -->
+            {Attachment_link}
+			<!-- accept="image/png, image/gif, image/jpeg" to specify type of files that should be accepted -->
+
+            <!-- value field in upload (image or file) fields will be a security issue for users-->
+			<input id="attachment" name="attachment" type="file" multiple/>
+		
+			<br>
+
+			<input type="submit" name="submit_input" value="send">
+			<input type="submit" name="submit_input" value="draft">
+			
+		  </form>
+			<label class="warning" for="To"> <span class="warning_text">{need_some_data_to_send_mail_warning}</span></label>
+
+
+
+		</div>
+	  </div>
+
+</body>
+
+</html>

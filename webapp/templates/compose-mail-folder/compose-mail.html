@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Configure mail</title>
+	<!-- <link rel="stylesheet" href="/static/style.css">  works  / starts from root-->
+	<link rel="stylesheet" href="/static/sent-mail.css">
+	<link rel="shortcut icon" href="#">
+
+
+	
+</head>
+
+<body>
+	
+
+	<div class="sent-mail-page">
+		<div class="form">
+
+
+
+		<!-- abc@t.com, abc@t1.com enter mails separated by comma-->
+		
+		  <form class="sent-mail-form" action="/compose-mail-post-view/"  method="post" enctype="multipart/form-data">
+			<label for="To">To</label>
+			<!-- better to close input tags like this -->
+			<input id="TO" name="to_list" type="email"  multiple/> 
+
+			<br>
+			
+
+			<label for="title">Title</label>
+			<input id="title" name="title" type="text"/>
+
+			<br>
+
+
+			<label for="body">Body</label>
+			<!-- dont define style here, it will cause issues with parsing, enctype not saving was the problem  -->
+			<!-- <textarea id="body" name="body" rows="4" cols="50"></textarea> -->
+			<!-- <input id="body" name="body" type="text"/> -->
+			<textarea id="body" name="body"  cols="30" rows="10"></textarea>
+
+			<br>
+
+			<label for="attachment">attachment</label>
+			<!-- accept="image/png, image/gif, image/jpeg" to specify type of files that should be accepted -->
+			<input id="attachment" name="attachment" type="file" multiple/>
+		
+			<br>
+
+			<input type="submit" name="submit_input" value="send" />
+			<input type="submit" name="submit_input" value="draft" />
+			
+		  </form>
+
+
+		</div>
+	  </div>
+
+</body>
+
+</html>
