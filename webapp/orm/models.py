@@ -50,8 +50,17 @@ class SessionDb(BaseModel):
 if __name__ == "__main__":
     try:
         User.objects.create(
-            new_data={'name': 'admin', 'username': 'username_admin', 'email': 'admin@admin.admin', 'password': 'admin'}
+            new_data={'name': 'admin1', 'username': 'username_admin1', 'email': 'admin1@admin.admin', 'password': 'admin1'}
         )
+        
+        User.objects.create(
+            new_data={'name': 'admin2', 'username': 'username_admin2', 'email': 'admin2@admin.admin', 'password': 'admin2'}
+        )
+
+        User.objects.create(
+            new_data={'name': 'admin3', 'username': 'username_admin3', 'email': 'admin3@admin.admin', 'password': 'admin3'}
+        )
+
 
     except psycopg2.errors.UniqueViolation:
         print("data with same field value on unique field exist in db")
